@@ -1,10 +1,1127 @@
-<!DOCTYPE html>
+try {
+                    supabase = window.supabase.createClient(url, key);
+                    document.getElementById('setupBanner').style.display = 'none';
+                    return true;
+                } catch (error) {
+                    console.error('Failed to initialize Supabase:', error);
+                    showAlert('Invalid Supabase configuration. Please check your credentials.', 'error');
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        function setupEventListeners() {
+            // Setup form listeners
+            document.getElementById('setupForm').addEventListener('submit', handleSetupSubmit);
+            document.getElementById('loginFormElement').addEventListener('submit', handleLogin);
+            document.getElementById('registerFormElement').addEventListener('submit', handleRegister);
+            document.getElementById('projectForm').addEventListener('submit', handleCreateProject);
+            document.getElementById('documentForm').addEventListener('submit', handleUploadDocument);
+            document.getElementById('changeRequestForm').addEventListener('submit', handleCreateChangeRequest);
+            document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+
+            // Close modal when clicking overlay
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('modal-overlay')) {
+                    e.target.classList.remove('active');
+                }
+            });
+        }
+
+        // Auth tab switching
+        function switchAuthTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('#loginForm, #registerForm').forEach(form => form.classList.add('hidden'));
+            
+            if (tab === 'login') {
+                document.getElementById('loginTab').classList.add('active');
+                document.getElementById('loginForm').classList.remove('hidden');
+            } else {
+                document.getElementById('registerTab').classList.add('active');
+                document.getElementById('registerForm').classList.remove('hidden');
+            }
+        }
+
+        // Setup configuration
+        async function handleSetupSubmit(e) {
+            e.preventDefault();
+            
+            const url = document.getElementById('supabaseUrl').value;
+            const key = document.getElementById('supabaseKey').value;
+            
+            if (!url || !key) {
+                showAlert('Please provide both URL and API key', 'error');
+                return;
+            }
+            
+            localStorage.setItem('supabase_url', url);
+            localStorage.setItem('supabase_key', key);
+            
+            if (initializeSupabase()) {
+                closeModal('setupModal');
+                showAlert('Configuration saved successfully! You can now create accounts and projects.', 'success');
+                checkAuthState();
+            }
+        }
+
+        // Authentication functions
+        async function checkAuthState() {
+            if (!supabase) return;
+            
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    currentUser = user;
+                    showApp();
+                    await loadUserData();
+                } else {
+                    showAuth();
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                showAuth();
+            }
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            if (!supabase) {
+                showAlert('Please configure Supabase first. Click "Configure Now" in the banner above.', 'error');
+                return;
+            }
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            showAuthLoading('login');
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+                
+                if (error) throw error;
+                
+                currentUser = data.user;
+                showApp();
+                await loadUserData();
+                showAlert('Welcome back to CoPlanner!', 'success');
+                
+            } catch (error) {
+                showAuthAlert('login', error.message, 'error');
+            }
+            
+            hideAuthLoading('login');
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            
+            if (!supabase) {
+                showAlert('Please configure Supabase first. Click "Configure Now" in the banner above.', 'error');
+                return;
+            }
+            
+            const name = document.getElementById('registerName').value;
+            const company = document.getElementById('registerCompany').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const role = document.getElementById('registerRole').value;
+            
+            showAuthLoading('register');
+            
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            full_name: name,
+                            company: company,
+                            role: role
+                        }
+                    }
+                });
+                
+                if (error) throw error;
+                
+                if (data.user) {
+                    currentUser = data.user;
+                    showApp();
+                    await loadUserData();
+                    showAlert('Welcome to CoPlanner! Your account has been created successfully.', 'success');
+                }
+                
+            } catch (error) {
+                showAuthAlert('register', error.message, 'error');
+            }
+            
+            hideAuthLoading('register');
+        }
+
+        async function logout() {
+            if (supabase) {
+                await supabase.auth.signOut();
+            }
+            currentUser = null;
+            projects = [];
+            documents = [];
+            comments = [];
+            changeRequests = [];
+            logbookEntries = [];
+            activeProject = null;
+            showAuth();
+            showAlert('You have been logged out successfully.', 'success');
+        }
+
+        // Project management functions
+        async function handleCreateProject(e) {
+            e.preventDefault();
+            
+            if (!supabase || !currentUser) {
+                showAlert('Authentication required', 'error');
+                return;
+            }
+            
+            const project = {
+                name: document.getElementById('projectName').value,
+                description: document.getElementById('projectDescription').value,
+                type: document.getElementById('projectType').value,
+                location: document.getElementById('projectLocation').value,
+                due_date: document.getElementById('projectDueDate').value || null,
+                user_id: currentUser.id,
+                status: 'active',
+                created_at: new Date().toISOString()
+            };
+            
+            try {
+                const { data, error } = await supabase
+                    .from('projects')
+                    .insert([project])
+                    .select();
+                
+                if (error) throw error;
+                
+                projects.push(data[0]);
+                await addLogEntry(data[0].id, `Project "${project.name}" created`, 'project_created');
+                
+                closeModal('projectModal');
+                document.getElementById('projectForm').reset();
+                await loadProjects();
+                loadProjectList();
+                showAlert('Project created successfully!', 'success');
+                
+            } catch (error) {
+                showAlert('Error creating project: ' + error.message, 'error');
+            }
+        }
+
+        // Data loading functions
+        async function loadUserData() {
+            if (!supabase || !currentUser) return;
+            
+            try {
+                await Promise.all([
+                    loadProjects(),
+                    loadDocuments(),
+                    loadComments(),
+                    loadChangeRequests(),
+                    loadLogbook()
+                ]);
+                
+                loadProjectList();
+                loadDashboard();
+                
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        async function loadProjects() {
+            if (!supabase || !currentUser) return;
+            
+            try {
+                const { data, error } = await supabase
+                    .from('projects')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false });
+                
+                if (error && !error.message.includes('relation "projects" does not exist')) {
+                    throw error;
+                }
+                
+                projects = data || [];
+                displayProjects();
+                
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                projects = [];
+                displayProjects();
+            }
+        }
+
+        async function loadDocuments() {
+            if (!supabase || !currentUser) return;
+            
+            try {
+                const { data, error } = await supabase
+                    .from('documents')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false });
+                
+                if (error && !error.message.includes('relation "documents" does not exist')) {
+                    throw error;
+                }
+                
+                documents = data || [];
+                displayDocuments();
+                
+            } catch (error) {
+                console.error('Error loading documents:', error);
+                documents = [];
+                displayDocuments();
+            }
+        }
+
+        async function loadComments() {
+            if (!supabase || !currentUser) return;
+            
+            try {
+                const { data, error } = await supabase
+                    .from('comments')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false });
+                
+                if (error && !error.message.includes('relation "comments" does not exist')) {
+                    throw error;
+                }
+                
+                comments = data || [];
+                displayComments();
+                
+            } catch (error) {
+                console.error('Error loading comments:', error);
+                comments = [];
+                displayComments();
+            }
+        }
+
+        async function loadChangeRequests() {
+            if (!supabase || !currentUser) return;
+            
+            try {
+                const { data, error } = await supabase
+                    .from('change_requests')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false });
+                
+                if (error && !error.message.includes('relation "change_requests" does not exist')) {
+                    throw error;
+                }
+                
+                changeRequests = data || [];
+                displayChangeRequests();
+                
+            } catch (error) {
+                console.error('Error loading change requests:', error);
+                changeRequests = [];
+                displayChangeRequests();
+            }
+        }
+
+        async function loadLogbook() {
+            if (!supabase || !currentUser) return;
+            
+            try {
+                const { data, error } = await supabase
+                    .from('logbook')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+                
+                if (error && !error.message.includes('relation "logbook" does not exist')) {
+                    throw error;
+                }
+                
+                logbookEntries = data || [];
+                displayLogbook();
+                
+            } catch (error) {
+                console.error('Error loading logbook:', error);
+                logbookEntries = [];
+                displayLogbook();
+            }
+        }
+
+        // Display functions
+        function displayProjects() {
+            const projectCards = document.getElementById('projectCards');
+            
+            if (projects.length === 0) {
+                projectCards.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-secondary);">
+                        <i class="fas fa-building construction-icon" style="font-size: 4rem; margin-bottom: 16px; opacity: 0.5;"></i>
+                        <h3>No building projects yet</h3>
+                        <p style="margin: 16px 0;">Create your first project to start collaborating with your construction team</p>
+                        <button class="btn btn-primary" onclick="openModal('projectModal')">
+                            <i class="fas fa-plus"></i>
+                            Create First Project
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            projectCards.innerHTML = projects.map(project => `
+                <div class="project-card" onclick="selectProject('${project.id}')">
+                    <div class="project-header">
+                        <div>
+                            <div class="project-title">${project.name}</div>
+                            <div class="project-subtitle">${project.type} • ${project.location || 'Location not specified'}</div>
+                        </div>
+                        <span class="status-badge status-${project.status}">${project.status}</span>
+                    </div>
+                    <div style="margin: 16px 0;">
+                        <p style="color: var(--text-secondary); line-height: 1.5;">${project.description || 'No description provided'}</p>
+                    </div>
+                    <div class="project-meta">
+                        <span class="project-stat">
+                            <i class="fas fa-calendar"></i>
+                            ${project.due_date ? new Date(project.due_date).toLocaleDateString() : 'No deadline'}
+                        </span>
+                        <span class="project-stat">
+                            <i class="fas fa-clock"></i>
+                            Created ${new Date(project.created_at).toLocaleDateString()}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function displayDocuments() {
+            const documentList = document.getElementById('documentList');
+            const projectDocuments = documents.filter(doc => !activeProject || doc.project_id === activeProject.id);
+            
+            if (projectDocuments.length === 0) {
+                documentList.innerHTML = `
+                    <div style="padding: 3rem; text-align: center; color: var(--text-secondary);">
+                        <i class="fas fa-file-alt construction-icon" style="font-size: 4rem; margin-bottom: 16px; opacity: 0.5;"></i>
+                        <h3>No project documents yet</h3>
+                        <p style="margin: 16px 0;">${activeProject ? 'Upload your first document for this building project' : 'Select a project to view and upload documents'}</p>
+                        <button class="btn btn-primary" onclick="openModal('documentModal')">
+                            <i class="fas fa-upload"></i>
+                            Upload Document
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            documentList.innerHTML = projectDocuments.map(doc => `
+                <div class="document-item">
+                    <div class="file-icon">${doc.file_name.split('.').pop().toUpperCase()}</div>
+                    <div class="document-info">
+                        <div class="document-name">${doc.name}</div>
+                        <div class="document-meta">
+                            ${doc.type} • Uploaded ${new Date(doc.created_at).toLocaleDateString()} • ${(doc.file_size / 1024 / 1024).toFixed(2)} MB
+                        </div>
+                    </div>
+                    <span class="version-badge">v${doc.version}</span>
+                    <button class="btn btn-sm btn-secondary" onclick="downloadDocument('${doc.id}')">
+                        <i class="fas fa-download"></i>
+                        Download
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function displayChangeRequests() {
+            const changeRequestsList = document.getElementById('changeRequestsList');
+            const projectChangeRequests = changeRequests.filter(cr => !activeProject || cr.project_id === activeProject.id);
+            
+            if (projectChangeRequests.length === 0) {
+                changeRequestsList.innerHTML = `
+                    <div style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+                        <i class="fas fa-exchange-alt construction-icon" style="font-size: 4rem; margin-bottom: 16px; opacity: 0.5;"></i>
+                        <h3>No change requests</h3>
+                        <p style="margin: 16px 0;">Change requests for project modifications will appear here</p>
+                        <button class="btn btn-primary" onclick="openModal('changeRequestModal')">
+                            <i class="fas fa-plus"></i>
+                            Create Change Request
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            changeRequestsList.innerHTML = projectChangeRequests.map(cr => `
+                <div class="change-request-item">
+                    <div class="change-request-header">
+                        <div>
+                            <div class="change-request-title">${cr.title}</div>
+                            <div style="display: flex; gap: 8px; margin: 8px 0; flex-wrap: wrap;">
+                                <span class="status-badge status-${cr.status === 'pending' ? 'pending' : cr.status}">${cr.status}</span>
+                                <span class="status-badge" style="background: var(--gray-100); color: var(--text-primary);">${cr.priority}</span>
+                                <span class="status-badge" style="background: var(--gray-100); color: var(--text-primary);">${cr.category}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="change-request-description">${cr.description}</div>
+                    ${cr.cost_impact > 0 ? `<div style="font-weight: 600; color: var(--error); margin: 8px 0;">Cost Impact: £${cr.cost_impact.toLocaleString()}</div>` : ''}
+                    <div style="font-size: 0.875rem; color: var(--text-muted); margin-top: 12px;">
+                        Submitted ${new Date(cr.created_at).toLocaleDateString()}
+                    </div>
+                    <div class="change-request-actions">
+                        ${cr.status === 'pending' ? `
+                            <button class="btn btn-success btn-sm" onclick="updateChangeRequestStatus('${cr.id}', 'approved')">
+                                <i class="fas fa-check"></i>
+                                Approve
+                            </button>
+                            <button class="btn btn-warning btn-sm" onclick="updateChangeRequestStatus('${cr.id}', 'rejected')">
+                                <i class="fas fa-times"></i>
+                                Reject
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function displayComments() {
+            const commentsList = document.getElementById('commentsList');
+            const projectComments = comments.filter(comment => !activeProject || comment.project_id === activeProject.id);
+            
+            if (projectComments.length === 0) {
+                commentsList.innerHTML = `
+                    <div style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+                        <i class="fas fa-comments construction-icon" style="font-size: 4rem; margin-bottom: 16px; opacity: 0.5;"></i>
+                        <h3>No comments yet</h3>
+                        <p>Comments will appear here when team members collaborate on documents</p>
+                    </div>
+                `;
+                return;
+            }
+
+            commentsList.innerHTML = `
+                <div class="comments-section">
+                    <div class="comment-form">
+                        <textarea placeholder="Add a comment to this project..." id="newCommentText" class="form-textarea"></textarea>
+                        <button class="btn btn-primary" onclick="submitComment()" style="margin-top: 12px;">
+                            <i class="fas fa-paper-plane"></i>
+                            Add Comment
+                        </button>
+                    </div>
+                    ${projectComments.map(comment => `
+                        <div class="comment-item">
+                            <div class="comment-header">
+                                <span class="comment-author">${comment.user_email || currentUser?.user_metadata?.full_name || 'Team Member'}</span>
+                                <span class="comment-date">${new Date(comment.created_at).toLocaleDateString()}</span>
+                            </div>
+                            <div class="comment-text">${comment.text}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function displayLogbook() {
+            const logbookDiv = document.getElementById('logbookEntries');
+            const projectEntries = logbookEntries.filter(entry => !activeProject || entry.project_id === activeProject.id);
+            
+            if (projectEntries.length === 0) {
+                logbookDiv.innerHTML = `
+                    <div style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+                        <i class="fas fa-clipboard-list construction-icon" style="font-size: 4rem; margin-bottom: 16px; opacity: 0.5;"></i>
+                        <h3>No activity yet</h3>
+                        <p>Project activity and audit trail will appear here</p>
+                    </div>
+                `;
+                return;
+            }
+
+            logbookDiv.innerHTML = `
+                <div class="document-list">
+                    ${projectEntries.map(entry => `
+                        <div class="document-item">
+                            <div class="file-icon" style="background: var(--gray-100); color: var(--text-secondary); font-size: 0.7rem;">LOG</div>
+                            <div class="document-info">
+                                <div class="document-name">${entry.action}</div>
+                                <div class="document-meta">${new Date(entry.created_at).toLocaleString()}</div>
+                            </div>
+                            <span class="version-badge">${entry.type.replace('_', ' ')}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function loadDashboard() {
+            const dashboardContent = document.getElementById('dashboardContent');
+            
+            dashboardContent.innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${projects.length}</div>
+                        <div class="stat-label">Active Projects</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${documents.length}</div>
+                        <div class="stat-label">Project Documents</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${comments.length}</div>
+                        <div class="stat-label">Team Comments</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${changeRequests.length}</div>
+                        <div class="stat-label">Change Requests</div>
+                    </div>
+                </div>
+                
+                ${projects.length > 0 ? `
+                <div class="card">
+                    <h3 style="margin-bottom: 24px; color: var(--text-primary);">Recent Activity</h3>
+                    <div class="document-list">
+                        ${logbookEntries.slice(0, 5).map(entry => `
+                            <div class="document-item">
+                                <div class="file-icon" style="background: var(--gray-100); color: var(--text-secondary); font-size: 0.6rem;">LOG</div>
+                                <div class="document-info">
+                                    <div class="document-name">${entry.action}</div>
+                                    <div class="document-meta">${new Date(entry.created_at).toLocaleString()}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                ` : `
+                <div class="card" style="text-align: center; padding: 3rem;">
+                    <i class="fas fa-hard-hat construction-icon" style="font-size: 4rem; margin-bottom: 24px; opacity: 0.5;"></i>
+                    <h3 style="margin-bottom: 16px; color: var(--text-primary);">Welcome to CoPlanner!</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 32px; line-height: 1.6;">The Central Hub for Building Projects. Get started by creating your first construction project and begin collaborating with your team.</p>
+                    <button class="btn btn-primary btn-lg" onclick="openModal('projectModal')">
+                        <i class="fas fa-plus"></i>
+                        Create Your First Project
+                    </button>
+                </div>
+                `}
+            `;
+        }
+
+        // Helper functions
+        function loadProjectList() {
+            const projectList = document.getElementById('projectList');
+            
+            if (projects.length === 0) {
+                projectList.innerHTML = '<li style="padding: 16px 24px; text-align: center; color: var(--text-muted);">No projects yet</li>';
+                return;
+            }
+
+            projectList.innerHTML = projects.map(project => `
+                <li class="project-item ${activeProject?.id === project.id ? 'active' : ''}" onclick="selectProject('${project.id}')">
+                    <div class="project-name">${project.name}</div>
+                    <div class="project-meta">${project.type} • ${project.location || 'No location'}</div>
+                </li>
+            `).join('');
+        }
+
+        function selectProject(projectId) {
+            activeProject = projects.find(p => p.id === projectId);
+            loadProjectList();
+            
+            // Reload all project-specific data
+            displayDocuments();
+            displayComments();
+            displayChangeRequests();
+            displayLogbook();
+        }
+
+        async function addLogEntry(projectId, action, type) {
+            if (!supabase || !currentUser) return;
+            
+            const entry = {
+                project_id: projectId,
+                action: action,
+                type: type,
+                user_id: currentUser.id,
+                created_at: new Date().toISOString()
+            };
+            
+            try {
+                const { data, error } = await supabase
+                    .from('logbook')
+                    .insert([entry])
+                    .select();
+                
+                if (error) throw error;
+                
+                logbookEntries.unshift(data[0]);
+                
+            } catch (error) {
+                console.error('Error adding log entry:', error);
+            }
+        }
+
+        // Navigation functions
+        function switchTab(tabName) {
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+                content.classList.remove('active');
+            });
+            const activeContent = document.getElementById(tabName);
+            activeContent.classList.remove('hidden');
+            activeContent.classList.add('active');
+
+            // Load tab-specific data
+            switch(tabName) {
+                case 'projects':
+                    displayProjects();
+                    break;
+                case 'documents':
+                    displayDocuments();
+                    break;
+                case 'revisions':
+                    displayDocuments();
+                    break;
+                case 'comments':
+                    displayComments();
+                    break;
+                case 'changes':
+                    displayChangeRequests();
+                    break;
+                case 'logbook':
+                    displayLogbook();
+                    break;
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+            }
+        }
+
+        // UI Helper functions
+        function showAuthLoading(form) {
+            const button = document.querySelector(`#${form}FormElement .btn-primary`);
+            if (button) {
+                button.classList.add('loading');
+                const btnText = button.querySelector('.btn-text');
+                const spinner = button.querySelector('.spinner');
+                if (btnText) btnText.style.display = 'none';
+                if (spinner) spinner.classList.remove('hidden');
+                button.disabled = true;
+            }
+        }
+
+        function hideAuthLoading(form) {
+            const button = document.querySelector(`#${form}FormElement .btn-primary`);
+            if (button) {
+                button.classList.remove('loading');
+                const btnText = button.querySelector('.btn-text');
+                const spinner = button.querySelector('.spinner');
+                if (btnText) btnText.style.display = 'inline';
+                if (spinner) spinner.classList.add('hidden');
+                button.disabled = false;
+            }
+        }
+
+        function showAuthAlert(form, message, type) {
+            const alertDiv = document.getElementById(`${form}Alert`);
+            if (alertDiv) {
+                alertDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            }
+        }
+
+        function showAuth() {
+            document.getElementById('authScreen').classList.remove('hidden');
+            document.getElementById('appScreen').classList.add('hidden');
+        }
+
+        function showApp() {
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('appScreen').classList.remove('hidden');
+            updateUserDisplay();
+        }
+
+        function updateUserDisplay() {
+            if (currentUser) {
+                const name = currentUser.user_metadata?.full_name || currentUser.email.split('@')[0];
+                document.getElementById('userWelcome').textContent = `Welcome, ${name}`;
+                const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                document.getElementById('userInitials').textContent = initials;
+            }
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('active');
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', newTheme);
+            const icon = document.getElementById('themeIcon');
+            if (icon) {
+                icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+            localStorage.setItem('theme', newTheme);
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const selectedFileDiv = document.getElementById('selectedFile');
+                if (selectedFileDiv) {
+                    selectedFileDiv.classList.remove('hidden');
+                }
+            }
+        }
+
+        function showAlert(message, type = 'success') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                ${message}
+            `;
+            alertDiv.style.position = 'fixed';
+            alertDiv.style.top = '20px';
+            alertDiv.style.right = '20px';
+            alertDiv.style.zIndex = '10000';
+            alertDiv.style.minWidth = '320px';
+            alertDiv.style.animation = 'fadeIn 0.3s ease-out';
+            
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.style.animation = 'fadeOut 0.3s ease-out';
+                setTimeout(() => alertDiv.remove(), 300);
+            }, 4000);
+        }
+
+        // Document and Change Request handlers (simplified for demo)
+        async function handleUploadDocument(e) {
+            e.preventDefault();
+            showAlert('Document upload feature will be enabled once Supabase is configured', 'warning');
+        }
+
+        async function handleCreateChangeRequest(e) {
+            e.preventDefault();
+            showAlert('Change request feature will be enabled once Supabase is configured', 'warning');
+        }
+
+        // Placeholder functions for demo
+        function downloadDocument(docId) {
+            showAlert('Document download will be available once files are uploaded', 'warning');
+        }
+
+        function updateChangeRequestStatus(id, status) {
+            showAlert(`Change request ${status} functionality will be available with backend`, 'warning');
+        }
+
+        function submitComment() {
+            const text = document.getElementById('newCommentText')?.value;
+            if (text && text.trim()) {
+                showAlert('Comment functionality will be available once Supabase is configured', 'warning');
+            }
+        }
+
+        // Initialize theme from localStorage
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.body.setAttribute('data-theme', savedTheme);
+        const themeIcon = document.getElementById('themeIcon');
+        if (themeIcon) {
+            themeIcon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        // Add CSS animations for alerts
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateX(100%); }
+                to { opacity: 1; transform: translateX(0); }
+            }
+            @keyframes fadeOut {
+                from { opacity: 1; transform: translateX(0); }
+                to { opacity: 0; transform: translateX(100%); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div class="file-icon" style="width: 32px; height: 32px; font-size: 0.6rem;">${file.name.split('.').pop().toUpperCase()}</div>
+                            <div>
+                                <div style="font-weight: 600; color: var(--text-primary);">${file.name}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">${(file.size / 1024 / 1024).toFixed(2)} MB</div>
+                            </div>
+                        </div>
+                    `;
+                    selectedFileDiv.    <!-- Modals -->
+    
+    <!-- Supabase Setup Modal -->
+    <div class="modal-overlay" id="setupModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Configure CoPlanner Backend</h3>
+                <p class="modal-subtitle">Set up your Supabase connection to enable real data storage and collaboration features.</p>
+            </div>
+            <div class="modal-body">
+                <form id="setupForm">
+                    <div class="form-group">
+                        <label class="form-label">Supabase URL</label>
+                        <input type="url" class="form-input" id="supabaseUrl" placeholder="https://your-project.supabase.co" required>
+                        <small style="color: var(--text-muted); font-size: 0.75rem;">Your Supabase project URL</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Supabase API Key</label>
+                        <input type="text" class="form-input" id="supabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." required>
+                        <small style="color: var(--text-muted); font-size: 0.75rem;">Your Supabase anonymous/public key</small>
+                    </div>
+                    <div style="background: var(--gray-50); padding: 16px; border-radius: 12px; margin: 20px 0;">
+                        <h4 style="margin-bottom: 8px; font-size: 0.875rem; font-weight: 600;">Quick Setup Guide:</h4>
+                        <ol style="font-size: 0.875rem; color: var(--text-secondary); padding-left: 20px; line-height: 1.5;">
+                            <li>Go to <a href="https://supabase.com" target="_blank" style="color: var(--primary);">supabase.com</a> and create account</li>
+                            <li>Create new project (takes 2 minutes)</li>
+                            <li>Go to Settings → API to get your URL and anon key</li>
+                            <li>Paste them above and click Save</li>
+                        </ol>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('setupModal')">Skip for Now</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            Save Configuration
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Modal -->
+    <div class="modal-overlay" id="projectModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Create New Building Project</h3>
+                <p class="modal-subtitle">Add a new construction project to start collaborating with your team</p>
+            </div>
+            <div class="modal-body">
+                <form id="projectForm">
+                    <div class="form-group">
+                        <label class="form-label">Project Name</label>
+                        <input type="text" class="form-input" id="projectName" placeholder="Manchester Residential Development" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Project Description</label>
+                        <textarea class="form-textarea" id="projectDescription" placeholder="Brief description of the building project..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Project Type</label>
+                        <select class="form-select" id="projectType" required>
+                            <option value="">Select project type...</option>
+                            <option value="residential">Residential</option>
+                            <option value="commercial">Commercial</option>
+                            <option value="industrial">Industrial</option>
+                            <option value="infrastructure">Infrastructure</option>
+                            <option value="renovation">Renovation</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Location</label>
+                        <input type="text" class="form-input" id="projectLocation" placeholder="Manchester, UK" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Target Completion Date</label>
+                        <input type="date" class="form-input" id="projectDueDate">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('projectModal')">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus"></i>
+                            Create Project
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Modal -->
+    <div class="modal-overlay" id="documentModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Upload Project Document</h3>
+                <p class="modal-subtitle">Add drawings, specifications, or other project documents</p>
+            </div>
+            <div class="modal-body">
+                <form id="documentForm">
+                    <div class="form-group">
+                        <label class="form-label">Document Name</label>
+                        <input type="text" class="form-input" id="documentName" placeholder="Foundation Plans - Rev C" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Document Type</label>
+                        <select class="form-select" id="documentType" required>
+                            <option value="">Select document type...</option>
+                            <option value="architectural">Architectural Drawings</option>
+                            <option value="structural">Structural Plans</option>
+                            <option value="mep">MEP Systems</option>
+                            <option value="specifications">Project Specifications</option>
+                            <option value="contracts">Contracts & Legal</option>
+                            <option value="reports">Reports & Surveys</option>
+                            <option value="permits">Permits & Approvals</option>
+                            <option value="photos">Site Photos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">File Upload</label>
+                        <div class="file-upload-area" onclick="document.getElementById('fileInput').click()">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: var(--primary); margin-bottom: 8px;"></i>
+                            <p style="font-weight: 500; margin-bottom: 4px;">Click to select file or drag and drop</p>
+                            <p style="font-size: 0.75rem; color: var(--text-muted);">Supports PDF, DWG, DXF, JPG, PNG, DOC (Max 50MB)</p>
+                            <input type="file" id="fileInput" style="display: none;" accept=".pdf,.dwg,.dxf,.jpg,.jpeg,.png,.doc,.docx">
+                        </div>
+                        <div id="selectedFile" class="hidden" style="margin-top: 16px; padding: 12px; background: var(--gray-50); border-radius: 8px;"></div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('documentModal')">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-upload"></i>
+                            Upload Document
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Request Modal -->
+    <div class="modal-overlay" id="changeRequestModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Create Change Request</h3>
+                <p class="modal-subtitle">Submit a request for project modifications or changes</p>
+            </div>
+            <div class="modal-body">
+                <form id="changeRequestForm">
+                    <div class="form-group">
+                        <label class="form-label">Change Request Title</label>
+                        <input type="text" class="form-input" id="changeTitle" placeholder="Additional fire escape stairwell" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-textarea" id="changeDescription" placeholder="Describe the requested change in detail..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <select class="form-select" id="changeCategory" required>
+                            <option value="">Select category...</option>
+                            <option value="design">Design Change</option>
+                            <option value="scope">Scope Change</option>
+                            <option value="materials">Materials Change</option>
+                            <option value="timeline">Timeline Change</option>
+                            <option value="budget">Budget Change</option>
+                            <option value="safety">Health & Safety</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Priority</label>
+                        <select class="form-select" id="changePriority" required>
+                            <option value="">Select priority...</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Cost Impact (£)</label>
+                        <input type="number" class="form-input" id="changeCost" placeholder="0" min="0">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('changeRequestModal')">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                            Submit Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let supabase = null;
+        let currentUser = null;
+        let projects = [];
+        let documents = [];
+        let comments = [];
+        let changeRequests = [];
+        let logbookEntries = [];
+        let activeProject = null;
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                if (isSupabaseConfigured()) {
+                    if (initializeSupabase()) {
+                        checkAuthState();
+                    }
+                } else {
+                    showAuth();
+                }
+                setupEventListeners();
+            } catch (error) {
+                console.error('App initialization error:', error);
+                showAuth();
+            }
+        });
+
+        // Check if Supabase is configured
+        function isSupabaseConfigured() {
+            const url = localStorage.getItem('supabase_url');
+            const key = localStorage.getItem('supabase_key');
+            return url && key;
+        }
+
+        // Initialize Supabase
+        function initializeSupabase() {
+            const url = localStorage.getItem('supabase_url');
+            const key = localStorage.getItem('supabase_key');
+            
+            if (url && key) {
+                try {
+                    supabase = window.su<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CoPlanner - The Central Hub for Building Projects</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
@@ -14,7 +1131,6 @@
         }
         
         :root {
-            /* Premium Blue Theme */
             --primary: #1e40af;
             --primary-light: #3b82f6;
             --primary-dark: #1e3a8a;
@@ -24,7 +1140,6 @@
             --error: #ef4444;
             --success: #22c55e;
             
-            /* Neutral Grays */
             --gray-50: #f8fafc;
             --gray-100: #f1f5f9;
             --gray-200: #e2e8f0;
@@ -36,33 +1151,27 @@
             --gray-800: #1e293b;
             --gray-900: #0f172a;
             
-            /* Backgrounds */
             --bg-primary: #ffffff;
             --bg-secondary: var(--gray-50);
             --bg-surface: #ffffff;
             --bg-overlay: rgba(30, 64, 175, 0.8);
             
-            /* Text */
             --text-primary: var(--gray-900);
             --text-secondary: var(--gray-600);
             --text-muted: var(--gray-500);
             
-            /* Borders */
             --border-light: var(--gray-200);
             --border-medium: var(--gray-300);
             
-            /* Shadows */
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             
-            /* Transitions */
             --transition-base: all 0.2s ease-in-out;
             --transition-slow: all 0.3s ease-in-out;
         }
         
-        /* Dark theme */
         [data-theme="dark"] {
             --bg-primary: var(--gray-900);
             --bg-secondary: var(--gray-800);
@@ -82,21 +1191,6 @@
             transition: var(--transition-base);
         }
         
-        /* Typography */
-        .text-xs { font-size: 0.75rem; }
-        .text-sm { font-size: 0.875rem; }
-        .text-base { font-size: 1rem; }
-        .text-lg { font-size: 1.125rem; }
-        .text-xl { font-size: 1.25rem; }
-        .text-2xl { font-size: 1.5rem; }
-        .text-3xl { font-size: 1.875rem; }
-        .text-4xl { font-size: 2.25rem; }
-        
-        .font-medium { font-weight: 500; }
-        .font-semibold { font-weight: 600; }
-        .font-bold { font-weight: 700; }
-        
-        /* Welcome/Auth Page */
         .welcome-container {
             min-height: 100vh;
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, var(--secondary) 100%);
@@ -137,16 +1231,6 @@
             padding: 40px 32px;
             text-align: center;
             position: relative;
-        }
-        
-        .welcome-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="80" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
         }
         
         .welcome-logo {
@@ -215,7 +1299,6 @@
             box-shadow: var(--shadow-sm);
         }
         
-        /* Main Application Layout */
         .app-container {
             min-height: 100vh;
             display: flex;
@@ -228,7 +1311,6 @@
             height: calc(100vh - 64px);
         }
         
-        /* Header */
         .header {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
             color: white;
@@ -327,7 +1409,6 @@
             background: var(--gray-50);
         }
         
-        /* Navigation */
         .nav-container {
             background: white;
             border-bottom: 1px solid var(--border-light);
@@ -363,7 +1444,6 @@
             border-bottom-color: var(--primary);
         }
         
-        /* Sidebar */
         .sidebar {
             width: 300px;
             background: var(--bg-surface);
@@ -442,7 +1522,6 @@
             box-shadow: var(--shadow-lg);
         }
         
-        /* Main Content */
         .content {
             flex: 1;
             padding: 32px;
@@ -470,7 +1549,6 @@
             gap: 12px;
         }
         
-        /* Cards */
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -548,7 +1626,6 @@
             color: white;
         }
         
-        /* Buttons */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -637,7 +1714,6 @@
             font-size: 1rem;
         }
         
-        /* Forms */
         .form-group {
             margin-bottom: 20px;
         }
@@ -672,7 +1748,6 @@
             min-height: 100px;
         }
         
-        /* Modals */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -731,7 +1806,6 @@
             justify-content: flex-end;
         }
         
-        /* File Upload */
         .file-upload-area {
             border: 2px dashed var(--border-medium);
             border-radius: 12px;
@@ -752,7 +1826,6 @@
             background: rgba(30, 64, 175, 0.05);
         }
         
-        /* Document List */
         .document-list {
             background: var(--bg-surface);
             border-radius: 16px;
@@ -815,7 +1888,6 @@
             font-weight: 500;
         }
         
-        /* Alerts */
         .alert {
             padding: 16px 20px;
             border-radius: 12px;
@@ -844,7 +1916,6 @@
             color: #92400e;
         }
         
-        /* Setup Banner */
         .setup-banner {
             background: linear-gradient(135deg, var(--warning) 0%, #fbbf24 100%);
             color: white;
@@ -863,7 +1934,6 @@
             font-weight: 600;
         }
         
-        /* Loading States */
         .loading {
             opacity: 0.6;
             pointer-events: none;
@@ -884,7 +1954,6 @@
             100% { transform: rotate(360deg); }
         }
         
-        /* Theme Toggle */
         .theme-toggle {
             background: rgba(255, 255, 255, 0.2);
             border: none;
@@ -900,7 +1969,6 @@
             background: rgba(255, 255, 255, 0.3);
         }
         
-        /* Footer */
         .footer {
             background: var(--bg-surface);
             border-top: 1px solid var(--border-light);
@@ -910,9 +1978,75 @@
             font-size: 0.875rem;
         }
         
-        /* Utilities */
-        .hidden { display: none !important; }
-        .flex { display: flex; }
-        .items-center { align-items: center; }
-        .justify-between { justify-content: space-between; }
-        .gap-2 { gap: 8px; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, var(--bg-surface) 0%, var(--gray-50) 100%);
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            transition: var(--transition-base);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .comments-section {
+            background: var(--bg-surface);
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 24px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+        }
+        
+        .comment-form {
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .comment-item {
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .comment-item:last-child {
+            border-bottom: none;
+        }

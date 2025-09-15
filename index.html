@@ -590,6 +590,12 @@
             color: #92400e;
         }
         
+        .alert-info {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: var(--primary);
+            color: #1e40af;
+        }
+        
         .setup-banner {
             background: linear-gradient(135deg, var(--warning) 0%, #fbbf24 100%);
             color: white;
@@ -693,6 +699,25 @@
             .cards-grid, .stats-grid {
                 grid-template-columns: 1fr;
             }
+        }
+
+        .file-upload-area {
+            border: 2px dashed var(--border-medium);
+            border-radius: 12px;
+            padding: 32px;
+            text-align: center;
+            transition: var(--transition-base);
+            cursor: pointer;
+        }
+        
+        .file-upload-area:hover {
+            border-color: var(--primary);
+            background: var(--gray-50);
+        }
+        
+        .file-upload-area.dragover {
+            border-color: var(--primary);
+            background: rgba(30, 64, 175, 0.05);
         }
     </style>
 </head>
@@ -840,7 +865,7 @@
                 <div class="sidebar-section">
                     <div class="sidebar-title">Your Building Projects</div>
                     <ul class="project-list" id="projectList">
-                        <li style="padding: 16px 24px; text-align: center; color: var(--text-muted);">No projects yet</li>
+                        <li style="padding: 16px 24px; text-align: center; color: var(--text-muted);">Loading projects...</li>
                     </ul>
                 </div>
                 <button class="create-project-btn" onclick="openModal('projectModal')">
@@ -859,19 +884,19 @@
                     <div id="dashboardContent">
                         <div class="stats-grid">
                             <div class="stat-card">
-                                <div class="stat-value">0</div>
+                                <div class="stat-value" id="activeProjectsCount">0</div>
                                 <div class="stat-label">Active Projects</div>
                             </div>
                             <div class="stat-card">
-                                <div class="stat-value">0</div>
+                                <div class="stat-value" id="documentsCount">0</div>
                                 <div class="stat-label">Project Documents</div>
                             </div>
                             <div class="stat-card">
-                                <div class="stat-value">0</div>
+                                <div class="stat-value" id="commentsCount">0</div>
                                 <div class="stat-label">Team Comments</div>
                             </div>
                             <div class="stat-card">
-                                <div class="stat-value">0</div>
+                                <div class="stat-value" id="changesCount">0</div>
                                 <div class="stat-label">Change Requests</div>
                             </div>
                         </div>
@@ -888,13 +913,9 @@
                         </button>
                     </div>
                     <div id="projectsGrid" class="cards-grid">
-                        <div class="card" style="text-align: center; padding: 48px 24px;">
+                        <div style="text-align: center; padding: 48px 24px;">
                             <i class="fas fa-building" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 16px;"></i>
-                            <p style="color: var(--text-muted); margin-bottom: 16px;">No projects created yet</p>
-                            <button class="btn btn-primary" onclick="openModal('projectModal')">
-                                <i class="fas fa-plus"></i>
-                                Create Your First Project
-                            </button>
+                            <p style="color: var(--text-muted);">Loading projects...</p>
                         </div>
                     </div>
                 </div>
@@ -909,13 +930,9 @@
                         </button>
                     </div>
                     <div id="documentsGrid" class="cards-grid">
-                        <div class="card" style="text-align: center; padding: 48px 24px;">
+                        <div style="text-align: center; padding: 48px 24px;">
                             <i class="fas fa-file-alt" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 16px;"></i>
-                            <p style="color: var(--text-muted); margin-bottom: 16px;">No documents uploaded yet</p>
-                            <button class="btn btn-primary" onclick="openModal('documentModal')">
-                                <i class="fas fa-upload"></i>
-                                Upload Your First Document
-                            </button>
+                            <p style="color: var(--text-muted);">Loading documents...</p>
                         </div>
                     </div>
                 </div>
@@ -926,9 +943,9 @@
                         <h1 class="content-title">Comments</h1>
                     </div>
                     <div id="commentsContent">
-                        <div class="card" style="text-align: center; padding: 48px 24px;">
+                        <div style="text-align: center; padding: 48px 24px;">
                             <i class="fas fa-comments" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 16px;"></i>
-                            <p style="color: var(--text-muted);">No comments yet - start a conversation!</p>
+                            <p style="color: var(--text-muted);">Loading comments...</p>
                         </div>
                     </div>
                 </div>
@@ -943,13 +960,9 @@
                         </button>
                     </div>
                     <div id="changesGrid" class="cards-grid">
-                        <div class="card" style="text-align: center; padding: 48px 24px;">
+                        <div style="text-align: center; padding: 48px 24px;">
                             <i class="fas fa-exchange-alt" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 16px;"></i>
-                            <p style="color: var(--text-muted); margin-bottom: 16px;">No change requests submitted</p>
-                            <button class="btn btn-primary" onclick="openModal('changeModal')">
-                                <i class="fas fa-plus"></i>
-                                Submit First Change Request
-                            </button>
+                            <p style="color: var(--text-muted);">Loading change requests...</p>
                         </div>
                     </div>
                 </div>
@@ -965,6 +978,7 @@
                 <div class="modal-subtitle">Start a new building project</div>
             </div>
             <div class="modal-body">
+                <div id="projectModalAlert"></div>
                 <form id="projectForm">
                     <div class="form-group">
                         <label class="form-label">Project Name</label>
@@ -995,7 +1009,8 @@
                 <button class="btn btn-secondary" onclick="closeModal('projectModal')">Cancel</button>
                 <button class="btn btn-primary" onclick="createProject()">
                     <i class="fas fa-plus"></i>
-                    Create Project
+                    <span>Create Project</span>
+                    <span class="spinner hidden"></span>
                 </button>
             </div>
         </div>
@@ -1009,6 +1024,7 @@
                 <div class="modal-subtitle">Add a new document to your project</div>
             </div>
             <div class="modal-body">
+                <div id="documentModalAlert"></div>
                 <form id="documentForm">
                     <div class="form-group">
                         <label class="form-label">Document Title</label>
@@ -1034,7 +1050,15 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">File</label>
-                        <input type="file" class="form-input" id="documentFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.dwg" required>
+                        <div class="file-upload-area" id="fileUploadArea" onclick="document.getElementById('documentFile').click()">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: var(--text-muted); margin-bottom: 8px;"></i>
+                            <p>Click to select file or drag and drop</p>
+                            <p style="font-size: 0.75rem; color: var(--text-muted);">Supports PDF, DOC, DOCX, JPG, PNG, DWG files</p>
+                        </div>
+                        <input type="file" class="form-input hidden" id="documentFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.dwg" onchange="handleFileSelect(this)">
+                        <div id="fileInfo" class="hidden" style="margin-top: 8px; padding: 8px; background: var(--gray-50); border-radius: 6px;">
+                            <small id="fileName"></small>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -1042,7 +1066,8 @@
                 <button class="btn btn-secondary" onclick="closeModal('documentModal')">Cancel</button>
                 <button class="btn btn-primary" onclick="uploadDocument()">
                     <i class="fas fa-upload"></i>
-                    Upload Document
+                    <span>Upload Document</span>
+                    <span class="spinner hidden"></span>
                 </button>
             </div>
         </div>
@@ -1056,6 +1081,7 @@
                 <div class="modal-subtitle">Submit a change request for review</div>
             </div>
             <div class="modal-body">
+                <div id="changeModalAlert"></div>
                 <form id="changeForm">
                     <div class="form-group">
                         <label class="form-label">Change Title</label>
@@ -1091,7 +1117,8 @@
                 <button class="btn btn-secondary" onclick="closeModal('changeModal')">Cancel</button>
                 <button class="btn btn-primary" onclick="submitChange()">
                     <i class="fas fa-paper-plane"></i>
-                    Submit Change Request
+                    <span>Submit Change Request</span>
+                    <span class="spinner hidden"></span>
                 </button>
             </div>
         </div>
@@ -1172,8 +1199,6 @@
 
             // Check for existing session
             checkSession();
-
-            // Set up event listeners
             setupEventListeners();
         }
 
@@ -1187,6 +1212,14 @@
             }
             if (registerForm) {
                 registerForm.addEventListener('submit', handleRegister);
+            }
+
+            // File upload drag and drop
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            if (fileUploadArea) {
+                fileUploadArea.addEventListener('dragover', handleDragOver);
+                fileUploadArea.addEventListener('dragleave', handleDragLeave);
+                fileUploadArea.addEventListener('drop', handleFileDrop);
             }
 
             // Click outside dropdown to close
@@ -1242,8 +1275,8 @@
         }
 
         function showDemoMode() {
-            // For demo mode, skip auth and show app
             currentUser = {
+                id: 'demo-user',
                 email: 'demo@coplanner.co.uk',
                 user_metadata: { full_name: 'Demo User' }
             };
@@ -1258,7 +1291,7 @@
             if (appScreen) appScreen.classList.add('hidden');
         }
 
-        function showApp() {
+        async function showApp() {
             const authScreen = document.getElementById('authScreen');
             const appScreen = document.getElementById('appScreen');
             
@@ -1266,7 +1299,7 @@
             if (appScreen) appScreen.classList.remove('hidden');
 
             updateUserInfo();
-            loadDashboard();
+            await loadAllData();
         }
 
         function updateUserInfo() {
@@ -1286,6 +1319,231 @@
             }
         }
 
+        async function loadAllData() {
+            try {
+                await Promise.all([
+                    loadProjects(),
+                    loadDocuments(),
+                    loadComments(),
+                    loadChanges()
+                ]);
+                updateStats();
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+
+        async function loadProjects() {
+            if (!supabase || !currentUser) {
+                projects = [];
+                updateProjectList();
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('projects')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                
+                projects = data || [];
+                updateProjectList();
+                updateProjectsGrid();
+                
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                projects = [];
+                updateProjectList();
+            }
+        }
+
+        async function loadDocuments() {
+            if (!supabase || !currentUser) {
+                documents = [];
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('documents')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                documents = data || [];
+                updateDocumentsGrid();
+                
+            } catch (error) {
+                console.error('Error loading documents:', error);
+                documents = [];
+            }
+        }
+
+        async function loadComments() {
+            if (!supabase || !currentUser) {
+                comments = [];
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('comments')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                comments = data || [];
+                
+            } catch (error) {
+                console.error('Error loading comments:', error);
+                comments = [];
+            }
+        }
+
+        async function loadChanges() {
+            if (!supabase || !currentUser) {
+                changes = [];
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('change_requests')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                changes = data || [];
+                updateChangesGrid();
+                
+            } catch (error) {
+                console.error('Error loading change requests:', error);
+                changes = [];
+            }
+        }
+
+        function updateStats() {
+            const activeProjectsEl = document.getElementById('activeProjectsCount');
+            const documentsEl = document.getElementById('documentsCount');
+            const commentsEl = document.getElementById('commentsCount');
+            const changesEl = document.getElementById('changesCount');
+
+            if (activeProjectsEl) activeProjectsEl.textContent = projects.length;
+            if (documentsEl) documentsEl.textContent = documents.length;
+            if (commentsEl) commentsEl.textContent = comments.length;
+            if (changesEl) changesEl.textContent = changes.length;
+        }
+
+        function updateProjectList() {
+            const projectList = document.getElementById('projectList');
+            if (!projectList) return;
+
+            if (projects.length === 0) {
+                projectList.innerHTML = '<li style="padding: 16px 24px; text-align: center; color: var(--text-muted);">No projects yet</li>';
+            } else {
+                projectList.innerHTML = projects.map(project => `
+                    <li class="project-item" onclick="selectProject('${project.id}')">
+                        <div class="project-name">${project.name}</div>
+                        <div class="project-meta">${project.location} • ${project.type}</div>
+                    </li>
+                `).join('');
+            }
+        }
+
+        function updateProjectsGrid() {
+            const grid = document.getElementById('projectsGrid');
+            if (!grid) return;
+
+            if (projects.length === 0) {
+                grid.innerHTML = `
+                    <div class="card" style="text-align: center; padding: 48px 24px;">
+                        <i class="fas fa-building" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 16px;"></i>
+                        <p style="color: var(--text-muted); margin-bottom: 16px;">No projects created yet</p>
+                        <button class="btn btn-primary" onclick="openModal('projectModal')">
+                            <i class="fas fa-plus"></i>
+                            Create Your First Project
+                        </button>
+                    </div>
+                `;
+            } else {
+                grid.innerHTML = projects.map(project => `
+                    <div class="card" onclick="selectProject('${project.id}')">
+                        <div class="card-title">${project.name}</div>
+                        <p style="color: var(--text-secondary); margin-bottom: 12px;">${project.location}</p>
+                        <div class="status-badge status-active">${project.type}</div>
+                        <p style="margin-top: 12px; font-size: 0.875rem;">${project.description || 'No description'}</p>
+                        <div style="margin-top: 16px; font-size: 0.75rem; color: var(--text-muted);">
+                            Created ${new Date(project.created_at).toLocaleDateString()}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function updateDocumentsGrid() {
+            const grid = document.getElementById('documentsGrid');
+            if (!grid) return;
+
+            if (documents.length === 0) {
+                grid.innerHTML = `
+                    <div class="card" style="text-align: center; padding: 48px 24px;">
+                        <i class="fas fa-file-alt" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 16px;"></i>
+                        <p style="color: var(--text-muted); margin-bottom: 16px;">No documents uploaded yet</p>
+                        <button class="btn btn-primary" onclick="openModal('documentModal')">
+                            <i class="fas fa-upload"></i>
+                            Upload Your First Document
+                        </button>
+                    </div>
+                `;
+            } else {
+                grid.innerHTML = documents.map(doc => `
+                    <div class="card">
+                        <div class="card-title">${doc.title}</div>
+                        <p style="color: var(--text-secondary); margin-bottom: 12px;">Type: ${doc.type}</p>
+                        <div style="margin-top: 16px; font-size: 0.75rem; color: var(--text-muted);">
+                            Uploaded ${new Date(doc.created_at).toLocaleDateString()}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function updateChangesGrid() {
+            const grid = document.getElementById('changesGrid');
+            if (!grid) return;
+
+            if (changes.length === 0) {
+                grid.innerHTML = `
+                    <div class="card" style="text-align: center; padding: 48px 24px;">
+                        <i class="fas fa-exchange-alt" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 16px;"></i>
+                        <p style="color: var(--text-muted); margin-bottom: 16px;">No change requests submitted</p>
+                        <button class="btn btn-primary" onclick="openModal('changeModal')">
+                            <i class="fas fa-plus"></i>
+                            Submit First Change Request
+                        </button>
+                    </div>
+                `;
+            } else {
+                grid.innerHTML = changes.map(change => `
+                    <div class="card">
+                        <div class="card-title">${change.title}</div>
+                        <p style="color: var(--text-secondary); margin-bottom: 12px;">Priority: ${change.priority}</p>
+                        <div class="status-badge status-active">${change.status}</div>
+                        <p style="margin-top: 12px; font-size: 0.875rem;">${change.description}</p>
+                        <div style="margin-top: 16px; font-size: 0.75rem; color: var(--text-muted);">
+                            Submitted ${new Date(change.created_at).toLocaleDateString()}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
         async function handleLogin(event) {
             event.preventDefault();
             
@@ -1296,10 +1554,7 @@
             const btnText = button.querySelector('.btn-text');
 
             try {
-                // Show loading state
-                if (spinner) spinner.classList.remove('hidden');
-                if (btnText) btnText.textContent = 'Signing In...';
-                button.disabled = true;
+                setLoadingState(button, spinner, btnText, true, 'Signing In...');
 
                 if (supabase) {
                     const { data, error } = await supabase.auth.signInWithPassword({
@@ -1313,9 +1568,9 @@
                     showAlert('success', 'Welcome back!');
                     setTimeout(() => showApp(), 1000);
                 } else {
-                    // Demo mode
                     setTimeout(() => {
                         currentUser = {
+                            id: 'demo-user',
                             email,
                             user_metadata: { full_name: 'Demo User' }
                         };
@@ -1327,10 +1582,7 @@
                 console.error('Login error:', error);
                 showAlert('error', error.message || 'Failed to sign in');
             } finally {
-                // Reset button state
-                if (spinner) spinner.classList.add('hidden');
-                if (btnText) btnText.textContent = 'Sign In to CoPlanner';
-                button.disabled = false;
+                setLoadingState(button, spinner, btnText, false, 'Sign In to CoPlanner');
             }
         }
 
@@ -1346,10 +1598,7 @@
             const btnText = button.querySelector('.btn-text');
 
             try {
-                // Show loading state
-                if (spinner) spinner.classList.remove('hidden');
-                if (btnText) btnText.textContent = 'Creating Account...';
-                button.disabled = true;
+                setLoadingState(button, spinner, btnText, true, 'Creating Account...');
 
                 if (supabase) {
                     const { data, error } = await supabase.auth.signUp({
@@ -1365,9 +1614,18 @@
 
                     if (error) throw error;
                     
+                    // Create profile record
+                    if (data.user) {
+                        await supabase.from('profiles').insert({
+                            id: data.user.id,
+                            email: data.user.email,
+                            full_name: name,
+                            company: company
+                        });
+                    }
+                    
                     showAlert('success', 'Account created! Please check your email to verify your account.');
                 } else {
-                    // Demo mode
                     setTimeout(() => {
                         showAlert('success', 'Demo account created! Welcome to CoPlanner.');
                         switchAuthTab('login');
@@ -1377,10 +1635,223 @@
                 console.error('Registration error:', error);
                 showAlert('error', error.message || 'Failed to create account');
             } finally {
-                // Reset button state
-                if (spinner) spinner.classList.add('hidden');
-                if (btnText) btnText.textContent = 'Create Account';
-                button.disabled = false;
+                setLoadingState(button, spinner, btnText, false, 'Create Account');
+            }
+        }
+
+        async function createProject() {
+            const name = document.getElementById('projectName').value;
+            const location = document.getElementById('projectLocation').value;
+            const type = document.getElementById('projectType').value;
+            const description = document.getElementById('projectDescription').value;
+            const button = document.querySelector('#projectModal .btn-primary');
+            const spinner = button.querySelector('.spinner');
+
+            if (!name || !location || !type) {
+                showModalAlert('projectModalAlert', 'error', 'Please fill in all required fields');
+                return;
+            }
+
+            try {
+                setLoadingState(button, spinner, null, true, 'Creating...');
+
+                if (supabase && currentUser) {
+                    const { data, error } = await supabase
+                        .from('projects')
+                        .insert({
+                            user_id: currentUser.id,
+                            name,
+                            location,
+                            type,
+                            description,
+                            status: 'active'
+                        })
+                        .select()
+                        .single();
+
+                    if (error) throw error;
+                    
+                    projects.unshift(data);
+                } else {
+                    // Demo mode
+                    const newProject = {
+                        id: 'demo-' + Date.now(),
+                        user_id: currentUser.id,
+                        name,
+                        location,
+                        type,
+                        description,
+                        status: 'active',
+                        created_at: new Date().toISOString()
+                    };
+                    projects.unshift(newProject);
+                }
+
+                updateProjectList();
+                updateProjectsGrid();
+                updateStats();
+                populateProjectDropdowns();
+                
+                document.getElementById('projectForm').reset();
+                closeModal('projectModal');
+                
+                showAlert('success', 'Project created successfully!');
+                
+            } catch (error) {
+                console.error('Error creating project:', error);
+                showModalAlert('projectModalAlert', 'error', error.message || 'Failed to create project');
+            } finally {
+                setLoadingState(button, spinner, null, false, 'Create Project');
+            }
+        }
+
+        async function uploadDocument() {
+            const title = document.getElementById('documentTitle').value;
+            const projectId = document.getElementById('documentProject').value;
+            const type = document.getElementById('documentType').value;
+            const fileInput = document.getElementById('documentFile');
+            const file = fileInput.files[0];
+            const button = document.querySelector('#documentModal .btn-primary');
+            const spinner = button.querySelector('.spinner');
+
+            if (!title || !projectId || !type || !file) {
+                showModalAlert('documentModalAlert', 'error', 'Please fill in all fields and select a file');
+                return;
+            }
+
+            try {
+                setLoadingState(button, spinner, null, true, 'Uploading...');
+
+                if (supabase && currentUser) {
+                    // Upload file to Supabase Storage
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `${Date.now()}.${fileExt}`;
+                    const filePath = `documents/${currentUser.id}/${fileName}`;
+
+                    const { data: uploadData, error: uploadError } = await supabase.storage
+                        .from('documents')
+                        .upload(filePath, file);
+
+                    if (uploadError) throw uploadError;
+
+                    // Get public URL
+                    const { data: urlData } = supabase.storage
+                        .from('documents')
+                        .getPublicUrl(filePath);
+
+                    // Save document record
+                    const { data, error } = await supabase
+                        .from('documents')
+                        .insert({
+                            user_id: currentUser.id,
+                            project_id: projectId,
+                            title,
+                            type,
+                            file_url: urlData.publicUrl,
+                            file_size: file.size
+                        })
+                        .select()
+                        .single();
+
+                    if (error) throw error;
+                    
+                    documents.unshift(data);
+                } else {
+                    // Demo mode - simulate upload
+                    const newDoc = {
+                        id: 'demo-' + Date.now(),
+                        user_id: currentUser.id,
+                        project_id: projectId,
+                        title,
+                        type,
+                        file_url: '#',
+                        file_size: file.size,
+                        created_at: new Date().toISOString()
+                    };
+                    documents.unshift(newDoc);
+                }
+
+                updateDocumentsGrid();
+                updateStats();
+                
+                document.getElementById('documentForm').reset();
+                document.getElementById('fileInfo').classList.add('hidden');
+                closeModal('documentModal');
+                
+                showAlert('success', 'Document uploaded successfully!');
+                
+            } catch (error) {
+                console.error('Error uploading document:', error);
+                showModalAlert('documentModalAlert', 'error', error.message || 'Failed to upload document');
+            } finally {
+                setLoadingState(button, spinner, null, false, 'Upload Document');
+            }
+        }
+
+        async function submitChange() {
+            const title = document.getElementById('changeTitle').value;
+            const projectId = document.getElementById('changeProject').value;
+            const priority = document.getElementById('changePriority').value;
+            const description = document.getElementById('changeDescription').value;
+            const justification = document.getElementById('changeJustification').value;
+            const button = document.querySelector('#changeModal .btn-primary');
+            const spinner = button.querySelector('.spinner');
+
+            if (!title || !projectId || !priority || !description || !justification) {
+                showModalAlert('changeModalAlert', 'error', 'Please fill in all fields');
+                return;
+            }
+
+            try {
+                setLoadingState(button, spinner, null, true, 'Submitting...');
+
+                if (supabase && currentUser) {
+                    const { data, error } = await supabase
+                        .from('change_requests')
+                        .insert({
+                            user_id: currentUser.id,
+                            project_id: projectId,
+                            title,
+                            description,
+                            justification,
+                            priority,
+                            status: 'pending'
+                        })
+                        .select()
+                        .single();
+
+                    if (error) throw error;
+                    
+                    changes.unshift(data);
+                } else {
+                    // Demo mode
+                    const newChange = {
+                        id: 'demo-' + Date.now(),
+                        user_id: currentUser.id,
+                        project_id: projectId,
+                        title,
+                        description,
+                        justification,
+                        priority,
+                        status: 'pending',
+                        created_at: new Date().toISOString()
+                    };
+                    changes.unshift(newChange);
+                }
+
+                updateChangesGrid();
+                updateStats();
+                
+                document.getElementById('changeForm').reset();
+                closeModal('changeModal');
+                
+                showAlert('success', 'Change request submitted successfully!');
+                
+            } catch (error) {
+                console.error('Error submitting change request:', error);
+                showModalAlert('changeModalAlert', 'error', error.message || 'Failed to submit change request');
+            } finally {
+                setLoadingState(button, spinner, null, false, 'Submit Change Request');
             }
         }
 
@@ -1424,75 +1895,18 @@
             // Load content based on tab
             switch (tabName) {
                 case 'dashboard':
-                    loadDashboard();
+                    updateStats();
                     break;
                 case 'projects':
-                    loadProjects();
+                    updateProjectsGrid();
                     break;
                 case 'documents':
-                    loadDocuments();
-                    break;
-                case 'comments':
-                    loadComments();
+                    updateDocumentsGrid();
                     break;
                 case 'changes':
-                    loadChanges();
+                    updateChangesGrid();
                     break;
             }
-        }
-
-        function loadDashboard() {
-            // Update dashboard stats
-            updateStats();
-        }
-
-        function updateStats() {
-            const statCards = document.querySelectorAll('.stat-value');
-            if (statCards.length >= 4) {
-                statCards[0].textContent = projects.length;
-                statCards[1].textContent = documents.length;
-                statCards[2].textContent = comments.length;
-                statCards[3].textContent = changes.length;
-            }
-        }
-
-        function loadProjects() {
-            const grid = document.getElementById('projectsGrid');
-            if (!grid) return;
-
-            if (projects.length === 0) {
-                grid.innerHTML = `
-                    <div class="card" style="text-align: center; padding: 48px 24px;">
-                        <i class="fas fa-building" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 16px;"></i>
-                        <p style="color: var(--text-muted); margin-bottom: 16px;">No projects created yet</p>
-                        <button class="btn btn-primary" onclick="openModal('projectModal')">
-                            <i class="fas fa-plus"></i>
-                            Create Your First Project
-                        </button>
-                    </div>
-                `;
-            } else {
-                grid.innerHTML = projects.map(project => `
-                    <div class="card">
-                        <div class="card-title">${project.name}</div>
-                        <p style="color: var(--text-secondary); margin-bottom: 12px;">${project.location}</p>
-                        <div class="status-badge status-active">${project.type}</div>
-                        <p style="margin-top: 12px; font-size: 0.875rem;">${project.description}</p>
-                    </div>
-                `).join('');
-            }
-        }
-
-        function loadDocuments() {
-            // Documents loading logic
-        }
-
-        function loadComments() {
-            // Comments loading logic
-        }
-
-        function loadChanges() {
-            // Changes loading logic
         }
 
         function openModal(modalId) {
@@ -1511,6 +1925,9 @@
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.classList.remove('active');
+                // Clear any alerts
+                const alertEl = modal.querySelector('[id*="Alert"]');
+                if (alertEl) alertEl.innerHTML = '';
             }
         }
 
@@ -1530,61 +1947,9 @@
             }
         }
 
-        function createProject() {
-            const name = document.getElementById('projectName').value;
-            const location = document.getElementById('projectLocation').value;
-            const type = document.getElementById('projectType').value;
-            const description = document.getElementById('projectDescription').value;
-
-            if (!name || !location || !type) {
-                showAlert('error', 'Please fill in all required fields');
-                return;
-            }
-
-            const project = {
-                id: Date.now(),
-                name,
-                location,
-                type,
-                description,
-                created: new Date().toISOString()
-            };
-
-            projects.push(project);
-            updateProjectList();
-            updateStats();
-            
-            // Reset form
-            document.getElementById('projectForm').reset();
-            closeModal('projectModal');
-            
-            showAlert('success', 'Project created successfully!');
-        }
-
-        function updateProjectList() {
-            const projectList = document.getElementById('projectList');
-            if (!projectList) return;
-
-            if (projects.length === 0) {
-                projectList.innerHTML = '<li style="padding: 16px 24px; text-align: center; color: var(--text-muted);">No projects yet</li>';
-            } else {
-                projectList.innerHTML = projects.map(project => `
-                    <li class="project-item">
-                        <div class="project-name">${project.name}</div>
-                        <div class="project-meta">${project.location} • ${project.type}</div>
-                    </li>
-                `).join('');
-            }
-        }
-
-        function uploadDocument() {
-            showAlert('info', 'Document upload feature coming soon!');
-            closeModal('documentModal');
-        }
-
-        function submitChange() {
-            showAlert('info', 'Change request feature coming soon!');
-            closeModal('changeModal');
+        function selectProject(projectId) {
+            // Future: Navigate to project details
+            console.log('Selected project:', projectId);
         }
 
         function saveSetup() {
@@ -1633,6 +1998,68 @@
             }
         }
 
+        // File upload handlers
+        function handleFileSelect(input) {
+            const file = input.files[0];
+            if (file) {
+                const fileInfo = document.getElementById('fileInfo');
+                const fileName = document.getElementById('fileName');
+                
+                if (fileInfo && fileName) {
+                    fileName.textContent = `${file.name} (${formatFileSize(file.size)})`;
+                    fileInfo.classList.remove('hidden');
+                }
+            }
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+        }
+
+        function handleFileDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const fileInput = document.getElementById('documentFile');
+                fileInput.files = files;
+                handleFileSelect(fileInput);
+            }
+        }
+
+        // Utility functions
+        function setLoadingState(button, spinner, textEl, isLoading, loadingText) {
+            if (button) button.disabled = isLoading;
+            if (spinner) {
+                if (isLoading) {
+                    spinner.classList.remove('hidden');
+                } else {
+                    spinner.classList.add('hidden');
+                }
+            }
+            if (textEl && loadingText) {
+                textEl.textContent = isLoading ? loadingText : textEl.dataset.originalText || textEl.textContent;
+                if (!textEl.dataset.originalText) {
+                    textEl.dataset.originalText = textEl.textContent;
+                }
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
         function showAlert(type, message, containerId = null) {
             const alertHtml = `
                 <div class="alert alert-${type}">
@@ -1658,6 +2085,22 @@
                 container.innerHTML = alertHtml;
                 
                 // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    container.innerHTML = '';
+                }, 5000);
+            }
+        }
+
+        function showModalAlert(containerId, type, message) {
+            const container = document.getElementById(containerId);
+            if (container) {
+                container.innerHTML = `
+                    <div class="alert alert-${type}">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
                 setTimeout(() => {
                     container.innerHTML = '';
                 }, 5000);

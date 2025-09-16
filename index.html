@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1e40af">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="CoPlanner">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231e40af'/><text y='70' font-size='70' text-anchor='middle' x='50' fill='white'>🏗️</text></svg>">
+    <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;CoPlanner - Construction Hub&quot;,&quot;short_name&quot;:&quot;CoPlanner&quot;,&quot;description&quot;:&quot;The Central Hub for Building Projects&quot;,&quot;start_url&quot;:&quot;/&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;%23ffffff&quot;,&quot;theme_color&quot;:&quot;%231e40af&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%231e40af'/><text y='130' font-size='120' text-anchor='middle' x='96' fill='white'>🏗️</text></svg>&quot;,&quot;sizes&quot;:&quot;192x192&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;},{&quot;src&quot;:&quot;data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%231e40af'/><text y='350' font-size='320' text-anchor='middle' x='256' fill='white'>🏗️</text></svg>&quot;,&quot;sizes&quot;:&quot;512x512&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}]}">
     <title>CoPlanner - The Central Hub for Building Projects</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1289,12 +1295,80 @@
         document.addEventListener('DOMContentLoaded', function() {
             try {
                 console.log('CoPlanner initializing...');
+                initializePWA();
                 initializeApp();
             } catch (error) {
                 console.error('Initialization error:', error);
                 showAlert('error', 'Failed to initialize application: ' + error.message);
             }
         });
+
+        function initializePWA() {
+            // Register service worker for PWA functionality
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('data:text/javascript,const CACHE_NAME="coplanner-v1";const urlsToCache=["/"];self.addEventListener("install",event=>{event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(urlsToCache)))});self.addEventListener("fetch",event=>{event.respondWith(caches.match(event.request).then(response=>{if(response){return response}return fetch(event.request)}))});')
+                .then(registration => {
+                    console.log('PWA Service Worker registered:', registration);
+                })
+                .catch(error => {
+                    console.log('PWA Service Worker registration failed:', error);
+                });
+            }
+
+            // Add install prompt
+            let deferredPrompt;
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                showInstallBanner();
+            });
+
+            function showInstallBanner() {
+                const banner = document.createElement('div');
+                banner.id = 'installBanner';
+                banner.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    background: linear-gradient(135deg, #10b981, #06b6d4);
+                    color: white;
+                    padding: 12px 16px;
+                    text-align: center;
+                    font-size: 14px;
+                    z-index: 1001;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                `;
+                
+                banner.innerHTML = `
+                    <span>📱 Install CoPlanner as an app on your phone for quick access</span>
+                    <div>
+                        <button onclick="installPWA()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 6px; margin-right: 8px; cursor: pointer; font-size: 12px;">Install</button>
+                        <button onclick="document.getElementById('installBanner').remove()" style="background: none; border: none; color: white; cursor: pointer; font-size: 16px;">×</button>
+                    </div>
+                `;
+                
+                document.body.prepend(banner);
+                
+                // Adjust page content for banner
+                document.body.style.paddingTop = '60px';
+            }
+
+            window.installPWA = async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        console.log('PWA installed');
+                        document.getElementById('installBanner')?.remove();
+                        document.body.style.paddingTop = '0';
+                    }
+                    deferredPrompt = null;
+                }
+            };
+        }
 
         function initializeApp() {
             // Check for saved Supabase config

@@ -1673,9 +1673,9 @@
                     
                     projects.unshift(data);
                 } else {
-                    // Demo mode
+                    // Demo mode - FIXED UUID generation
                     const newProject = {
-                        id: crypto.randomUUID(),,
+                        id: crypto.randomUUID(),
                         user_id: currentUser.id,
                         name,
                         location,
@@ -1759,7 +1759,7 @@
                 } else {
                     // Demo mode - simulate upload
                     const newDoc = {
-                        id: 'demo-' + Date.now(),
+                        id: crypto.randomUUID(),
                         user_id: currentUser.id,
                         project_id: projectId,
                         title,
@@ -1826,7 +1826,7 @@
                 } else {
                     // Demo mode
                     const newChange = {
-                        id: 'demo-' + Date.now(),
+                        id: crypto.randomUUID(),
                         user_id: currentUser.id,
                         project_id: projectId,
                         title,

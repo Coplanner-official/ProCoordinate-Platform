@@ -726,6 +726,98 @@
             background: rgba(30, 64, 175, 0.05);
         }
 
+        .install-app-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--success) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--shadow-lg);
+            display: none;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            transition: var(--transition-base);
+        }
+
+        .install-app-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4);
+        }
+
+        .install-app-btn.show {
+            display: flex;
+        }
+
+        .install-banner {
+            background: linear-gradient(135deg, var(--success) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 16px 24px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            position: relative;
+            z-index: 1001;
+        }
+
+        .install-banner.show {
+            display: flex;
+        }
+
+        .install-banner-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .install-banner-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .install-banner button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: var(--transition-base);
+        }
+
+        .install-banner button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .install-banner .close-btn {
+            background: none;
+            font-size: 1.25rem;
+            padding: 4px 8px;
+        }
+
+        @media (max-width: 768px) {
+            .install-app-btn {
+                bottom: 80px;
+                right: 16px;
+                left: 16px;
+                border-radius: 12px;
+                justify-content: center;
+            }
+        }
+
         .document-card {
             position: relative;
         }
@@ -840,6 +932,18 @@
             </div>
         </div>
     </div>
+    <!-- Install App Banner -->
+    <div class="install-banner" id="installBanner">
+        <div class="install-banner-content">
+            <i class="fas fa-mobile-alt"></i>
+            <span>Install CoPlanner as an app for quick access on your device</span>
+        </div>
+        <div class="install-banner-actions">
+            <button onclick="installPWA()" id="installBannerBtn">Install App</button>
+            <button class="close-btn" onclick="dismissInstallBanner()">&times;</button>
+        </div>
+    </div>
+
     <!-- Setup Banner -->
     <div id="setupBanner" class="setup-banner">
         <i class="fas fa-exclamation-triangle"></i>
@@ -1088,6 +1192,12 @@
         </div>
     </div>
 
+    <!-- Floating Install App Button -->
+    <button class="install-app-btn" id="installAppBtn" onclick="installPWA()">
+        <i class="fas fa-download"></i>
+        <span>Install App</span>
+    </button>
+
     <!-- Project Modal -->
     <div class="modal-overlay" id="projectModal">
         <div class="modal">
@@ -1304,6 +1414,8 @@
         });
 
         function initializePWA() {
+            let deferredPrompt;
+
             // Register service worker for PWA functionality
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('data:text/javascript,const CACHE_NAME="coplanner-v1";const urlsToCache=["/"];self.addEventListener("install",event=>{event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(urlsToCache)))});self.addEventListener("fetch",event=>{event.respondWith(caches.match(event.request).then(response=>{if(response){return response}return fetch(event.request)}))});')
@@ -1315,59 +1427,132 @@
                 });
             }
 
-            // Add install prompt
-            let deferredPrompt;
+            // Show install options on page load
+            window.addEventListener('load', () => {
+                // Check if app is already installed
+                if (window.matchMedia('(display-mode: standalone)').matches || 
+                    window.navigator.standalone === true) {
+                    console.log('App is already installed');
+                    return;
+                }
+
+                // Show install button after 3 seconds if not installed
+                setTimeout(() => {
+                    showInstallOptions();
+                }, 3000);
+            });
+
+            // Handle install prompt event
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 deferredPrompt = e;
-                showInstallBanner();
+                showInstallOptions();
             });
 
-            function showInstallBanner() {
-                const banner = document.createElement('div');
-                banner.id = 'installBanner';
-                banner.style.cssText = `
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    background: linear-gradient(135deg, #10b981, #06b6d4);
-                    color: white;
-                    padding: 12px 16px;
-                    text-align: center;
-                    font-size: 14px;
-                    z-index: 1001;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                `;
+            function showInstallOptions() {
+                const installBtn = document.getElementById('installAppBtn');
+                const installBanner = document.getElementById('installBanner');
                 
-                banner.innerHTML = `
-                    <span>📱 Install CoPlanner as an app on your phone for quick access</span>
-                    <div>
-                        <button onclick="installPWA()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 6px; margin-right: 8px; cursor: pointer; font-size: 12px;">Install</button>
-                        <button onclick="document.getElementById('installBanner').remove()" style="background: none; border: none; color: white; cursor: pointer; font-size: 16px;">×</button>
+                // Show floating button on mobile
+                if (window.innerWidth <= 768) {
+                    if (installBtn) installBtn.classList.add('show');
+                } else {
+                    // Show banner on desktop
+                    if (installBanner) installBanner.classList.add('show');
+                }
+            }
+
+            // Global install function
+            window.installPWA = async () => {
+                if (deferredPrompt) {
+                    // Use native install prompt
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    
+                    if (outcome === 'accepted') {
+                        console.log('PWA installed via prompt');
+                        hideInstallOptions();
+                    }
+                    deferredPrompt = null;
+                } else {
+                    // Show manual install instructions
+                    showManualInstallInstructions();
+                }
+            };
+
+            // Global dismiss function
+            window.dismissInstallBanner = () => {
+                const installBanner = document.getElementById('installBanner');
+                if (installBanner) installBanner.classList.remove('show');
+                
+                // Remember dismissal for 24 hours
+                localStorage.setItem('installBannerDismissed', Date.now() + (24 * 60 * 60 * 1000));
+            };
+
+            function hideInstallOptions() {
+                const installBtn = document.getElementById('installAppBtn');
+                const installBanner = document.getElementById('installBanner');
+                
+                if (installBtn) installBtn.classList.remove('show');
+                if (installBanner) installBanner.classList.remove('show');
+            }
+
+            function showManualInstallInstructions() {
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                const isAndroid = /Android/.test(navigator.userAgent);
+                
+                let instructions = '';
+                
+                if (isIOS) {
+                    instructions = `
+                        <div style="text-align: left; padding: 16px;">
+                            <h4 style="margin-bottom: 16px;">Install CoPlanner on iPhone/iPad:</h4>
+                            <ol style="padding-left: 20px; line-height: 1.6;">
+                                <li>Tap the Share button <i class="fas fa-share" style="color: #007AFF;"></i> at the bottom of Safari</li>
+                                <li>Scroll down and tap "Add to Home Screen"</li>
+                                <li>Tap "Add" to confirm</li>
+                                <li>CoPlanner will appear on your home screen</li>
+                            </ol>
+                        </div>
+                    `;
+                } else if (isAndroid) {
+                    instructions = `
+                        <div style="text-align: left; padding: 16px;">
+                            <h4 style="margin-bottom: 16px;">Install CoPlanner on Android:</h4>
+                            <ol style="padding-left: 20px; line-height: 1.6;">
+                                <li>Tap the menu <i class="fas fa-ellipsis-v"></i> in Chrome</li>
+                                <li>Select "Add to Home screen"</li>
+                                <li>Tap "Add" to confirm</li>
+                                <li>CoPlanner will appear on your home screen</li>
+                            </ol>
+                        </div>
+                    `;
+                } else {
+                    instructions = `
+                        <div style="text-align: center; padding: 16px;">
+                            <h4 style="margin-bottom: 16px;">Install CoPlanner</h4>
+                            <p style="line-height: 1.6;">Look for an install option in your browser menu, or bookmark this page for quick access.</p>
+                        </div>
+                    `;
+                }
+                
+                // Show instructions in a modal-style alert
+                const alertHtml = `
+                    <div class="alert alert-info" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2000; max-width: 400px; width: 90%;">
+                        <button onclick="this.parentElement.remove()" style="position: absolute; top: 8px; right: 12px; background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                        ${instructions}
                     </div>
                 `;
                 
-                document.body.prepend(banner);
+                const alertContainer = document.createElement('div');
+                alertContainer.innerHTML = alertHtml;
+                document.body.appendChild(alertContainer);
                 
-                // Adjust page content for banner
-                document.body.style.paddingTop = '60px';
+                // Auto-remove after 10 seconds
+                setTimeout(() => {
+                    alertContainer.remove();
+                }, 10000);
             }
-
-            window.installPWA = async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    if (outcome === 'accepted') {
-                        console.log('PWA installed');
-                        document.getElementById('installBanner')?.remove();
-                        document.body.style.paddingTop = '0';
-                    }
-                    deferredPrompt = null;
-                }
-            };
         }
 
         function initializeApp() {

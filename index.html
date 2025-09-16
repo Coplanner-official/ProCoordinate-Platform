@@ -7,11 +7,41 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="CoPlanner">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231e40af'/><text y='70' font-size='70' text-anchor='middle' x='50' fill='white'>🏗️</text></svg>">
-    <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;CoPlanner - Construction Hub&quot;,&quot;short_name&quot;:&quot;CoPlanner&quot;,&quot;description&quot;:&quot;The Central Hub for Building Projects&quot;,&quot;start_url&quot;:&quot;/&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;%23ffffff&quot;,&quot;theme_color&quot;:&quot;%231e40af&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%231e40af'/><text y='130' font-size='120' text-anchor='middle' x='96' fill='white'>🏗️</text></svg>&quot;,&quot;sizes&quot;:&quot;192x192&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;},{&quot;src&quot;:&quot;data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%231e40af'/><text y='350' font-size='320' text-anchor='middle' x='256' fill='white'>🏗️</text></svg>&quot;,&quot;sizes&quot;:&quot;512x512&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}]}">
+    <link rel="apple-touch-icon" sizes="192x192" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%231e40af'/%3E%3Ctext y='130' font-size='120' text-anchor='middle' x='96' fill='white'%3E🏗️%3C/text%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231e40af'/%3E%3Ctext y='70' font-size='70' text-anchor='middle' x='50' fill='white'%3E🏗️%3C/text%3E%3C/svg%3E">
     <title>CoPlanner - The Central Hub for Building Projects</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- PWA Manifest -->
+    <script>
+        // Create manifest dynamically to avoid encoding issues
+        const manifest = {
+            name: "CoPlanner - Construction Hub",
+            short_name: "CoPlanner",
+            description: "The Central Hub for Building Projects",
+            start_url: "/",
+            display: "standalone",
+            background_color: "#ffffff",
+            theme_color: "#1e40af",
+            icons: [
+                {
+                    src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%231e40af'/%3E%3Ctext y='130' font-size='120' text-anchor='middle' x='96' fill='white'%3E🏗️%3C/text%3E%3C/svg%3E",
+                    sizes: "192x192",
+                    type: "image/svg+xml"
+                },
+                {
+                    src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%231e40af'/%3E%3Ctext y='350' font-size='320' text-anchor='middle' x='256' fill='white'%3E🏗️%3C/text%3E%3C/svg%3E",
+                    sizes: "512x512", 
+                    type: "image/svg+xml"
+                }
+            ]
+        };
+        
+        const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+        const manifestURL = URL.createObjectURL(manifestBlob);
+        document.querySelector('head').insertAdjacentHTML('beforeend', `<link rel="manifest" href="${manifestURL}">`);
+    </script>
     <style>
         * {
             margin: 0;
@@ -1437,18 +1467,49 @@
         function initializePWA() {
             let deferredPrompt;
 
+            // Create and register a proper service worker
+            const swCode = `
+                const CACHE_NAME = 'coplanner-v1';
+                const urlsToCache = ['/'];
+                
+                self.addEventListener('install', event => {
+                    event.waitUntil(
+                        caches.open(CACHE_NAME)
+                            .then(cache => cache.addAll(urlsToCache))
+                    );
+                });
+                
+                self.addEventListener('fetch', event => {
+                    event.respondWith(
+                        caches.match(event.request)
+                            .then(response => {
+                                if (response) {
+                                    return response;
+                                }
+                                return fetch(event.request);
+                            })
+                    );
+                });
+            `;
+
             // Register service worker for PWA functionality
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('data:text/javascript,const CACHE_NAME="coplanner-v1";const urlsToCache=["/"];self.addEventListener("install",event=>{event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(urlsToCache)))});self.addEventListener("fetch",event=>{event.respondWith(caches.match(event.request).then(response=>{if(response){return response}return fetch(event.request)}))});')
+                const swBlob = new Blob([swCode], {type: 'application/javascript'});
+                const swURL = URL.createObjectURL(swBlob);
+                
+                navigator.serviceWorker.register(swURL)
                 .then(registration => {
-                    console.log('PWA Service Worker registered:', registration);
+                    console.log('PWA Service Worker registered successfully:', registration);
+                    
+                    // Clean up the blob URL after registration
+                    setTimeout(() => URL.revokeObjectURL(swURL), 1000);
                 })
                 .catch(error => {
                     console.log('PWA Service Worker registration failed:', error);
                 });
             }
 
-            // Show install options on page load
+            // Show install options on page load (but not immediately to avoid interference)
             window.addEventListener('load', () => {
                 // Check if app is already installed
                 if (window.matchMedia('(display-mode: standalone)').matches || 
@@ -1457,16 +1518,23 @@
                     return;
                 }
 
-                // Show install button after 3 seconds if not installed
+                // Check if install banner was dismissed recently
+                const dismissTime = localStorage.getItem('installBannerDismissed');
+                if (dismissTime && Date.now() < parseInt(dismissTime)) {
+                    return;
+                }
+
+                // Show install button after 5 seconds to avoid interfering with login
                 setTimeout(() => {
                     showInstallOptions();
-                }, 3000);
+                }, 5000);
             });
 
             // Handle install prompt event
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 deferredPrompt = e;
+                console.log('Install prompt available');
                 showInstallOptions();
             });
 
@@ -1474,29 +1542,32 @@
                 const installBtn = document.getElementById('installAppBtn');
                 const installBanner = document.getElementById('installBanner');
                 
-                // Show floating button on mobile
+                // Show floating button on mobile, banner on desktop
                 if (window.innerWidth <= 768) {
                     if (installBtn) installBtn.classList.add('show');
                 } else {
-                    // Show banner on desktop
                     if (installBanner) installBanner.classList.add('show');
                 }
             }
 
             // Global install function
             window.installPWA = async () => {
+                console.log('Install PWA clicked');
+                
                 if (deferredPrompt) {
                     // Use native install prompt
+                    console.log('Using native install prompt');
                     deferredPrompt.prompt();
                     const { outcome } = await deferredPrompt.userChoice;
                     
+                    console.log('Install outcome:', outcome);
                     if (outcome === 'accepted') {
-                        console.log('PWA installed via prompt');
                         hideInstallOptions();
                     }
                     deferredPrompt = null;
                 } else {
                     // Show manual install instructions
+                    console.log('Showing manual install instructions');
                     showManualInstallInstructions();
                 }
             };
@@ -1683,7 +1754,13 @@
 
         async function checkSession() {
             if (!supabase) {
-                showDemoMode();
+                // Only show demo mode if user hasn't explicitly logged out
+                const hasLoggedOut = sessionStorage.getItem('user_logged_out');
+                if (!hasLoggedOut) {
+                    showDemoMode();
+                } else {
+                    showAuth();
+                }
                 return;
             }
 
@@ -1691,6 +1768,7 @@
                 const { data: { session } } = await supabase.auth.getSession();
                 if (session) {
                     currentUser = session.user;
+                    sessionStorage.removeItem('user_logged_out'); // Clear logout flag
                     showApp();
                 } else {
                     showAuth();
@@ -1702,6 +1780,9 @@
         }
 
         function showDemoMode() {
+            // Clear the logout flag since we're entering demo mode
+            sessionStorage.removeItem('user_logged_out');
+            
             currentUser = {
                 id: 'demo-user',
                 email: 'demo@coplanner.co.uk',
@@ -2429,6 +2510,9 @@
 
         async function logout() {
             try {
+                // Set logout flag FIRST to prevent auto-login
+                sessionStorage.setItem('user_logged_out', 'true');
+                
                 if (supabase) {
                     await supabase.auth.signOut();
                 }
@@ -2440,29 +2524,22 @@
                 comments = [];
                 changes = [];
                 
-                // Clear localStorage
+                // Clear localStorage but keep logout flag
                 localStorage.removeItem('coplanner_config');
                 localStorage.removeItem('supabase.auth.token');
                 
-                // Clear sessionStorage
-                sessionStorage.clear();
-                
-                // Show auth screen
+                // Show auth screen immediately
                 showAuth();
                 showAlert('success', 'Logged out successfully');
                 
-                // Force page reload to ensure clean state
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-                
             } catch (error) {
                 console.error('Logout error:', error);
-                showAlert('error', 'Failed to logout');
-                // Force reload anyway
+                showAlert('error', 'Failed to logout - forcing page reload');
+                // Force reload if logout fails
                 setTimeout(() => {
+                    sessionStorage.setItem('user_logged_out', 'true');
                     window.location.reload();
-                }, 2000);
+                }, 1000);
             }
         }
 

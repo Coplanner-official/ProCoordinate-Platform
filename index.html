@@ -8,11 +8,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="CoPlanner">
     
-    <!-- Simple Apple Touch Icon -->
-    <link rel="apple-touch-icon" href="/favicon.png">
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    
     <title>CoPlanner - The Central Hub for Building Projects</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         * {
             margin: 0;
@@ -242,210 +241,37 @@
             background: var(--gray-50);
         }
         
-        .nav-container {
-            background: white;
-            border-bottom: 1px solid var(--border-light);
-            padding: 0 24px;
-            overflow-x: auto;
-        }
-        
-        .nav-tabs {
-            display: flex;
-            gap: 32px;
-            min-width: fit-content;
-        }
-        
-        .nav-tab {
-            padding: 16px 0;
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            font-weight: 500;
-            color: var(--text-secondary);
-            transition: var(--transition-base);
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .nav-tab:hover {
-            color: var(--primary);
-        }
-        
-        .nav-tab.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-        }
-        
-        .main-layout {
-            display: flex;
-            flex: 1;
-            height: calc(100vh - 128px);
-        }
-        
-        .sidebar {
-            width: 300px;
-            background: var(--bg-surface);
-            border-right: 1px solid var(--border-light);
-            padding: 24px 0;
-            overflow-y: auto;
-            flex-shrink: 0;
-        }
-        
-        .sidebar-section {
-            margin-bottom: 32px;
-        }
-        
-        .sidebar-title {
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-muted);
-            margin: 0 24px 12px;
-        }
-        
-        .project-list {
-            list-style: none;
-        }
-        
-        .project-item {
-            padding: 12px 24px;
-            margin: 2px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: var(--transition-base);
-            border: 1px solid transparent;
-        }
-        
-        .project-item:hover {
-            background: var(--gray-50);
-        }
-        
-        .project-item.active {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-            color: white;
-            box-shadow: var(--shadow-md);
-        }
-        
-        .project-name {
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-        
-        .project-meta {
-            font-size: 0.75rem;
-            opacity: 0.8;
-        }
-        
-        .create-project-btn {
-            width: calc(100% - 32px);
-            margin: 0 16px;
-            padding: 12px 16px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition-base);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        
-        .create-project-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-        
         .content {
             flex: 1;
             padding: 32px;
             overflow-y: auto;
             background: var(--bg-secondary);
-        }
-        
-        .content-header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 32px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border-light);
+            justify-content: center;
+            text-align: center;
         }
         
-        .content-title {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text-primary);
+        .content h1 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 16px;
         }
         
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-        
-        .card {
-            background: var(--bg-surface);
-            border: 1px solid var(--border-light);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: var(--shadow-sm);
-            transition: var(--transition-base);
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-        }
-        
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
-            border-color: var(--primary);
-        }
-        
-        .card-title {
-            font-weight: 600;
+        .content p {
+            color: var(--text-secondary);
             font-size: 1.125rem;
-            margin-bottom: 8px;
-            color: var(--text-primary);
-        }
-        
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: capitalize;
-        }
-        
-        .status-active {
-            background: linear-gradient(135deg, var(--success) 0%, #22d3ee 100%);
-            color: white;
         }
         
         .btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 10px 16px;
+            padding: 12px 24px;
             border: none;
             border-radius: 10px;
             font-size: 0.875rem;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
             transition: var(--transition-base);
             text-decoration: none;
@@ -475,11 +301,6 @@
             border-color: var(--primary);
         }
         
-        .btn-lg {
-            padding: 16px 24px;
-            font-size: 1rem;
-        }
-        
         .form-group {
             margin-bottom: 20px;
         }
@@ -492,7 +313,7 @@
             margin-bottom: 8px;
         }
         
-        .form-input, .form-select, .form-textarea {
+        .form-input {
             width: 100%;
             padding: 12px 16px;
             border: 2px solid var(--border-light);
@@ -503,70 +324,10 @@
             transition: var(--transition-base);
         }
         
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
+        .form-input:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 4px rgba(30, 64, 175, 0.1);
-        }
-        
-        .form-textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-        
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--bg-overlay);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        
-        .modal-overlay.active {
-            display: flex;
-        }
-        
-        .modal {
-            background: var(--bg-surface);
-            border-radius: 20px;
-            box-shadow: var(--shadow-xl);
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        
-        .modal-header {
-            padding: 24px 24px 16px;
-            border-bottom: 1px solid var(--border-light);
-        }
-        
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-        }
-        
-        .modal-subtitle {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-        
-        .modal-body {
-            padding: 24px;
-        }
-        
-        .modal-actions {
-            padding: 16px 24px 24px;
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
         }
         
         .alert {
@@ -591,16 +352,8 @@
             color: #991b1b;
         }
         
-        .alert-warning {
-            background: rgba(245, 158, 11, 0.1);
-            border-color: var(--warning);
-            color: #92400e;
-        }
-        
-        .alert-info {
-            background: rgba(59, 130, 246, 0.1);
-            border-color: var(--primary);
-            color: #1e40af;
+        .hidden { 
+            display: none !important; 
         }
         
         .setup-banner {
@@ -621,112 +374,6 @@
             font-weight: 600;
         }
         
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-        
-        .stat-card {
-            background: var(--bg-surface);
-            border: 1px solid var(--border-light);
-            border-radius: 16px;
-            padding: 24px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-        }
-        
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 8px;
-        }
-        
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-        
-        .hidden { 
-            display: none !important; 
-        }
-        
-        .spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top: 2px solid white;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        @media (max-width: 768px) {
-            .main-layout {
-                flex-direction: column;
-            }
-            
-            .sidebar {
-                width: 100%;
-                border-right: none;
-                border-bottom: 1px solid var(--border-light);
-                padding: 16px 0;
-            }
-            
-            .content {
-                padding: 16px;
-            }
-            
-            .header {
-                padding: 0 16px;
-            }
-            
-            .cards-grid, .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .file-upload-area {
-            border: 2px dashed var(--border-medium);
-            border-radius: 12px;
-            padding: 32px;
-            text-align: center;
-            transition: var(--transition-base);
-            cursor: pointer;
-        }
-        
-        .file-upload-area:hover {
-            border-color: var(--primary);
-            background: var(--gray-50);
-        }
-        
-        .file-upload-area.dragover {
-            border-color: var(--primary);
-            background: rgba(30, 64, 175, 0.05);
-        }
-
         .install-app-btn {
             position: fixed;
             top: 80px;
@@ -748,76 +395,16 @@
             min-width: 120px;
             justify-content: center;
         }
-
+        
         .install-app-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4);
         }
-
+        
         .install-app-btn.show {
             display: flex;
         }
-
-        .install-banner {
-            background: linear-gradient(135deg, var(--success) 0%, var(--secondary) 100%);
-            color: white;
-            padding: 12px 20px;
-            text-align: center;
-            font-weight: 500;
-            display: none;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            position: relative;
-            z-index: 1001;
-            font-size: 0.875rem;
-        }
-
-        .install-banner.show {
-            display: flex;
-        }
-
-        .install-banner-content {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex: 1;
-        }
-
-        .install-banner-actions {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .install-banner button {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: 500;
-            transition: var(--transition-base);
-        }
-
-        .install-banner button:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .install-banner .close-btn {
-            background: none;
-            font-size: 1.1rem;
-            padding: 2px 6px;
-        }
-
-        /* Fix overlapping content */
-        .welcome-container {
-            position: relative;
-            z-index: 1;
-        }
-
+        
         @media (max-width: 768px) {
             .install-app-btn {
                 top: 70px;
@@ -828,149 +415,23 @@
                 font-size: 0.75rem;
                 padding: 8px 12px;
             }
-
-            .setup-banner {
-                font-size: 0.8rem;
-                padding: 12px 16px;
+            
+            .header {
+                padding: 0 16px;
             }
-
-            .install-banner {
-                font-size: 0.8rem;
-                padding: 10px 16px;
+            
+            .content {
+                padding: 16px;
             }
-        }
-
-        .document-card {
-            position: relative;
-        }
-
-        .document-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 12px;
-        }
-
-        .file-icon {
-            font-size: 2rem;
-            color: var(--primary);
-        }
-
-        .document-actions {
-            display: flex;
-            gap: 8px;
-            opacity: 0;
-            transition: var(--transition-base);
-        }
-
-        .document-card:hover .document-actions {
-            opacity: 1;
-        }
-
-        .btn-icon {
-            width: 32px;
-            height: 32px;
-            border: none;
-            border-radius: 6px;
-            background: var(--gray-100);
-            color: var(--text-secondary);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition-base);
-        }
-
-        .btn-icon:hover {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-icon.delete-btn:hover {
-            background: var(--error);
-        }
-
-        .document-viewer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-
-        .document-viewer.active {
-            display: flex;
-        }
-
-        .document-viewer-content {
-            max-width: 90%;
-            max-height: 90%;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .document-viewer-header {
-            background: var(--primary);
-            color: white;
-            padding: 16px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .document-viewer-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 4px;
-        }
-
-        .document-viewer-body {
-            padding: 24px;
-            max-height: 70vh;
-            overflow: auto;
         }
     </style>
 </head>
 <body>
-    <!-- Document Viewer Modal -->
-    <div class="document-viewer" id="documentViewer">
-        <div class="document-viewer-content">
-            <div class="document-viewer-header">
-                <h3 id="documentViewerTitle">Document</h3>
-                <button class="document-viewer-close" onclick="closeDocumentViewer()">×</button>
-            </div>
-            <div class="document-viewer-body" id="documentViewerBody">
-                Loading...
-            </div>
-        </div>
-    </div>
-    <!-- Install App Banner -->
-    <div class="install-banner" id="installBanner">
-        <div class="install-banner-content">
-            <i class="fas fa-mobile-alt"></i>
-            <span>Install CoPlanner as an app for quick access on your device</span>
-        </div>
-        <div class="install-banner-actions">
-            <button onclick="installPWA()" id="installBannerBtn">Install App</button>
-            <button class="close-btn" onclick="dismissInstallBanner()">&times;</button>
-        </div>
-    </div>
-
     <!-- Setup Banner -->
     <div id="setupBanner" class="setup-banner">
         <i class="fas fa-exclamation-triangle"></i>
         <span>CoPlanner Setup Required: Please configure your Supabase connection to enable full functionality.</span>
-        <a href="#" onclick="openModal('setupModal')">Configure Now</a>
+        <a href="#" onclick="openSetupModal()">Configure Now</a>
     </div>
 
     <!-- Welcome/Auth Screen -->
@@ -1004,10 +465,9 @@
                             <input type="password" class="form-input" id="loginPassword" placeholder="••••••••" required>
                         </div>
                         <div class="form-group">
-                            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">
                                 <i class="fas fa-sign-in-alt"></i>
-                                <span class="btn-text">Sign In to CoPlanner</span>
-                                <span class="spinner hidden"></span>
+                                <span>Sign In to CoPlanner</span>
                             </button>
                         </div>
                     </form>
@@ -1034,10 +494,9 @@
                             <input type="password" class="form-input" id="registerPassword" placeholder="••••••••" required>
                         </div>
                         <div class="form-group">
-                            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">
                                 <i class="fas fa-user-plus"></i>
-                                <span class="btn-text">Create Account</span>
-                                <span class="spinner hidden"></span>
+                                <span>Create Account</span>
                             </button>
                         </div>
                     </form>
@@ -1077,581 +536,39 @@
             </div>
         </header>
 
-        <!-- Navigation -->
-        <div class="nav-container">
-            <div class="nav-tabs">
-                <div class="nav-tab active" data-tab="dashboard" onclick="switchTab('dashboard')">
-                    <i class="fas fa-chart-pie"></i>
-                    Dashboard
-                </div>
-                <div class="nav-tab" data-tab="projects" onclick="switchTab('projects')">
-                    <i class="fas fa-building"></i>
-                    Projects
-                </div>
-                <div class="nav-tab" data-tab="documents" onclick="switchTab('documents')">
-                    <i class="fas fa-file-alt"></i>
-                    Documents
-                </div>
-                <div class="nav-tab" data-tab="comments" onclick="switchTab('comments')">
-                    <i class="fas fa-comments"></i>
-                    Comments
-                </div>
-                <div class="nav-tab" data-tab="changes" onclick="switchTab('changes')">
-                    <i class="fas fa-exchange-alt"></i>
-                    Change Requests
-                </div>
-            </div>
-        </div>
-
-        <div class="main-layout">
-            <!-- Sidebar -->
-            <div class="sidebar">
-                <div class="sidebar-section">
-                    <div class="sidebar-title">Your Building Projects</div>
-                    <ul class="project-list" id="projectList">
-                        <li style="padding: 16px 24px; text-align: center; color: var(--text-muted);">Loading projects...</li>
-                    </ul>
-                </div>
-                <button class="create-project-btn" onclick="openModal('projectModal')">
-                    <i class="fas fa-plus"></i>
-                    New Project
-                </button>
-            </div>
-
-            <!-- Main Content -->
-            <div class="content">
-                <!-- Dashboard Tab -->
-                <div class="tab-content" id="dashboard">
-                    <div class="content-header">
-                        <h1 class="content-title">Project Dashboard</h1>
-                    </div>
-                    <div id="dashboardContent">
-                        <div class="stats-grid">
-                            <div class="stat-card">
-                                <div class="stat-value" id="activeProjectsCount">0</div>
-                                <div class="stat-label">Active Projects</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value" id="documentsCount">0</div>
-                                <div class="stat-label">Project Documents</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value" id="commentsCount">0</div>
-                                <div class="stat-label">Team Comments</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-value" id="changesCount">0</div>
-                                <div class="stat-label">Change Requests</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Projects Tab -->
-                <div class="tab-content hidden" id="projects">
-                    <div class="content-header">
-                        <h1 class="content-title">Projects</h1>
-                        <button class="btn btn-primary" onclick="openModal('projectModal')">
-                            <i class="fas fa-plus"></i>
-                            New Project
-                        </button>
-                    </div>
-                    <div id="projectsGrid" class="cards-grid">
-                        <div style="text-align: center; padding: 48px 24px;">
-                            <i class="fas fa-building" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 16px;"></i>
-                            <p style="color: var(--text-muted);">Loading projects...</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Documents Tab -->
-                <div class="tab-content hidden" id="documents">
-                    <div class="content-header">
-                        <h1 class="content-title">Documents</h1>
-                        <button class="btn btn-primary" onclick="openModal('documentModal')">
-                            <i class="fas fa-upload"></i>
-                            Upload Document
-                        </button>
-                    </div>
-                    <div id="documentsGrid" class="cards-grid">
-                        <div style="text-align: center; padding: 48px 24px;">
-                            <i class="fas fa-file-alt" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 16px;"></i>
-                            <p style="color: var(--text-muted);">Loading documents...</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Comments Tab -->
-                <div class="tab-content hidden" id="comments">
-                    <div class="content-header">
-                        <h1 class="content-title">Comments</h1>
-                    </div>
-                    <div id="commentsContent">
-                        <div style="text-align: center; padding: 48px 24px;">
-                            <i class="fas fa-comments" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 16px;"></i>
-                            <p style="color: var(--text-muted);">Loading comments...</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Change Requests Tab -->
-                <div class="tab-content hidden" id="changes">
-                    <div class="content-header">
-                        <h1 class="content-title">Change Requests</h1>
-                        <button class="btn btn-primary" onclick="openModal('changeModal')">
-                            <i class="fas fa-plus"></i>
-                            New Change Request
-                        </button>
-                    </div>
-                    <div id="changesGrid" class="cards-grid">
-                        <div style="text-align: center; padding: 48px 24px;">
-                            <i class="fas fa-exchange-alt" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 16px;"></i>
-                            <p style="color: var(--text-muted);">Loading change requests...</p>
-                        </div>
-                    </div>
-                </div>
+        <div class="content">
+            <div>
+                <h1>Welcome to CoPlanner</h1>
+                <p>Your construction collaboration platform is loading...</p>
+                <p style="margin-top: 24px;">
+                    <button class="btn btn-primary" onclick="showFeatureComingSoon()">Explore Features</button>
+                </p>
             </div>
         </div>
     </div>
 
-    <!-- Floating Install App Button -->
-    <button class="install-app-btn" id="installAppBtn" onclick="installPWA()">
+    <!-- Install App Button -->
+    <button class="install-app-btn" id="installAppBtn" onclick="showInstallInstructions()">
         <i class="fas fa-download"></i>
         <span>Install App</span>
     </button>
 
-    <!-- Project Modal -->
-    <div class="modal-overlay" id="projectModal">
-        <div class="modal">
-            <div class="modal-header">
-                <div class="modal-title">Create New Project</div>
-                <div class="modal-subtitle">Start a new building project</div>
-            </div>
-            <div class="modal-body">
-                <div id="projectModalAlert"></div>
-                <form id="projectForm">
-                    <div class="form-group">
-                        <label class="form-label">Project Name</label>
-                        <input type="text" class="form-input" id="projectName" placeholder="e.g. Residential Complex Phase 1" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Location</label>
-                        <input type="text" class="form-input" id="projectLocation" placeholder="e.g. Manchester, UK" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Project Type</label>
-                        <select class="form-select" id="projectType" required>
-                            <option value="">Select project type</option>
-                            <option value="residential">Residential</option>
-                            <option value="commercial">Commercial</option>
-                            <option value="industrial">Industrial</option>
-                            <option value="infrastructure">Infrastructure</option>
-                            <option value="renovation">Renovation</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Description</label>
-                        <textarea class="form-textarea" id="projectDescription" placeholder="Brief description of the project..."></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="closeModal('projectModal')">Cancel</button>
-                <button class="btn btn-primary" onclick="createProject()">
-                    <i class="fas fa-plus"></i>
-                    <span>Create Project</span>
-                    <span class="spinner hidden"></span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Document Modal -->
-    <div class="modal-overlay" id="documentModal">
-        <div class="modal">
-            <div class="modal-header">
-                <div class="modal-title">Upload Document</div>
-                <div class="modal-subtitle">Add a new document to your project</div>
-            </div>
-            <div class="modal-body">
-                <div id="documentModalAlert"></div>
-                <form id="documentForm">
-                    <div class="form-group">
-                        <label class="form-label">Document Title</label>
-                        <input type="text" class="form-input" id="documentTitle" placeholder="e.g. Floor Plans v2.1" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Project</label>
-                        <select class="form-select" id="documentProject" required>
-                            <option value="">Select project</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Document Type</label>
-                        <select class="form-select" id="documentType" required>
-                            <option value="">Select type</option>
-                            <option value="plans">Plans & Drawings</option>
-                            <option value="permits">Permits & Licenses</option>
-                            <option value="contracts">Contracts</option>
-                            <option value="reports">Reports</option>
-                            <option value="photos">Photos</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">File</label>
-                        <div class="file-upload-area" id="fileUploadArea" onclick="document.getElementById('documentFile').click()">
-                            <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: var(--text-muted); margin-bottom: 8px;"></i>
-                            <p>Click to select file or drag and drop</p>
-                            <p style="font-size: 0.75rem; color: var(--text-muted);">Supports PDF, DOC, DOCX, JPG, PNG, DWG files</p>
-                        </div>
-                        <input type="file" class="form-input hidden" id="documentFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.dwg" onchange="handleFileSelect(this)">
-                        <div id="fileInfo" class="hidden" style="margin-top: 8px; padding: 8px; background: var(--gray-50); border-radius: 6px;">
-                            <small id="fileName"></small>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="closeModal('documentModal')">Cancel</button>
-                <button class="btn btn-primary" onclick="uploadDocument()">
-                    <i class="fas fa-upload"></i>
-                    <span>Upload Document</span>
-                    <span class="spinner hidden"></span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Change Request Modal -->
-    <div class="modal-overlay" id="changeModal">
-        <div class="modal">
-            <div class="modal-header">
-                <div class="modal-title">New Change Request</div>
-                <div class="modal-subtitle">Submit a change request for review</div>
-            </div>
-            <div class="modal-body">
-                <div id="changeModalAlert"></div>
-                <form id="changeForm">
-                    <div class="form-group">
-                        <label class="form-label">Change Title</label>
-                        <input type="text" class="form-input" id="changeTitle" placeholder="e.g. Modify kitchen layout" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Project</label>
-                        <select class="form-select" id="changeProject" required>
-                            <option value="">Select project</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Priority</label>
-                        <select class="form-select" id="changePriority" required>
-                            <option value="">Select priority</option>
-                            <option value="low">Low</option>
-                            <option value="medium">Medium</option>
-                            <option value="high">High</option>
-                            <option value="urgent">Urgent</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Description</label>
-                        <textarea class="form-textarea" id="changeDescription" placeholder="Detailed description of the requested change..." required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Justification</label>
-                        <textarea class="form-textarea" id="changeJustification" placeholder="Why is this change necessary?" required></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="closeModal('changeModal')">Cancel</button>
-                <button class="btn btn-primary" onclick="submitChange()">
-                    <i class="fas fa-paper-plane"></i>
-                    <span>Submit Change Request</span>
-                    <span class="spinner hidden"></span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Setup Modal -->
-    <div class="modal-overlay" id="setupModal">
-        <div class="modal">
-            <div class="modal-header">
-                <div class="modal-title">CoPlanner Setup</div>
-                <div class="modal-subtitle">Configure your Supabase backend</div>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span>To enable full functionality, please configure your Supabase connection.</span>
-                </div>
-                <form id="setupForm">
-                    <div class="form-group">
-                        <label class="form-label">Supabase URL</label>
-                        <input type="url" class="form-input" id="supabaseUrl" placeholder="https://your-project.supabase.co" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Supabase Anon Key</label>
-                        <input type="text" class="form-input" id="supabaseKey" placeholder="Your anon key" required>
-                    </div>
-                </form>
-                <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border-light);">
-                    <p style="font-size: 0.875rem; color: var(--text-secondary);">
-                        <strong>Need help?</strong> Visit the 
-                        <a href="https://supabase.com/docs" target="_blank" style="color: var(--primary);">Supabase documentation</a> 
-                        to learn how to create a project and get your credentials.
-                    </p>
-                </div>
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="closeModal('setupModal')">Skip for Now</button>
-                <button class="btn btn-primary" onclick="saveSetup()">
-                    <i class="fas fa-save"></i>
-                    Save Configuration
-                </button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // Global variables
+        // Global variables - simplified
         let supabase = null;
         let currentUser = null;
-        let projects = [];
-        let documents = [];
-        let comments = [];
-        let changes = [];
 
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('CoPlanner initializing...');
             try {
-                console.log('CoPlanner initializing...');
-                initializePWA();
                 initializeApp();
             } catch (error) {
                 console.error('Initialization error:', error);
-                showAlert('error', 'Failed to initialize application: ' + error.message);
+                // Fallback - show auth screen
+                showAuth();
             }
         });
-
-        function initializePWA() {
-            let deferredPrompt;
-
-            // Create and register a proper service worker
-            const swCode = `
-                const CACHE_NAME = 'coplanner-v1';
-                const urlsToCache = ['/'];
-                
-                self.addEventListener('install', event => {
-                    event.waitUntil(
-                        caches.open(CACHE_NAME)
-                            .then(cache => cache.addAll(urlsToCache))
-                    );
-                });
-                
-                self.addEventListener('fetch', event => {
-                    event.respondWith(
-                        caches.match(event.request)
-                            .then(response => {
-                                if (response) {
-                                    return response;
-                                }
-                                return fetch(event.request);
-                            })
-                    );
-                });
-            `;
-
-            // Register service worker for PWA functionality
-            if ('serviceWorker' in navigator) {
-                const swBlob = new Blob([swCode], {type: 'application/javascript'});
-                const swURL = URL.createObjectURL(swBlob);
-                
-                navigator.serviceWorker.register(swURL)
-                .then(registration => {
-                    console.log('PWA Service Worker registered successfully:', registration);
-                    
-                    // Clean up the blob URL after registration
-                    setTimeout(() => URL.revokeObjectURL(swURL), 1000);
-                })
-                .catch(error => {
-                    console.log('PWA Service Worker registration failed:', error);
-                });
-            }
-
-            // Show install options on page load (but not immediately to avoid interference)
-            window.addEventListener('load', () => {
-                // Check if app is already installed
-                if (window.matchMedia('(display-mode: standalone)').matches || 
-                    window.navigator.standalone === true) {
-                    console.log('App is already installed');
-                    return;
-                }
-
-                // Check if install banner was dismissed recently
-                const dismissTime = localStorage.getItem('installBannerDismissed');
-                if (dismissTime && Date.now() < parseInt(dismissTime)) {
-                    return;
-                }
-
-                // Show install button after 5 seconds to avoid interfering with login
-                setTimeout(() => {
-                    showInstallOptions();
-                }, 5000);
-            });
-
-            // Handle install prompt event
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                console.log('Install prompt available');
-                showInstallOptions();
-            });
-
-            function showInstallOptions() {
-                const installBtn = document.getElementById('installAppBtn');
-                const installBanner = document.getElementById('installBanner');
-                
-                // Show floating button on mobile, banner on desktop
-                if (window.innerWidth <= 768) {
-                    if (installBtn) installBtn.classList.add('show');
-                } else {
-                    if (installBanner) installBanner.classList.add('show');
-                }
-            }
-
-            // Global install function
-            window.installPWA = async () => {
-                console.log('Install PWA clicked');
-                
-                if (deferredPrompt) {
-                    // Use native install prompt
-                    console.log('Using native install prompt');
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    
-                    console.log('Install outcome:', outcome);
-                    if (outcome === 'accepted') {
-                        hideInstallOptions();
-                    }
-                    deferredPrompt = null;
-                } else {
-                    // Show manual install instructions
-                    console.log('Showing manual install instructions');
-                    showManualInstallInstructions();
-                }
-            };
-
-            // Global dismiss function
-            window.dismissInstallBanner = () => {
-                const installBanner = document.getElementById('installBanner');
-                if (installBanner) installBanner.classList.remove('show');
-                
-                // Remember dismissal for 24 hours
-                localStorage.setItem('installBannerDismissed', Date.now() + (24 * 60 * 60 * 1000));
-            };
-
-            function hideInstallOptions() {
-                const installBtn = document.getElementById('installAppBtn');
-                const installBanner = document.getElementById('installBanner');
-                
-                if (installBtn) installBtn.classList.remove('show');
-                if (installBanner) installBanner.classList.remove('show');
-            }
-
-            function showManualInstallInstructions() {
-                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-                const isAndroid = /Android/.test(navigator.userAgent);
-                
-                let instructions = '';
-                
-                if (isIOS) {
-                    instructions = `
-                        <div style="text-align: center; padding: 24px;">
-                            <h3 style="color: var(--primary); margin-bottom: 20px;">Install CoPlanner on iPhone</h3>
-                            <div style="text-align: left; max-width: 300px; margin: 0 auto;">
-                                <div style="display: flex; align-items: center; margin-bottom: 12px; padding: 8px; background: var(--gray-50); border-radius: 8px;">
-                                    <span style="background: #007AFF; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; margin-right: 12px;">1</span>
-                                    <span>Tap the Share button <i class="fas fa-share" style="color: #007AFF;"></i> at the bottom</span>
-                                </div>
-                                <div style="display: flex; align-items: center; margin-bottom: 12px; padding: 8px; background: var(--gray-50); border-radius: 8px;">
-                                    <span style="background: #007AFF; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; margin-right: 12px;">2</span>
-                                    <span>Select "Add to Home Screen"</span>
-                                </div>
-                                <div style="display: flex; align-items: center; margin-bottom: 12px; padding: 8px; background: var(--gray-50); border-radius: 8px;">
-                                    <span style="background: #007AFF; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; margin-right: 12px;">3</span>
-                                    <span>Tap "Add" to confirm</span>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                } else if (isAndroid) {
-                    instructions = `
-                        <div style="text-align: center; padding: 24px;">
-                            <h3 style="color: var(--primary); margin-bottom: 20px;">Install CoPlanner on Android</h3>
-                            <div style="text-align: left; max-width: 300px; margin: 0 auto;">
-                                <div style="display: flex; align-items: center; margin-bottom: 12px; padding: 8px; background: var(--gray-50); border-radius: 8px;">
-                                    <span style="background: #4285F4; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; margin-right: 12px;">1</span>
-                                    <span>Tap the menu <i class="fas fa-ellipsis-v"></i> in Chrome</span>
-                                </div>
-                                <div style="display: flex; align-items: center; margin-bottom: 12px; padding: 8px; background: var(--gray-50); border-radius: 8px;">
-                                    <span style="background: #4285F4; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; margin-right: 12px;">2</span>
-                                    <span>Select "Add to Home screen"</span>
-                                </div>
-                                <div style="display: flex; align-items: center; margin-bottom: 12px; padding: 8px; background: var(--gray-50); border-radius: 8px;">
-                                    <span style="background: #4285F4; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; margin-right: 12px;">3</span>
-                                    <span>Tap "Add" to confirm</span>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    instructions = `
-                        <div style="text-align: center; padding: 24px;">
-                            <h3 style="color: var(--primary); margin-bottom: 16px;">Install CoPlanner</h3>
-                            <p style="line-height: 1.6; margin-bottom: 16px;">Look for an install option in your browser menu, or bookmark this page for quick access.</p>
-                        </div>
-                    `;
-                }
-                
-                // Use modal instead of alert
-                openInstallModal(instructions);
-            }
-
-            function openInstallModal(content) {
-                // Create modal if it doesn't exist
-                let modal = document.getElementById('installInstructionsModal');
-                if (!modal) {
-                    modal = document.createElement('div');
-                    modal.id = 'installInstructionsModal';
-                    modal.className = 'modal-overlay';
-                    modal.innerHTML = `
-                        <div class="modal">
-                            <div class="modal-header">
-                                <div class="modal-title">Install CoPlanner App</div>
-                                <button onclick="closeInstallModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
-                            </div>
-                            <div class="modal-body" id="installModalContent">
-                                ${content}
-                            </div>
-                        </div>
-                    `;
-                    document.body.appendChild(modal);
-                } else {
-                    document.getElementById('installModalContent').innerHTML = content;
-                }
-                
-                modal.classList.add('active');
-            }
-
-            window.closeInstallModal = () => {
-                const modal = document.getElementById('installInstructionsModal');
-                if (modal) {
-                    modal.classList.remove('active');
-                }
-            };
-        }
 
         function initializeApp() {
             // Check for saved Supabase config
@@ -1666,40 +583,10 @@
                 }
             }
 
-            // Check for existing session
+            // Check session and setup
             checkSession();
             setupEventListeners();
-        }
-
-        function setupEventListeners() {
-            // Auth form submissions
-            const loginForm = document.getElementById('loginFormElement');
-            const registerForm = document.getElementById('registerFormElement');
-
-            if (loginForm) {
-                loginForm.addEventListener('submit', handleLogin);
-            }
-            if (registerForm) {
-                registerForm.addEventListener('submit', handleRegister);
-            }
-
-            // File upload drag and drop
-            const fileUploadArea = document.getElementById('fileUploadArea');
-            if (fileUploadArea) {
-                fileUploadArea.addEventListener('dragover', handleDragOver);
-                fileUploadArea.addEventListener('dragleave', handleDragLeave);
-                fileUploadArea.addEventListener('drop', handleFileDrop);
-            }
-
-            // Click outside dropdown to close
-            document.addEventListener('click', function(event) {
-                const dropdown = document.getElementById('userDropdown');
-                const avatar = document.querySelector('.user-avatar');
-                
-                if (dropdown && avatar && !avatar.contains(event.target)) {
-                    dropdown.classList.remove('active');
-                }
-            });
+            setupInstallButton();
         }
 
         function initializeSupabase(url, key) {
@@ -1712,7 +599,6 @@
                 }
             } catch (error) {
                 console.error('Failed to initialize Supabase:', error);
-                showAlert('error', 'Failed to connect to database. Some features may not work.');
             }
         }
 
@@ -1724,14 +610,18 @@
         }
 
         async function checkSession() {
+            // Check if user explicitly logged out
+            const hasLoggedOut = localStorage.getItem('user_logged_out');
+            
+            if (hasLoggedOut === 'true') {
+                console.log('User previously logged out - showing auth');
+                showAuth();
+                return;
+            }
+
             if (!supabase) {
-                // Only show demo mode if user hasn't explicitly logged out
-                const hasLoggedOut = sessionStorage.getItem('user_logged_out');
-                if (!hasLoggedOut) {
-                    showDemoMode();
-                } else {
-                    showAuth();
-                }
+                console.log('No Supabase - showing demo mode');
+                showDemoMode();
                 return;
             }
 
@@ -1739,7 +629,7 @@
                 const { data: { session } } = await supabase.auth.getSession();
                 if (session) {
                     currentUser = session.user;
-                    sessionStorage.removeItem('user_logged_out'); // Clear logout flag
+                    localStorage.removeItem('user_logged_out'); // Clear logout flag
                     showApp();
                 } else {
                     showAuth();
@@ -1751,9 +641,7 @@
         }
 
         function showDemoMode() {
-            // Clear the logout flag since we're entering demo mode
-            sessionStorage.removeItem('user_logged_out');
-            
+            localStorage.removeItem('user_logged_out'); // Clear logout flag
             currentUser = {
                 id: 'demo-user',
                 email: 'demo@coplanner.co.uk',
@@ -1770,7 +658,7 @@
             if (appScreen) appScreen.classList.add('hidden');
         }
 
-        async function showApp() {
+        function showApp() {
             const authScreen = document.getElementById('authScreen');
             const appScreen = document.getElementById('appScreen');
             
@@ -1778,7 +666,6 @@
             if (appScreen) appScreen.classList.remove('hidden');
 
             updateUserInfo();
-            await loadAllData();
         }
 
         function updateUserInfo() {
@@ -1798,251 +685,27 @@
             }
         }
 
-        async function loadAllData() {
-            try {
-                await Promise.all([
-                    loadProjects(),
-                    loadDocuments(),
-                    loadComments(),
-                    loadChanges()
-                ]);
-                updateStats();
-            } catch (error) {
-                console.error('Error loading data:', error);
-            }
-        }
+        function setupEventListeners() {
+            // Auth form submissions
+            const loginForm = document.getElementById('loginFormElement');
+            const registerForm = document.getElementById('registerFormElement');
 
-        async function loadProjects() {
-            if (!supabase || !currentUser) {
-                projects = [];
-                updateProjectList();
-                return;
+            if (loginForm) {
+                loginForm.addEventListener('submit', handleLogin);
+            }
+            if (registerForm) {
+                registerForm.addEventListener('submit', handleRegister);
             }
 
-            try {
-                const { data, error } = await supabase
-                    .from('projects')
-                    .select('*')
-                    .eq('user_id', currentUser.id)
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
+            // Click outside dropdown to close
+            document.addEventListener('click', function(event) {
+                const dropdown = document.getElementById('userDropdown');
+                const avatar = document.querySelector('.user-avatar');
                 
-                projects = data || [];
-                updateProjectList();
-                updateProjectsGrid();
-                
-            } catch (error) {
-                console.error('Error loading projects:', error);
-                projects = [];
-                updateProjectList();
-            }
-        }
-
-        async function loadDocuments() {
-            if (!supabase || !currentUser) {
-                documents = [];
-                return;
-            }
-
-            try {
-                const { data, error } = await supabase
-                    .from('documents')
-                    .select('*')
-                    .eq('user_id', currentUser.id)
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-                documents = data || [];
-                updateDocumentsGrid();
-                
-            } catch (error) {
-                console.error('Error loading documents:', error);
-                documents = [];
-            }
-        }
-
-        async function loadComments() {
-            if (!supabase || !currentUser) {
-                comments = [];
-                return;
-            }
-
-            try {
-                const { data, error } = await supabase
-                    .from('comments')
-                    .select('*')
-                    .eq('user_id', currentUser.id)
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-                comments = data || [];
-                
-            } catch (error) {
-                console.error('Error loading comments:', error);
-                comments = [];
-            }
-        }
-
-        async function loadChanges() {
-            if (!supabase || !currentUser) {
-                changes = [];
-                return;
-            }
-
-            try {
-                const { data, error } = await supabase
-                    .from('change_requests')
-                    .select('*')
-                    .eq('user_id', currentUser.id)
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-                changes = data || [];
-                updateChangesGrid();
-                
-            } catch (error) {
-                console.error('Error loading change requests:', error);
-                changes = [];
-            }
-        }
-
-        function updateStats() {
-            const activeProjectsEl = document.getElementById('activeProjectsCount');
-            const documentsEl = document.getElementById('documentsCount');
-            const commentsEl = document.getElementById('commentsCount');
-            const changesEl = document.getElementById('changesCount');
-
-            if (activeProjectsEl) activeProjectsEl.textContent = projects.length;
-            if (documentsEl) documentsEl.textContent = documents.length;
-            if (commentsEl) commentsEl.textContent = comments.length;
-            if (changesEl) changesEl.textContent = changes.length;
-        }
-
-        function updateProjectList() {
-            const projectList = document.getElementById('projectList');
-            if (!projectList) return;
-
-            if (projects.length === 0) {
-                projectList.innerHTML = '<li style="padding: 16px 24px; text-align: center; color: var(--text-muted);">No projects yet</li>';
-            } else {
-                projectList.innerHTML = projects.map(project => `
-                    <li class="project-item" onclick="selectProject('${project.id}')">
-                        <div class="project-name">${project.name}</div>
-                        <div class="project-meta">${project.location} • ${project.type}</div>
-                    </li>
-                `).join('');
-            }
-        }
-
-        function updateProjectsGrid() {
-            const grid = document.getElementById('projectsGrid');
-            if (!grid) return;
-
-            if (projects.length === 0) {
-                grid.innerHTML = `
-                    <div class="card" style="text-align: center; padding: 48px 24px;">
-                        <i class="fas fa-building" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 16px;"></i>
-                        <p style="color: var(--text-muted); margin-bottom: 16px;">No projects created yet</p>
-                        <button class="btn btn-primary" onclick="openModal('projectModal')">
-                            <i class="fas fa-plus"></i>
-                            Create Your First Project
-                        </button>
-                    </div>
-                `;
-            } else {
-                grid.innerHTML = projects.map(project => `
-                    <div class="card" onclick="selectProject('${project.id}')">
-                        <div class="card-title">${project.name}</div>
-                        <p style="color: var(--text-secondary); margin-bottom: 12px;">${project.location}</p>
-                        <div class="status-badge status-active">${project.type}</div>
-                        <p style="margin-top: 12px; font-size: 0.875rem;">${project.description || 'No description'}</p>
-                        <div style="margin-top: 16px; font-size: 0.75rem; color: var(--text-muted);">
-                            Created ${new Date(project.created_at).toLocaleDateString()}
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-
-        function updateDocumentsGrid() {
-            const grid = document.getElementById('documentsGrid');
-            if (!grid) return;
-
-            if (documents.length === 0) {
-                grid.innerHTML = `
-                    <div class="card" style="text-align: center; padding: 48px 24px;">
-                        <i class="fas fa-file-alt" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 16px;"></i>
-                        <p style="color: var(--text-muted); margin-bottom: 16px;">No documents uploaded yet</p>
-                        <button class="btn btn-primary" onclick="openModal('documentModal')">
-                            <i class="fas fa-upload"></i>
-                            Upload Your First Document
-                        </button>
-                    </div>
-                `;
-            } else {
-                grid.innerHTML = documents.map(doc => {
-                    const fileIcon = getFileIcon(doc.file_url || doc.title);
-                    const fileSize = doc.file_size ? formatFileSize(doc.file_size) : '';
-                    
-                    return `
-                        <div class="card document-card">
-                            <div class="document-header">
-                                <div class="file-icon">${fileIcon}</div>
-                                <div class="document-actions">
-                                    <button class="btn-icon" onclick="viewDocument('${doc.id}', '${doc.file_url || '#'}', '${doc.title}')" title="View document">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="btn-icon" onclick="downloadDocument('${doc.file_url || '#'}', '${doc.title}')" title="Download">
-                                        <i class="fas fa-download"></i>
-                                    </button>
-                                    <button class="btn-icon delete-btn" onclick="deleteDocument('${doc.id}')" title="Delete">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="card-title">${doc.title}</div>
-                            <p style="color: var(--text-secondary); margin-bottom: 8px; text-transform: capitalize;">
-                                ${doc.type.replace(/_/g, ' ')}
-                            </p>
-                            ${fileSize ? `<p style="color: var(--text-muted); font-size: 0.75rem; margin-bottom: 8px;">${fileSize}</p>` : ''}
-                            <div style="margin-top: 12px; font-size: 0.75rem; color: var(--text-muted);">
-                                Uploaded ${new Date(doc.created_at).toLocaleDateString()}
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-        }
-
-        function updateChangesGrid() {
-            const grid = document.getElementById('changesGrid');
-            if (!grid) return;
-
-            if (changes.length === 0) {
-                grid.innerHTML = `
-                    <div class="card" style="text-align: center; padding: 48px 24px;">
-                        <i class="fas fa-exchange-alt" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 16px;"></i>
-                        <p style="color: var(--text-muted); margin-bottom: 16px;">No change requests submitted</p>
-                        <button class="btn btn-primary" onclick="openModal('changeModal')">
-                            <i class="fas fa-plus"></i>
-                            Submit First Change Request
-                        </button>
-                    </div>
-                `;
-            } else {
-                grid.innerHTML = changes.map(change => `
-                    <div class="card">
-                        <div class="card-title">${change.title}</div>
-                        <p style="color: var(--text-secondary); margin-bottom: 12px;">Priority: ${change.priority}</p>
-                        <div class="status-badge status-active">${change.status}</div>
-                        <p style="margin-top: 12px; font-size: 0.875rem;">${change.description}</p>
-                        <div style="margin-top: 16px; font-size: 0.75rem; color: var(--text-muted);">
-                            Submitted ${new Date(change.created_at).toLocaleDateString()}
-                        </div>
-                    </div>
-                `).join('');
-            }
+                if (dropdown && avatar && !avatar.contains(event.target)) {
+                    dropdown.classList.remove('active');
+                }
+            });
         }
 
         async function handleLogin(event) {
@@ -2050,13 +713,8 @@
             
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
-            const button = event.target.querySelector('button[type="submit"]');
-            const spinner = button.querySelector('.spinner');
-            const btnText = button.querySelector('.btn-text');
 
             try {
-                setLoadingState(button, spinner, btnText, true, 'Signing In...');
-
                 if (supabase) {
                     const { data, error } = await supabase.auth.signInWithPassword({
                         email,
@@ -2066,15 +724,18 @@
                     if (error) throw error;
                     
                     currentUser = data.user;
+                    localStorage.removeItem('user_logged_out'); // Clear logout flag
                     showAlert('success', 'Welcome back!');
                     setTimeout(() => showApp(), 1000);
                 } else {
+                    // Demo mode
                     setTimeout(() => {
                         currentUser = {
                             id: 'demo-user',
                             email,
                             user_metadata: { full_name: 'Demo User' }
                         };
+                        localStorage.removeItem('user_logged_out'); // Clear logout flag
                         showAlert('success', 'Welcome to CoPlanner demo!');
                         setTimeout(() => showApp(), 1000);
                     }, 1000);
@@ -2082,8 +743,6 @@
             } catch (error) {
                 console.error('Login error:', error);
                 showAlert('error', error.message || 'Failed to sign in');
-            } finally {
-                setLoadingState(button, spinner, btnText, false, 'Sign In to CoPlanner');
             }
         }
 
@@ -2094,13 +753,8 @@
             const company = document.getElementById('registerCompany').value;
             const email = document.getElementById('registerEmail').value;
             const password = document.getElementById('registerPassword').value;
-            const button = event.target.querySelector('button[type="submit"]');
-            const spinner = button.querySelector('.spinner');
-            const btnText = button.querySelector('.btn-text');
 
             try {
-                setLoadingState(button, spinner, btnText, true, 'Creating Account...');
-
                 if (supabase) {
                     const { data, error } = await supabase.auth.signUp({
                         email,
@@ -2115,16 +769,6 @@
 
                     if (error) throw error;
                     
-                    // Create profile record
-                    if (data.user) {
-                        await supabase.from('profiles').insert({
-                            id: data.user.id,
-                            email: data.user.email,
-                            full_name: name,
-                            company: company
-                        });
-                    }
-                    
                     showAlert('success', 'Account created! Please check your email to verify your account.');
                 } else {
                     setTimeout(() => {
@@ -2135,224 +779,29 @@
             } catch (error) {
                 console.error('Registration error:', error);
                 showAlert('error', error.message || 'Failed to create account');
-            } finally {
-                setLoadingState(button, spinner, btnText, false, 'Create Account');
             }
         }
 
-        async function createProject() {
-            const name = document.getElementById('projectName').value;
-            const location = document.getElementById('projectLocation').value;
-            const type = document.getElementById('projectType').value;
-            const description = document.getElementById('projectDescription').value;
-            const button = document.querySelector('#projectModal .btn-primary');
-            const spinner = button.querySelector('.spinner');
-
-            if (!name || !location || !type) {
-                showModalAlert('projectModalAlert', 'error', 'Please fill in all required fields');
-                return;
-            }
-
+        function logout() {
             try {
-                setLoadingState(button, spinner, null, true, 'Creating...');
-
-                if (supabase && currentUser) {
-                    const { data, error } = await supabase
-                        .from('projects')
-                        .insert({
-                            user_id: currentUser.id,
-                            name,
-                            location,
-                            type,
-                            description,
-                            status: 'active'
-                        })
-                        .select()
-                        .single();
-
-                    if (error) throw error;
-                    
-                    projects.unshift(data);
-                } else {
-                    // Demo mode - FIXED UUID generation
-                    const newProject = {
-                        id: crypto.randomUUID(),
-                        user_id: currentUser.id,
-                        name,
-                        location,
-                        type,
-                        description,
-                        status: 'active',
-                        created_at: new Date().toISOString()
-                    };
-                    projects.unshift(newProject);
+                // Set logout flag FIRST
+                localStorage.setItem('user_logged_out', 'true');
+                
+                if (supabase) {
+                    supabase.auth.signOut();
                 }
-
-                updateProjectList();
-                updateProjectsGrid();
-                updateStats();
-                populateProjectDropdowns();
                 
-                document.getElementById('projectForm').reset();
-                closeModal('projectModal');
+                // Clear user data
+                currentUser = null;
                 
-                showAlert('success', 'Project created successfully!');
+                // Show auth screen immediately
+                showAuth();
+                showAlert('success', 'Logged out successfully');
                 
             } catch (error) {
-                console.error('Error creating project:', error);
-                showModalAlert('projectModalAlert', 'error', error.message || 'Failed to create project');
-            } finally {
-                setLoadingState(button, spinner, null, false, 'Create Project');
-            }
-        }
-
-        async function uploadDocument() {
-            const title = document.getElementById('documentTitle').value;
-            const projectId = document.getElementById('documentProject').value;
-            const type = document.getElementById('documentType').value;
-            const fileInput = document.getElementById('documentFile');
-            const file = fileInput.files[0];
-            const button = document.querySelector('#documentModal .btn-primary');
-            const spinner = button.querySelector('.spinner');
-
-            if (!title || !projectId || !type || !file) {
-                showModalAlert('documentModalAlert', 'error', 'Please fill in all fields and select a file');
-                return;
-            }
-
-            try {
-                setLoadingState(button, spinner, null, true, 'Uploading...');
-
-                if (supabase && currentUser) {
-                    // Upload file to Supabase Storage
-                    const fileExt = file.name.split('.').pop();
-                    const fileName = `${Date.now()}.${fileExt}`;
-                    const filePath = `documents/${currentUser.id}/${fileName}`;
-
-                    const { data: uploadData, error: uploadError } = await supabase.storage
-                        .from('documents')
-                        .upload(filePath, file);
-
-                    if (uploadError) throw uploadError;
-
-                    // Get public URL
-                    const { data: urlData } = supabase.storage
-                        .from('documents')
-                        .getPublicUrl(filePath);
-
-                    // Save document record
-                    const { data, error } = await supabase
-                        .from('documents')
-                        .insert({
-                            user_id: currentUser.id,
-                            project_id: projectId,
-                            title,
-                            type,
-                            file_url: urlData.publicUrl,
-                            file_size: file.size
-                        })
-                        .select()
-                        .single();
-
-                    if (error) throw error;
-                    
-                    documents.unshift(data);
-                } else {
-                    // Demo mode - simulate upload
-                    const newDoc = {
-                        id: crypto.randomUUID(),
-                        user_id: currentUser.id,
-                        project_id: projectId,
-                        title,
-                        type,
-                        file_url: '#',
-                        file_size: file.size,
-                        created_at: new Date().toISOString()
-                    };
-                    documents.unshift(newDoc);
-                }
-
-                updateDocumentsGrid();
-                updateStats();
-                
-                document.getElementById('documentForm').reset();
-                document.getElementById('fileInfo').classList.add('hidden');
-                closeModal('documentModal');
-                
-                showAlert('success', 'Document uploaded successfully!');
-                
-            } catch (error) {
-                console.error('Error uploading document:', error);
-                showModalAlert('documentModalAlert', 'error', error.message || 'Failed to upload document');
-            } finally {
-                setLoadingState(button, spinner, null, false, 'Upload Document');
-            }
-        }
-
-        async function submitChange() {
-            const title = document.getElementById('changeTitle').value;
-            const projectId = document.getElementById('changeProject').value;
-            const priority = document.getElementById('changePriority').value;
-            const description = document.getElementById('changeDescription').value;
-            const justification = document.getElementById('changeJustification').value;
-            const button = document.querySelector('#changeModal .btn-primary');
-            const spinner = button.querySelector('.spinner');
-
-            if (!title || !projectId || !priority || !description || !justification) {
-                showModalAlert('changeModalAlert', 'error', 'Please fill in all fields');
-                return;
-            }
-
-            try {
-                setLoadingState(button, spinner, null, true, 'Submitting...');
-
-                if (supabase && currentUser) {
-                    const { data, error } = await supabase
-                        .from('change_requests')
-                        .insert({
-                            user_id: currentUser.id,
-                            project_id: projectId,
-                            title,
-                            description,
-                            justification,
-                            priority,
-                            status: 'pending'
-                        })
-                        .select()
-                        .single();
-
-                    if (error) throw error;
-                    
-                    changes.unshift(data);
-                } else {
-                    // Demo mode
-                    const newChange = {
-                        id: crypto.randomUUID(),
-                        user_id: currentUser.id,
-                        project_id: projectId,
-                        title,
-                        description,
-                        justification,
-                        priority,
-                        status: 'pending',
-                        created_at: new Date().toISOString()
-                    };
-                    changes.unshift(newChange);
-                }
-
-                updateChangesGrid();
-                updateStats();
-                
-                document.getElementById('changeForm').reset();
-                closeModal('changeModal');
-                
-                showAlert('success', 'Change request submitted successfully!');
-                
-            } catch (error) {
-                console.error('Error submitting change request:', error);
-                showModalAlert('changeModalAlert', 'error', error.message || 'Failed to submit change request');
-            } finally {
-                setLoadingState(button, spinner, null, false, 'Submit Change Request');
+                console.error('Logout error:', error);
+                localStorage.setItem('user_logged_out', 'true');
+                showAuth();
             }
         }
 
@@ -2375,103 +824,6 @@
             }
         }
 
-        function switchTab(tabName) {
-            // Remove active class from all tabs
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Hide all tab content
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.add('hidden');
-            });
-            
-            // Show selected tab
-            const selectedTab = document.querySelector(`[data-tab="${tabName}"]`);
-            const selectedContent = document.getElementById(tabName);
-            
-            if (selectedTab) selectedTab.classList.add('active');
-            if (selectedContent) selectedContent.classList.remove('hidden');
-
-            // Load content based on tab
-            switch (tabName) {
-                case 'dashboard':
-                    updateStats();
-                    break;
-                case 'projects':
-                    updateProjectsGrid();
-                    break;
-                case 'documents':
-                    updateDocumentsGrid();
-                    break;
-                case 'changes':
-                    updateChangesGrid();
-                    break;
-            }
-        }
-
-        function openModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.add('active');
-                
-                // Populate project dropdowns if needed
-                if (modalId === 'documentModal' || modalId === 'changeModal') {
-                    populateProjectDropdowns();
-                }
-            }
-        }
-
-        function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.classList.remove('active');
-                // Clear any alerts
-                const alertEl = modal.querySelector('[id*="Alert"]');
-                if (alertEl) alertEl.innerHTML = '';
-            }
-        }
-
-        function populateProjectDropdowns() {
-            const docProjectSelect = document.getElementById('documentProject');
-            const changeProjectSelect = document.getElementById('changeProject');
-
-            const options = projects.map(project => 
-                `<option value="${project.id}">${project.name}</option>`
-            ).join('');
-
-            if (docProjectSelect) {
-                docProjectSelect.innerHTML = '<option value="">Select project</option>' + options;
-            }
-            if (changeProjectSelect) {
-                changeProjectSelect.innerHTML = '<option value="">Select project</option>' + options;
-            }
-        }
-
-        function selectProject(projectId) {
-            // Future: Navigate to project details
-            console.log('Selected project:', projectId);
-        }
-
-        function saveSetup() {
-            const url = document.getElementById('supabaseUrl').value;
-            const key = document.getElementById('supabaseKey').value;
-
-            if (!url || !key) {
-                showAlert('error', 'Please fill in all fields');
-                return;
-            }
-
-            const config = { url, key };
-            localStorage.setItem('coplanner_config', JSON.stringify(config));
-            
-            initializeSupabase(url, key);
-            hideSetupBanner();
-            closeModal('setupModal');
-            
-            showAlert('success', 'Configuration saved successfully!');
-        }
-
         function toggleUserDropdown() {
             const dropdown = document.getElementById('userDropdown');
             if (dropdown) {
@@ -2479,306 +831,51 @@
             }
         }
 
-        async function logout() {
-            try {
-                // Set logout flag FIRST to prevent auto-login
-                sessionStorage.setItem('user_logged_out', 'true');
-                
-                if (supabase) {
-                    await supabase.auth.signOut();
+        function openSetupModal() {
+            alert('Setup modal would open here. For now, configure Supabase manually in the browser console.');
+        }
+
+        function showFeatureComingSoon() {
+            alert('Full features coming soon! This is a working demo of CoPlanner authentication.');
+        }
+
+        function setupInstallButton() {
+            // Simple install button setup
+            setTimeout(() => {
+                const installBtn = document.getElementById('installAppBtn');
+                if (installBtn && window.innerWidth <= 768) {
+                    installBtn.classList.add('show');
                 }
-                
-                // Clear all user data
-                currentUser = null;
-                projects = [];
-                documents = [];
-                comments = [];
-                changes = [];
-                
-                // Clear localStorage but keep logout flag
-                localStorage.removeItem('coplanner_config');
-                localStorage.removeItem('supabase.auth.token');
-                
-                // Show auth screen immediately
-                showAuth();
-                showAlert('success', 'Logged out successfully');
-                
-            } catch (error) {
-                console.error('Logout error:', error);
-                showAlert('error', 'Failed to logout - forcing page reload');
-                // Force reload if logout fails
-                setTimeout(() => {
-                    sessionStorage.setItem('user_logged_out', 'true');
-                    window.location.reload();
-                }, 1000);
-            }
+            }, 5000);
         }
 
-        // File upload handlers
-        function handleFileSelect(input) {
-            const file = input.files[0];
-            if (file) {
-                const fileInfo = document.getElementById('fileInfo');
-                const fileName = document.getElementById('fileName');
-                
-                if (fileInfo && fileName) {
-                    fileName.textContent = `${file.name} (${formatFileSize(file.size)})`;
-                    fileInfo.classList.remove('hidden');
-                }
-            }
-        }
-
-        function handleDragOver(e) {
-            e.preventDefault();
-            e.currentTarget.classList.add('dragover');
-        }
-
-        function handleDragLeave(e) {
-            e.preventDefault();
-            e.currentTarget.classList.remove('dragover');
-        }
-
-        function handleFileDrop(e) {
-            e.preventDefault();
-            e.currentTarget.classList.remove('dragover');
+        function showInstallInstructions() {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            let message = '';
             
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                const fileInput = document.getElementById('documentFile');
-                fileInput.files = files;
-                handleFileSelect(fileInput);
+            if (isIOS) {
+                message = 'To install on iPhone:\n\n1. Tap the Share button at the bottom of Safari\n2. Select "Add to Home Screen"\n3. Tap "Add" to confirm\n\nNote: This only works in Safari browser.';
+            } else {
+                message = 'To install:\n\n1. Look for "Add to Home screen" in your browser menu\n2. Or bookmark this page for quick access';
             }
-        }
-
-        // Utility functions
-        function getFileIcon(filename) {
-            if (!filename) return '<i class="fas fa-file"></i>';
             
-            const extension = filename.split('.').pop().toLowerCase();
-            
-            switch (extension) {
-                case 'pdf':
-                    return '<i class="fas fa-file-pdf"></i>';
-                case 'doc':
-                case 'docx':
-                    return '<i class="fas fa-file-word"></i>';
-                case 'jpg':
-                case 'jpeg':
-                case 'png':
-                case 'gif':
-                case 'bmp':
-                    return '<i class="fas fa-file-image"></i>';
-                case 'dwg':
-                case 'dxf':
-                    return '<i class="fas fa-drafting-compass"></i>';
-                case 'xls':
-                case 'xlsx':
-                    return '<i class="fas fa-file-excel"></i>';
-                case 'txt':
-                    return '<i class="fas fa-file-alt"></i>';
-                case 'zip':
-                case 'rar':
-                case '7z':
-                    return '<i class="fas fa-file-archive"></i>';
-                default:
-                    return '<i class="fas fa-file"></i>';
-            }
+            alert(message);
         }
 
-        async function viewDocument(docId, fileUrl, title) {
-            if (!fileUrl || fileUrl === '#') {
-                showAlert('error', 'Document file not available for viewing');
-                return;
-            }
-
-            const viewer = document.getElementById('documentViewer');
-            const viewerTitle = document.getElementById('documentViewerTitle');
-            const viewerBody = document.getElementById('documentViewerBody');
-
-            viewerTitle.textContent = title;
-            viewerBody.innerHTML = 'Loading...';
-            viewer.classList.add('active');
-
-            const extension = fileUrl.split('.').pop().toLowerCase();
-
-            try {
-                if (['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(extension)) {
-                    // Image viewer
-                    viewerBody.innerHTML = `
-                        <div style="text-align: center;">
-                            <img src="${fileUrl}" style="max-width: 100%; max-height: 60vh; border-radius: 8px;" alt="${title}">
-                        </div>
-                    `;
-                } else if (extension === 'pdf') {
-                    // PDF viewer
-                    viewerBody.innerHTML = `
-                        <iframe src="${fileUrl}" style="width: 100%; height: 60vh; border: none; border-radius: 8px;"></iframe>
-                    `;
-                } else {
-                    // Other file types - show info and download option
-                    const fileIcon = getFileIcon(fileUrl);
-                    viewerBody.innerHTML = `
-                        <div style="text-align: center; padding: 40px;">
-                            <div style="font-size: 4rem; color: var(--primary); margin-bottom: 16px;">
-                                ${fileIcon}
-                            </div>
-                            <h3 style="margin-bottom: 16px;">${title}</h3>
-                            <p style="color: var(--text-secondary); margin-bottom: 24px;">
-                                This file type cannot be previewed in the browser.
-                            </p>
-                            <button class="btn btn-primary" onclick="downloadDocument('${fileUrl}', '${title}')">
-                                <i class="fas fa-download"></i>
-                                Download File
-                            </button>
-                        </div>
-                    `;
-                }
-            } catch (error) {
-                console.error('Error viewing document:', error);
-                viewerBody.innerHTML = `
-                    <div style="text-align: center; padding: 40px;">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--warning); margin-bottom: 16px;"></i>
-                        <p style="color: var(--text-secondary);">Unable to load document for viewing.</p>
-                        <button class="btn btn-primary" onclick="downloadDocument('${fileUrl}', '${title}')" style="margin-top: 16px;">
-                            <i class="fas fa-download"></i>
-                            Try Download Instead
-                        </button>
-                    </div>
-                `;
-            }
-        }
-
-        function closeDocumentViewer() {
-            const viewer = document.getElementById('documentViewer');
-            viewer.classList.remove('active');
-        }
-
-        function downloadDocument(fileUrl, filename) {
-            if (!fileUrl || fileUrl === '#') {
-                showAlert('error', 'Download not available for this document');
-                return;
-            }
-
-            try {
-                const link = document.createElement('a');
-                link.href = fileUrl;
-                link.download = filename || 'document';
-                link.target = '_blank';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                showAlert('success', 'Download started');
-            } catch (error) {
-                console.error('Download error:', error);
-                // Fallback - open in new window
-                window.open(fileUrl, '_blank');
-            }
-        }
-
-        async function deleteDocument(docId) {
-            if (!confirm('Are you sure you want to delete this document? This action cannot be undone.')) {
-                return;
-            }
-
-            try {
-                if (supabase && currentUser) {
-                    // Find the document first
-                    const docToDelete = documents.find(doc => doc.id === docId);
-                    if (!docToDelete) {
-                        throw new Error('Document not found');
-                    }
-
-                    // Delete from storage if file exists
-                    if (docToDelete.file_url && docToDelete.file_url !== '#') {
-                        try {
-                            // Extract file path from URL
-                            const url = new URL(docToDelete.file_url);
-                            const pathParts = url.pathname.split('/');
-                            const filePath = pathParts.slice(pathParts.indexOf('documents')).join('/');
-                            
-                            await supabase.storage
-                                .from('documents')
-                                .remove([filePath]);
-                        } catch (storageError) {
-                            console.warn('Could not delete file from storage:', storageError);
-                            // Continue with database deletion even if storage deletion fails
-                        }
-                    }
-
-                    // Delete from database
-                    const { error } = await supabase
-                        .from('documents')
-                        .delete()
-                        .eq('id', docId)
-                        .eq('user_id', currentUser.id);
-
-                    if (error) throw error;
-                } else {
-                    // Demo mode - just remove from array
-                    const docIndex = documents.findIndex(doc => doc.id === docId);
-                    if (docIndex === -1) {
-                        throw new Error('Document not found');
-                    }
-                }
-
-                // Remove from local array
-                documents = documents.filter(doc => doc.id !== docId);
-                
-                updateDocumentsGrid();
-                updateStats();
-                
-                showAlert('success', 'Document deleted successfully');
-                
-            } catch (error) {
-                console.error('Error deleting document:', error);
-                showAlert('error', error.message || 'Failed to delete document');
-            }
-        }
-        function setLoadingState(button, spinner, textEl, isLoading, loadingText) {
-            if (button) button.disabled = isLoading;
-            if (spinner) {
-                if (isLoading) {
-                    spinner.classList.remove('hidden');
-                } else {
-                    spinner.classList.add('hidden');
-                }
-            }
-            if (textEl && loadingText) {
-                textEl.textContent = isLoading ? loadingText : textEl.dataset.originalText || textEl.textContent;
-                if (!textEl.dataset.originalText) {
-                    textEl.dataset.originalText = textEl.textContent;
-                }
-            }
-        }
-
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        function showAlert(type, message, containerId = null) {
+        function showAlert(type, message) {
             const alertHtml = `
                 <div class="alert alert-${type}">
-                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
                     <span>${message}</span>
                 </div>
             `;
 
             let container;
-            if (containerId) {
-                container = document.getElementById(containerId);
+            const activeTab = document.querySelector('.auth-tab.active');
+            if (activeTab && activeTab.id === 'loginTab') {
+                container = document.getElementById('loginAlert');
             } else {
-                // Find the appropriate alert container
-                const activeTab = document.querySelector('.auth-tab.active');
-                if (activeTab && activeTab.id === 'loginTab') {
-                    container = document.getElementById('loginAlert');
-                } else {
-                    container = document.getElementById('registerAlert');
-                }
+                container = document.getElementById('registerAlert');
             }
 
             if (container) {
@@ -2790,37 +887,6 @@
                 }, 5000);
             }
         }
-
-        function showModalAlert(containerId, type, message) {
-            const container = document.getElementById(containerId);
-            if (container) {
-                container.innerHTML = `
-                    <div class="alert alert-${type}">
-                        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-                        <span>${message}</span>
-                    </div>
-                `;
-                
-                setTimeout(() => {
-                    container.innerHTML = '';
-                }, 5000);
-            }
-        }
-
-        // Close document viewer on outside click
-        document.addEventListener('click', function(event) {
-            const viewer = document.getElementById('documentViewer');
-            if (viewer && event.target === viewer) {
-                closeDocumentViewer();
-            }
-        });
-
-        // Click outside modal to close
-        document.addEventListener('click', function(event) {
-            if (event.target.classList.contains('modal-overlay')) {
-                event.target.classList.remove('active');
-            }
-        });
     </script>
 </body>
 </html>

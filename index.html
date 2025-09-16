@@ -1675,7 +1675,7 @@
                 } else {
                     // Demo mode
                     const newProject = {
-                        id: 'demo-' + Date.now(),
+                        id: crypto.randomUUID(),,
                         user_id: currentUser.id,
                         name,
                         location,

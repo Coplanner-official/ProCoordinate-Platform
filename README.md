@@ -6,7 +6,7 @@ ProCoordinate is a comprehensive web-based platform designed to streamline const
 
 ## 🚀 Features
 
-- **User Management**: Secure registration and authentication system
+- **User Management**: Secure registration and authentication system 
 - **Project Dashboard**: Centralized view of all active projects
 - **Document Management**: Upload, organize, and share project documents
 - **Team Collaboration**: Real-time communication and task coordination

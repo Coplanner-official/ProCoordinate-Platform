@@ -12,7 +12,7 @@
     <link rel="apple-touch-icon" href="/favicon.png">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     
-    <title>CoPlanner - The Central Hub for Building Projects</title>
+    <title>ProCoordinate - Professional Project Coordination Platform</title>
     <style>
         * {
             margin: 0;
@@ -969,7 +969,7 @@
     <!-- Setup Banner -->
     <div id="setupBanner" class="setup-banner">
         <i class="fas fa-exclamation-triangle"></i>
-        <span>CoPlanner Setup Required: Please configure your Supabase connection to enable full functionality.</span>
+        <span>ProCoordinate Setup Required: Please configure your Supabase connection to enable full functionality.</span>
         <a href="#" onclick="openModal('setupModal')">Configure Now</a>
     </div>
 
@@ -980,8 +980,8 @@
                 <div class="welcome-logo">
                     <i class="fas fa-hard-hat"></i>
                 </div>
-                <div class="welcome-title">CoPlanner</div>
-                <div class="welcome-subtitle">The Central Hub for Building Projects</div>
+                <div class="welcome-title">ProCoordinate</div>
+                <div class="welcome-subtitle">Professional Project Coordination Platform</div>
                 <div class="uk-badge">UK Construction Platform</div>
             </div>
             
@@ -1006,7 +1006,7 @@
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
                                 <i class="fas fa-sign-in-alt"></i>
-                                <span class="btn-text">Sign In to CoPlanner</span>
+                                <span class="btn-text">Sign In to ProCoordinate</span>
                                 <span class="spinner hidden"></span>
                             </button>
                         </div>
@@ -1059,7 +1059,7 @@
         <header class="header">
             <div class="logo">
                 <i class="fas fa-hard-hat"></i>
-                <span>CoPlanner</span>
+                <span>ProCoordinate</span>
             </div>
             
             <div class="header-actions">
@@ -1426,7 +1426,7 @@
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
             try {
-                console.log('CoPlanner initializing...');
+                console.log('ProCoordinate initializing...');
                 initializePWA();
                 initializeApp();
             } catch (error) {
@@ -1655,7 +1655,7 @@
 
         function initializeApp() {
             // Check for saved Supabase config
-            const savedConfig = localStorage.getItem('coplanner_config');
+            const savedConfig = localStorage.getItem('procoordinate_config');
             if (savedConfig) {
                 try {
                     const config = JSON.parse(savedConfig);
@@ -2496,7 +2496,7 @@
                 changes = [];
                 
                 // Clear Supabase config but keep logout flag
-                localStorage.removeItem('coplanner_config');
+                localStorage.removeItem('procoordinate_config');
                 
                 // Clear all auth tokens
                 Object.keys(localStorage).forEach(key => {

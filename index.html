@@ -310,6 +310,32 @@
             border: 1px solid #e5e7eb;
             cursor: pointer;
             transition: all 0.3s;
+            position: relative;
+        }
+        
+        .project-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            font-weight: 700;
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .project-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
         }
         
         .project-card:hover {
@@ -419,6 +445,18 @@
             font-size: 26px;
             color: #111827;
             margin-bottom: 6px;
+        }
+        
+        .project-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 16px;
+        }
+        
+        .project-detail-actions {
+            display: flex;
+            gap: 8px;
         }
         
         .project-meta {
@@ -1215,34 +1253,53 @@
 
         function renderProjects() {
             const grid = document.getElementById('projectsGrid');
-            grid.innerHTML = projects.map(p => `
-                <div class="project-card" onclick="openProject('${p.id}')">
-                    <div class="project-header">
-                        <h3>${p.name}</h3>
-                        <p>${p.location || 'No location specified'}</p>
-                    </div>
-                    <div class="project-body">
-                        <div class="project-stats">
-                            <div class="stat">
-                                <div class="stat-number">${(p.drawings || []).length}</div>
-                                <div class="stat-label">Drawings</div>
+            grid.innerHTML = projects.map(p => {
+                let avatarContent = '';
+                if (p.avatar) {
+                    // Check if it's a URL (contains http or https)
+                    if (p.avatar.startsWith('http://') || p.avatar.startsWith('https://')) {
+                        avatarContent = `<img src="${p.avatar}" alt="${p.name}">`;
+                    } else {
+                        // It's an emoji or text
+                        avatarContent = p.avatar;
+                    }
+                } else {
+                    // Default to first letter
+                    avatarContent = p.name.charAt(0).toUpperCase();
+                }
+                
+                return `
+                    <div class="project-card" onclick="openProject('${p.id}')">
+                        <div class="project-avatar">
+                            ${avatarContent}
+                        </div>
+                        <div class="project-header">
+                            <h3>${p.name}</h3>
+                            <p>${p.location || 'No location specified'}</p>
+                        </div>
+                        <div class="project-body">
+                            <div class="project-stats">
+                                <div class="stat">
+                                    <div class="stat-number">${(p.drawings || []).length}</div>
+                                    <div class="stat-label">Drawings</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="stat-number">${(p.rfis || []).length}</div>
+                                    <div class="stat-label">RFIs</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="stat-number">${(p.dailyLogs || []).length}</div>
+                                    <div class="stat-label">Daily Logs</div>
+                                </div>
                             </div>
-                            <div class="stat">
-                                <div class="stat-number">${(p.rfis || []).length}</div>
-                                <div class="stat-label">RFIs</div>
-                            </div>
-                            <div class="stat">
-                                <div class="stat-number">${(p.dailyLogs || []).length}</div>
-                                <div class="stat-label">Daily Logs</div>
+                            <div class="project-dates">
+                                <span>Start: ${formatDate(p.startDate)}</span>
+                                <span>End: ${formatDate(p.endDate)}</span>
                             </div>
                         </div>
-                        <div class="project-dates">
-                            <span>Start: ${formatDate(p.startDate)}</span>
-                            <span>End: ${formatDate(p.endDate)}</span>
-                        </div>
                     </div>
-                </div>
-            `).join('') + `
+                `;
+            }).join('') + `
                 <div class="new-project-card" onclick="openProjectModal()">
                     <div class="plus">+</div>
                     <span style="color: #1e40af; font-weight: 600;">Create New Project</span>
@@ -1269,6 +1326,32 @@
         function renderProjectDetail() {
             document.getElementById('projectName').textContent = currentProject.name;
             document.getElementById('projectDescription').textContent = currentProject.description || '';
+            
+            // Add edit and delete buttons
+            const projectDetailDiv = document.querySelector('.project-detail');
+            const existingHeader = projectDetailDiv.querySelector('.project-detail-header');
+            if (existingHeader) {
+                existingHeader.remove();
+            }
+            
+            const backBtn = projectDetailDiv.querySelector('.back-btn');
+            const headerHTML = `
+                <div class="project-detail-header">
+                    <div>
+                        <h2>${currentProject.name}</h2>
+                        <p style="color: #6b7280; margin-bottom: 0;">${currentProject.description || ''}</p>
+                    </div>
+                    <div class="project-detail-actions">
+                        <button class="btn btn-secondary btn-small" onclick="openEditProjectModal()">✏️ Edit Project</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteProject()">🗑️ Delete</button>
+                    </div>
+                </div>
+            `;
+            backBtn.insertAdjacentHTML('afterend', headerHTML);
+            
+            // Hide the old h2 and p tags
+            document.getElementById('projectName').style.display = 'none';
+            document.getElementById('projectDescription').style.display = 'none';
             
             document.getElementById('projectMeta').innerHTML = `
                 <div class="meta-box">
@@ -1613,8 +1696,20 @@
             showModal(`
                 <h3>Create New Project</h3>
                 <div class="form-group">
+                    <label>Project Avatar (Optional)</label>
+                    <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px;">
+                        <div id="avatarPreview" style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); display: flex; align-items: center; justify-content: center; font-size: 32px; color: white; font-weight: 700; overflow: hidden;">
+                            ?
+                        </div>
+                        <div style="flex: 1;">
+                            <input type="text" id="projectAvatar" placeholder="Enter emoji 🏗️ or image URL" oninput="updateAvatarPreview()">
+                            <small style="color: #6b7280; display: block; margin-top: 4px;">Add an emoji (🏗️ 🏢 🏠 🏭) or image URL to represent your project</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
                     <label>Project Name *</label>
-                    <input type="text" id="projectName">
+                    <input type="text" id="projectName" oninput="updateAvatarPreview()">
                 </div>
                 <div class="form-group">
                     <label>Description</label>
@@ -1653,6 +1748,8 @@
                 return;
             }
 
+            const avatarInput = document.getElementById('projectAvatar').value.trim();
+
             const project = {
                 id: 'proj_' + Date.now(),
                 name: name,
@@ -1661,6 +1758,7 @@
                 endDate: endDate,
                 location: document.getElementById('projectLocation').value,
                 budget: parseInt(document.getElementById('projectBudget').value) || 0,
+                avatar: avatarInput || null,
                 userEmail: currentUser.email,
                 created: new Date().toISOString(),
                 drawings: [], rfis: [], submittals: [], dailyLogs: [],
@@ -1669,6 +1767,124 @@
             
             saveProject(project);
             closeModal();
+        }
+
+        function openEditProjectModal() {
+            let avatarPreview = '';
+            if (currentProject.avatar) {
+                if (currentProject.avatar.startsWith('http://') || currentProject.avatar.startsWith('https://')) {
+                    avatarPreview = `<img src="${currentProject.avatar}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                } else {
+                    avatarPreview = currentProject.avatar;
+                }
+            } else {
+                avatarPreview = currentProject.name.charAt(0).toUpperCase();
+            }
+            
+            showModal(`
+                <h3>Edit Project</h3>
+                <div class="form-group">
+                    <label>Project Avatar</label>
+                    <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px;">
+                        <div id="avatarPreview" style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); display: flex; align-items: center; justify-content: center; font-size: 32px; color: white; font-weight: 700; overflow: hidden;">
+                            ${avatarPreview}
+                        </div>
+                        <div style="flex: 1;">
+                            <input type="text" id="projectAvatar" placeholder="Paste image URL or emoji" value="${currentProject.avatar || ''}" oninput="updateAvatarPreview()">
+                            <small style="color: #6b7280; display: block; margin-top: 4px;">Enter an emoji (🏗️ 🏢 🏠) or image URL</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Project Name *</label>
+                    <input type="text" id="projectName" value="${currentProject.name}" oninput="updateAvatarPreview()">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="projectDesc" rows="3">${currentProject.description || ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Start Date *</label>
+                    <input type="date" id="projectStart" value="${currentProject.startDate}">
+                </div>
+                <div class="form-group">
+                    <label>End Date *</label>
+                    <input type="date" id="projectEnd" value="${currentProject.endDate}">
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" id="projectLocation" value="${currentProject.location || ''}">
+                </div>
+                <div class="form-group">
+                    <label>Budget (£)</label>
+                    <input type="number" id="projectBudget" value="${currentProject.budget || ''}">
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="updateProject()">Save Changes</button>
+                </div>
+            `);
+        }
+
+        function updateAvatarPreview() {
+            const avatarInput = document.getElementById('projectAvatar');
+            const nameInput = document.getElementById('projectName');
+            const preview = document.getElementById('avatarPreview');
+            
+            if (!avatarInput || !preview) return;
+            
+            const avatarValue = avatarInput.value.trim();
+            
+            if (avatarValue) {
+                if (avatarValue.startsWith('http://') || avatarValue.startsWith('https://')) {
+                    preview.innerHTML = `<img src="${avatarValue}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                } else {
+                    preview.textContent = avatarValue;
+                }
+            } else {
+                const name = nameInput ? nameInput.value.trim() : '';
+                preview.textContent = name ? name.charAt(0).toUpperCase() : '?';
+            }
+        }
+
+        function updateProject() {
+            const name = document.getElementById('projectName').value;
+            const startDate = document.getElementById('projectStart').value;
+            const endDate = document.getElementById('projectEnd').value;
+
+            if (!name || !startDate || !endDate) {
+                alert('Please fill in required fields');
+                return;
+            }
+
+            currentProject.name = name;
+            currentProject.description = document.getElementById('projectDesc').value;
+            currentProject.startDate = startDate;
+            currentProject.endDate = endDate;
+            currentProject.location = document.getElementById('projectLocation').value;
+            currentProject.budget = parseInt(document.getElementById('projectBudget').value) || 0;
+            
+            const avatarInput = document.getElementById('projectAvatar').value.trim();
+            currentProject.avatar = avatarInput || null;
+            
+            saveProject(currentProject);
+            closeModal();
+            renderProjectDetail();
+        }
+
+        function deleteProject() {
+            if (confirm(`Are you sure you want to delete "${currentProject.name}"? This action cannot be undone and will delete all project data including RFIs, drawings, and logs.`)) {
+                const allProjects = JSON.parse(localStorage.getItem('pc_projects') || '[]');
+                const filtered = allProjects.filter(p => p.id !== currentProject.id);
+                localStorage.setItem('pc_projects', JSON.stringify(filtered));
+                
+                // Go back to dashboard
+                currentProject = null;
+                document.getElementById('dashboardView').classList.remove('hidden');
+                document.getElementById('projectView').classList.add('hidden');
+                document.getElementById('dashboardNavBtn').classList.add('active');
+                loadProjects();
+            }
         }
 
         function openDrawingModal() {

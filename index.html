@@ -21,32 +21,6 @@
             flex-direction: column;
         }
 
-        .setup-banner {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            color: white;
-            padding: 12px 20px;
-            text-align: center;
-            font-weight: 500;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .setup-banner button {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 6px;
-            margin-left: 12px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        .setup-banner button:hover {
-            background: rgba(255,255,255,0.3);
-            transform: translateY(-1px);
-        }
-
         .navbar {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -92,14 +66,12 @@
         .user-info {
             color: rgba(255, 255, 255, 0.9);
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
 
-        .user-menu {
-            position: relative;
-            display: inline-block;
-        }
-
-        .user-menu button {
+        .logout-btn {
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: white;
@@ -107,9 +79,10 @@
             border-radius: 6px;
             cursor: pointer;
             font-weight: 500;
+            transition: all 0.2s;
         }
 
-        .user-menu button:hover {
+        .logout-btn:hover {
             background: rgba(255, 255, 255, 0.2);
         }
 
@@ -133,19 +106,31 @@
             margin-bottom: 12px;
         }
 
+        .dashboard-layout {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+
+        .dashboard-main {
+            flex: 1;
+        }
+
         .sidebar {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border-radius: 12px;
             padding: 24px;
-            margin-bottom: 30px;
+            width: 300px;
         }
 
         .sidebar h3 {
             color: white;
-            font-size: 18px;
+            font-size: 14px;
             margin-bottom: 16px;
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .new-project-btn {
@@ -194,16 +179,58 @@
             font-weight: 700;
             color: #60a5fa;
             margin-bottom: 8px;
-            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
 
         .stat-label {
             color: rgba(255, 255, 255, 0.9);
             font-weight: 500;
             font-size: 16px;
+        }
+
+        .project-list {
+            margin-bottom: 20px;
+        }
+
+        .project-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .project-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(4px);
+        }
+
+        .project-item h4 {
+            color: white;
+            font-size: 16px;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .project-item p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .project-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .no-projects {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-style: italic;
+            padding: 20px;
         }
 
         .modal {
@@ -231,6 +258,8 @@
             width: 90%;
             max-width: 500px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .modal-content h2 {
@@ -259,6 +288,7 @@
             border-radius: 8px;
             font-size: 16px;
             transition: border-color 0.2s;
+            font-family: inherit;
         }
 
         .form-group input:focus,
@@ -286,6 +316,7 @@
             cursor: pointer;
             transition: all 0.2s;
             font-size: 16px;
+            flex: 1;
         }
 
         .btn-primary {
@@ -308,53 +339,21 @@
             background: #e5e7eb;
         }
 
-        .project-list {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 30px;
-        }
-
-        .project-list h3 {
+        .btn-danger {
+            background: #ef4444;
             color: white;
-            margin-bottom: 20px;
-            font-size: 20px;
-            font-weight: 600;
         }
 
-        .project-item {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 16px;
-            transition: all 0.2s;
-            cursor: pointer;
+        .btn-danger:hover {
+            background: #dc2626;
         }
 
-        .project-item:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateX(4px);
-        }
-
-        .project-item h4 {
-            color: white;
-            font-size: 18px;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .project-item p {
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 12px;
-        }
-
-        .project-meta {
+        .auth-container {
             display: flex;
-            gap: 20px;
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.7);
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
         }
 
         .auth-form {
@@ -362,9 +361,8 @@
             backdrop-filter: blur(20px);
             padding: 40px;
             border-radius: 16px;
-            width: 90%;
+            width: 100%;
             max-width: 420px;
-            margin: auto;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
         }
 
@@ -374,17 +372,6 @@
             color: #1e40af;
             font-size: 28px;
             font-weight: 700;
-        }
-
-        .auth-form .form-group {
-            margin-bottom: 24px;
-        }
-
-        .auth-form .btn {
-            width: 100%;
-            padding: 16px;
-            font-size: 18px;
-            margin-bottom: 16px;
         }
 
         .auth-toggle {
@@ -407,22 +394,45 @@
             display: none;
         }
 
-        .page-section {
-            display: none;
+        .section-content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
         }
 
-        .page-section.active {
-            display: block;
+        .section-content h2 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 600;
         }
 
-        .no-projects {
-            text-align: center;
-            color: rgba(255, 255, 255, 0.7);
-            font-style: italic;
-            padding: 40px;
+        .project-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 14px;
         }
 
         @media (max-width: 768px) {
+            .dashboard-layout {
+                flex-direction: column-reverse;
+            }
+
+            .sidebar {
+                width: 100%;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
             .nav-container {
                 flex-direction: column;
                 height: auto;
@@ -431,186 +441,106 @@
 
             .nav-links {
                 margin-top: 16px;
-                gap: 20px;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-
-            .dashboard-header h1 {
-                font-size: 36px;
-            }
-
-            .modal-content {
-                margin: 20px;
-                padding: 24px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Setup Banner -->
-    <div class="setup-banner" id="setupBanner">
-        ProCoordinate Setup Required: Please configure your Supabase connection to enable full functionality.
-        <button onclick="openSetupModal()">Configure Now</button>
-    </div>
-
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="#" class="logo">ProCoordinate</a>
-            
-            <div class="nav-links" id="mainNav">
-                <a href="#" class="active" onclick="showSection('dashboard')">Dashboard</a>
-                <a href="#" onclick="showSection('projects')">Projects</a>
-                <a href="#" onclick="showSection('documents')">Documents</a>
-                <a href="#" onclick="showSection('comments')">Comments</a>
-                <a href="#" onclick="showSection('changes')">Change Requests</a>
-            </div>
-            
-            <div class="user-menu">
-                <span class="user-info" id="userWelcome">Welcome, Demo</span>
-                <button onclick="logout()" id="logoutBtn">D</button>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Main Application -->
-    <main class="main-content" id="appMain">
-        <!-- Dashboard Section -->
-        <section class="page-section active" id="dashboard">
-            <div class="dashboard-header">
-                <h1>Project Dashboard</h1>
-            </div>
-
-            <div style="display: flex; gap: 30px; align-items: flex-start;">
-                <div style="flex: 1;">
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-number" id="activeProjects">0</div>
-                            <div class="stat-label">Active Projects</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="totalDocuments">0</div>
-                            <div class="stat-label">Project Documents</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="teamComments">0</div>
-                            <div class="stat-label">Team Comments</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" id="changeRequests">0</div>
-                            <div class="stat-label">Change Requests</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="sidebar">
-                    <h3>YOUR BUILDING PROJECTS</h3>
-                    <div id="projectsSidebar" class="no-projects">No projects yet</div>
-                    <button class="new-project-btn" onclick="openProjectModal()">New Project</button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Other sections (Projects, Documents, etc.) -->
-        <section class="page-section" id="projects">
-            <div class="project-list">
-                <h3>All Projects</h3>
-                <div id="projectsList" class="no-projects">No projects created yet</div>
-            </div>
-        </section>
-
-        <section class="page-section" id="documents">
-            <div class="project-list">
-                <h3>Documents</h3>
-                <div class="no-projects">Document management coming soon</div>
-            </div>
-        </section>
-
-        <section class="page-section" id="comments">
-            <div class="project-list">
-                <h3>Comments</h3>
-                <div class="no-projects">Comment system coming soon</div>
-            </div>
-        </section>
-
-        <section class="page-section" id="changes">
-            <div class="project-list">
-                <h3>Change Requests</h3>
-                <div class="no-projects">Change request system coming soon</div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Authentication Form -->
-    <div class="main-content hidden" id="authMain">
+    <!-- Authentication View -->
+    <div id="authView" class="auth-container">
         <div class="auth-form">
             <h2 id="authTitle">Welcome to ProCoordinate</h2>
             <form id="authForm">
                 <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required placeholder="your@email.com">
+                    <label for="authEmail">Email</label>
+                    <input type="email" id="authEmail" required placeholder="your@email.com">
                 </div>
                 <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required placeholder="Your password">
+                    <label for="authPassword">Password</label>
+                    <input type="password" id="authPassword" required placeholder="Your password">
                 </div>
                 <div class="form-group hidden" id="nameGroup">
-                    <label for="fullName">Full Name</label>
-                    <input type="text" id="fullName" name="fullName" placeholder="Your full name">
+                    <label for="authName">Full Name</label>
+                    <input type="text" id="authName" placeholder="Your full name">
                 </div>
                 <div class="form-group hidden" id="companyGroup">
-                    <label for="company">Company</label>
-                    <input type="text" id="company" name="company" placeholder="Your company">
+                    <label for="authCompany">Company</label>
+                    <input type="text" id="authCompany" placeholder="Your company">
                 </div>
-                <button type="submit" class="btn btn-primary" id="authSubmitBtn">Sign In</button>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 16px;">Sign In</button>
             </form>
             <div class="auth-toggle">
                 <span id="authToggleText">Don't have an account?</span>
-                <a href="#" onclick="toggleAuthMode()" id="authToggleLink">Sign up</a>
+                <a href="#" onclick="toggleAuthMode(event)" id="authToggleLink">Sign up</a>
             </div>
         </div>
     </div>
 
-    <!-- Modals -->
-    <!-- Setup Modal -->
-    <div class="modal" id="setupModal">
-        <div class="modal-content">
-            <h2>ProCoordinate Setup</h2>
-            <p>Configure your Supabase backend</p>
-            
-            <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 16px; margin: 16px 0;">
-                <p style="color: #92400e; font-weight: 500;">To enable full functionality, please configure your Supabase connection.</p>
+    <!-- Main Application View -->
+    <div id="appView" class="hidden">
+        <nav class="navbar">
+            <div class="nav-container">
+                <a href="#" class="logo">ProCoordinate</a>
+                
+                <div class="nav-links">
+                    <a href="#" class="active" onclick="showDashboard(event)">Dashboard</a>
+                    <a href="#" onclick="showProjects(event)">Projects</a>
+                </div>
+                
+                <div class="user-info">
+                    <span id="userName">Welcome</span>
+                    <button onclick="logout()" class="logout-btn">Logout</button>
+                </div>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <!-- Dashboard View -->
+            <div id="dashboardView">
+                <div class="dashboard-header">
+                    <h1>Project Dashboard</h1>
+                </div>
+
+                <div class="dashboard-layout">
+                    <div class="dashboard-main">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number" id="activeProjects">0</div>
+                                <div class="stat-label">Active Projects</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="totalDocuments">0</div>
+                                <div class="stat-label">Documents</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="teamMembers">1</div>
+                                <div class="stat-label">Team Members</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sidebar">
+                        <h3>Your Building Projects</h3>
+                        <div id="projectsSidebar" class="project-list"></div>
+                        <button class="new-project-btn" onclick="openProjectModal()">New Project</button>
+                    </div>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="supabaseUrl">Supabase URL</label>
-                <input type="url" id="supabaseUrl" placeholder="https://your-project.supabase.co">
+            <!-- Projects View -->
+            <div id="projectsView" class="hidden">
+                <div class="section-content">
+                    <h2>All Projects</h2>
+                    <div id="projectsList"></div>
+                </div>
             </div>
-
-            <div class="form-group">
-                <label for="supabaseKey">Supabase Anon Key</label>
-                <input type="text" id="supabaseKey" placeholder="Your anon key">
-            </div>
-
-            <p style="color: #6b7280; font-size: 14px; margin: 16px 0;">
-                Need help? Visit the <a href="https://supabase.com/docs" target="_blank" style="color: #3b82f6;">Supabase documentation</a> to learn how to create a project and get your credentials.
-            </p>
-
-            <div class="modal-actions">
-                <button class="btn btn-secondary" onclick="skipSetup()">Skip for Now</button>
-                <button class="btn btn-primary" onclick="saveConfiguration()">Save Configuration</button>
-            </div>
-        </div>
+        </main>
     </div>
 
     <!-- Project Modal -->
     <div class="modal" id="projectModal">
         <div class="modal-content">
-            <h2>Create New Project</h2>
+            <h2 id="projectModalTitle">Create New Project</h2>
             <form id="projectForm">
                 <div class="form-group">
                     <label for="projectName">Project Name</label>
@@ -625,221 +555,116 @@
                     <input type="text" id="projectLocation" placeholder="e.g. London, UK">
                 </div>
                 <div class="form-group">
-                    <label for="projectBudget">Budget</label>
+                    <label for="projectBudget">Budget (£)</label>
                     <input type="number" id="projectBudget" placeholder="e.g. 500000">
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeProjectModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Create Project</button>
+                    <button type="submit" class="btn btn-primary">Save Project</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/supabase/2.39.0/umd/supabase.min.js"></script>
     <script>
-        // Global variables
-        let supabaseClient = null;
+        // Global state
         let currentUser = null;
-        let isAuthMode = false;
+        let isSignup = false;
+        let editingProjectId = null;
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
-            checkSavedConfiguration();
-            initializeApp();
+            checkAuth();
         });
 
-        // Check for saved Supabase configuration
-        function checkSavedConfiguration() {
-            const savedUrl = localStorage.getItem('supabaseUrl');
-            const savedKey = localStorage.getItem('supabaseKey');
-            
-            if (savedUrl && savedKey) {
-                try {
-                    supabaseClient = supabase.createClient(savedUrl, savedKey);
-                    hideSetupBanner();
-                    console.log('Supabase initialized with saved configuration');
-                } catch (error) {
-                    console.error('Error initializing Supabase with saved config:', error);
-                    showSetupBanner();
-                }
-            } else {
-                showSetupBanner();
-            }
-        }
-
-        function showSetupBanner() {
-            const banner = document.getElementById('setupBanner');
-            if (banner) banner.style.display = 'block';
-        }
-
-        function hideSetupBanner() {
-            const banner = document.getElementById('setupBanner');
-            if (banner) banner.style.display = 'none';
-        }
-
-        function openSetupModal() {
-            document.getElementById('setupModal').classList.add('active');
-            
-            // Pre-fill with saved values if they exist
-            const savedUrl = localStorage.getItem('supabaseUrl');
-            const savedKey = localStorage.getItem('supabaseKey');
-            
-            if (savedUrl) document.getElementById('supabaseUrl').value = savedUrl;
-            if (savedKey) document.getElementById('supabaseKey').value = savedKey;
-        }
-
-        function closeSetupModal() {
-            document.getElementById('setupModal').classList.remove('active');
-        }
-
-        function saveConfiguration() {
-            const url = document.getElementById('supabaseUrl').value.trim();
-            const key = document.getElementById('supabaseKey').value.trim();
-
-            if (!url || !key) {
-                alert('Please fill in both Supabase URL and API key');
-                return;
-            }
-
-            try {
-                // Save to localStorage for persistence
-                localStorage.setItem('supabaseUrl', url);
-                localStorage.setItem('supabaseKey', key);
-                
-                // Initialize Supabase client
-                supabaseClient = supabase.createClient(url, key);
-                
-                // Hide setup elements
-                hideSetupBanner();
-                closeSetupModal();
-                
-                // Show success message
-                alert('Supabase configuration saved successfully!');
-                
-                // Refresh the page to apply new configuration
-                window.location.reload();
-                
-            } catch (error) {
-                console.error('Error configuring Supabase:', error);
-                alert('Error configuring Supabase. Please check your credentials.');
-            }
-        }
-
-        function skipSetup() {
-            closeSetupModal();
-        }
-
-        // Initialize the app
-        function initializeApp() {
-            // Check if user is logged in
+        function checkAuth() {
             const userData = localStorage.getItem('procoordinate_user');
             if (userData) {
                 currentUser = JSON.parse(userData);
-                showMainApp();
+                showApp();
             } else {
-                // Demo mode
-                currentUser = { 
-                    email: 'demo@procoordinate.com', 
-                    name: 'Demo', 
-                    company: 'Demo Company' 
-                };
-                showMainApp();
+                showAuth();
             }
         }
 
-        function showMainApp() {
-            document.getElementById('authMain').classList.add('hidden');
-            document.getElementById('appMain').classList.remove('hidden');
-            
-            // Update user welcome message
-            const welcomeMsg = document.getElementById('userWelcome');
-            if (welcomeMsg) {
-                welcomeMsg.textContent = `Welcome, ${currentUser.name}`;
-            }
-            
-            loadDashboardData();
+        function showAuth() {
+            document.getElementById('authView').classList.remove('hidden');
+            document.getElementById('appView').classList.add('hidden');
         }
 
-        function showAuthForm() {
-            document.getElementById('appMain').classList.add('hidden');
-            document.getElementById('authMain').classList.remove('hidden');
-            isAuthMode = true;
+        function showApp() {
+            document.getElementById('authView').classList.add('hidden');
+            document.getElementById('appView').classList.remove('hidden');
+            document.getElementById('userName').textContent = `Welcome, ${currentUser.name}`;
+            loadDashboard();
         }
 
-        // Authentication functions
-        document.getElementById('authForm').addEventListener('submit', async function(e) {
+        // Authentication
+        document.getElementById('authForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const name = document.getElementById('fullName').value;
-            const company = document.getElementById('company').value;
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const name = document.getElementById('authName').value;
+            const company = document.getElementById('authCompany').value;
 
-            if (!supabaseClient) {
-                // Demo mode
-                const userData = {
-                    email: email,
-                    name: name || email.split('@')[0],
-                    company: company || 'Demo Company'
+            if (isSignup) {
+                // Registration
+                if (!name || !company) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+
+                const users = JSON.parse(localStorage.getItem('procoordinate_users') || '[]');
+                const existing = users.find(u => u.email === email);
+                
+                if (existing) {
+                    alert('Email already registered');
+                    return;
+                }
+
+                const newUser = {
+                    email,
+                    password,
+                    name,
+                    company,
+                    created: new Date().toISOString()
                 };
-                
-                localStorage.setItem('procoordinate_user', JSON.stringify(userData));
-                currentUser = userData;
-                showMainApp();
-                return;
-            }
 
-            try {
-                let result;
+                users.push(newUser);
+                localStorage.setItem('procoordinate_users', JSON.stringify(users));
                 
-                if (isAuthMode) {
-                    // Registration
-                    result = await supabaseClient.auth.signUp({
-                        email: email,
-                        password: password,
-                        options: {
-                            data: {
-                                name: name,
-                                company: company
-                            }
-                        }
-                    });
-                } else {
-                    // Login
-                    result = await supabaseClient.auth.signInWithPassword({
-                        email: email,
-                        password: password
-                    });
-                }
-
-                if (result.error) {
-                    alert('Authentication error: ' + result.error.message);
-                } else {
-                    currentUser = {
-                        email: result.data.user.email,
-                        name: result.data.user.user_metadata?.name || result.data.user.email.split('@')[0],
-                        company: result.data.user.user_metadata?.company || 'Your Company'
-                    };
+                currentUser = { email, name, company };
+                localStorage.setItem('procoordinate_user', JSON.stringify(currentUser));
+                
+                showApp();
+            } else {
+                // Login
+                const users = JSON.parse(localStorage.getItem('procoordinate_users') || '[]');
+                const user = users.find(u => u.email === email && u.password === password);
+                
+                if (user) {
+                    currentUser = { email: user.email, name: user.name, company: user.company };
                     localStorage.setItem('procoordinate_user', JSON.stringify(currentUser));
-                    showMainApp();
+                    showApp();
+                } else {
+                    alert('Invalid email or password');
                 }
-            } catch (error) {
-                console.error('Auth error:', error);
-                alert('Authentication failed. Please try again.');
             }
         });
 
-        function toggleAuthMode() {
-            isAuthMode = !isAuthMode;
+        function toggleAuthMode(e) {
+            e.preventDefault();
+            isSignup = !isSignup;
+            
             const title = document.getElementById('authTitle');
-            const submitBtn = document.getElementById('authSubmitBtn');
+            const submitBtn = document.querySelector('#authForm .btn-primary');
             const toggleText = document.getElementById('authToggleText');
             const toggleLink = document.getElementById('authToggleLink');
             const nameGroup = document.getElementById('nameGroup');
             const companyGroup = document.getElementById('companyGroup');
 
-            if (isAuthMode) {
+            if (isSignup) {
                 title.textContent = 'Create Account';
                 submitBtn.textContent = 'Sign Up';
                 toggleText.textContent = 'Already have an account?';
@@ -859,55 +684,192 @@
         function logout() {
             localStorage.removeItem('procoordinate_user');
             currentUser = null;
-            if (supabaseClient) {
-                supabaseClient.auth.signOut();
-            }
-            showAuthForm();
+            showAuth();
         }
 
-        // Navigation functions
-        function showSection(sectionName) {
-            // Hide all sections
-            const sections = document.querySelectorAll('.page-section');
-            sections.forEach(section => section.classList.remove('active'));
-            
-            // Remove active class from nav links
-            const navLinks = document.querySelectorAll('.nav-links a');
-            navLinks.forEach(link => link.classList.remove('active'));
-            
-            // Show selected section
-            const targetSection = document.getElementById(sectionName);
-            if (targetSection) {
-                targetSection.classList.add('active');
-            }
-            
-            // Add active class to clicked nav link
-            event.target.classList.add('active');
-            
-            // Load section-specific data
-            if (sectionName === 'dashboard') {
-                loadDashboardData();
-            } else if (sectionName === 'projects') {
-                loadProjectsData();
+        // Navigation
+        function showDashboard(e) {
+            if (e) e.preventDefault();
+            document.getElementById('dashboardView').classList.remove('hidden');
+            document.getElementById('projectsView').classList.add('hidden');
+            updateActiveNav(0);
+            loadDashboard();
+        }
+
+        function showProjects(e) {
+            if (e) e.preventDefault();
+            document.getElementById('dashboardView').classList.add('hidden');
+            document.getElementById('projectsView').classList.remove('hidden');
+            updateActiveNav(1);
+            loadProjectsList();
+        }
+
+        function updateActiveNav(index) {
+            const links = document.querySelectorAll('.nav-links a');
+            links.forEach((link, i) => {
+                if (i === index) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        }
+
+        // Projects
+        function getProjects() {
+            const allProjects = JSON.parse(localStorage.getItem('procoordinate_projects') || '[]');
+            return allProjects.filter(p => p.userEmail === currentUser.email);
+        }
+
+        function saveProject(project) {
+            const allProjects = JSON.parse(localStorage.getItem('procoordinate_projects') || '[]');
+            allProjects.push(project);
+            localStorage.setItem('procoordinate_projects', JSON.stringify(allProjects));
+        }
+
+        function updateProject(project) {
+            const allProjects = JSON.parse(localStorage.getItem('procoordinate_projects') || '[]');
+            const index = allProjects.findIndex(p => p.id === project.id);
+            if (index !== -1) {
+                allProjects[index] = project;
+                localStorage.setItem('procoordinate_projects', JSON.stringify(allProjects));
             }
         }
 
-        // Project functions
+        function deleteProject(projectId) {
+            const allProjects = JSON.parse(localStorage.getItem('procoordinate_projects') || '[]');
+            const filtered = allProjects.filter(p => p.id !== projectId);
+            localStorage.setItem('procoordinate_projects', JSON.stringify(filtered));
+        }
+
+        function loadDashboard() {
+            const projects = getProjects();
+            
+            // Update stats
+            document.getElementById('activeProjects').textContent = projects.length;
+            document.getElementById('totalDocuments').textContent = projects.reduce((sum, p) => sum + (p.documents || 0), 0);
+            
+            // Update sidebar
+            const sidebar = document.getElementById('projectsSidebar');
+            if (projects.length === 0) {
+                sidebar.innerHTML = '<div class="no-projects">No projects yet</div>';
+            } else {
+                sidebar.innerHTML = projects.slice(0, 5).map(project => `
+                    <div class="project-item" onclick="viewProject('${project.id}')">
+                        <h4>${project.name}</h4>
+                        <p>${project.location || 'No location'}</p>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function loadProjectsList() {
+            const projects = getProjects();
+            const container = document.getElementById('projectsList');
+            
+            if (projects.length === 0) {
+                container.innerHTML = '<div class="no-projects">No projects created yet</div>';
+            } else {
+                container.innerHTML = projects.map(project => `
+                    <div class="project-item">
+                        <h4>${project.name}</h4>
+                        <p>${project.description || 'No description provided'}</p>
+                        <div class="project-meta">
+                            <span>📍 ${project.location || 'Not specified'}</span>
+                            <span>💰 £${(project.budget || 0).toLocaleString()}</span>
+                            <span>📅 ${new Date(project.created).toLocaleDateString()}</span>
+                        </div>
+                        <div class="project-actions">
+                            <button class="btn btn-secondary btn-small" onclick="editProject('${project.id}')">Edit</button>
+                            <button class="btn btn-danger btn-small" onclick="confirmDeleteProject('${project.id}')">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
         function openProjectModal() {
+            editingProjectId = null;
+            document.getElementById('projectModalTitle').textContent = 'Create New Project';
+            document.getElementById('projectForm').reset();
             document.getElementById('projectModal').classList.add('active');
         }
 
         function closeProjectModal() {
             document.getElementById('projectModal').classList.remove('active');
-            document.getElementById('projectForm').reset();
+            editingProjectId = null;
         }
 
-        // Project form submission
-        document.getElementById('projectForm').addEventListener('submit', async function(e) {
+        function editProject(projectId) {
+            const projects = getProjects();
+            const project = projects.find(p => p.id === projectId);
+            
+            if (project) {
+                editingProjectId = projectId;
+                document.getElementById('projectModalTitle').textContent = 'Edit Project';
+                document.getElementById('projectName').value = project.name;
+                document.getElementById('projectDescription').value = project.description || '';
+                document.getElementById('projectLocation').value = project.location || '';
+                document.getElementById('projectBudget').value = project.budget || '';
+                document.getElementById('projectModal').classList.add('active');
+            }
+        }
+
+        function confirmDeleteProject(projectId) {
+            if (confirm('Are you sure you want to delete this project?')) {
+                deleteProject(projectId);
+                loadDashboard();
+                loadProjectsList();
+            }
+        }
+
+        function viewProject(projectId) {
+            // Future: Navigate to detailed project view
+            console.log('View project:', projectId);
+        }
+
+        document.getElementById('projectForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const projectData = {
+                id: editingProjectId || Date.now().toString(),
                 name: document.getElementById('projectName').value,
                 description: document.getElementById('projectDescription').value,
                 location: document.getElementById('projectLocation').value,
-                budget:
+                budget: parseInt(document.getElementById('projectBudget').value) || 0,
+                userEmail: currentUser.email,
+                created: editingProjectId ? getProjects().find(p => p.id === editingProjectId).created : new Date().toISOString(),
+                modified: new Date().toISOString(),
+                documents: editingProjectId ? getProjects().find(p => p.id === editingProjectId).documents : 0
+            };
+
+            if (editingProjectId) {
+                updateProject(projectData);
+            } else {
+                saveProject(projectData);
+            }
+
+            closeProjectModal();
+            loadDashboard();
+            loadProjectsList();
+        });
+
+        // Close modal on outside click
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('active');
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const activeModal = document.querySelector('.modal.active');
+                if (activeModal) {
+                    activeModal.classList.remove('active');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

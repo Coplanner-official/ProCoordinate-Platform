@@ -4,594 +4,1083 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ProCoordinate - Professional Construction Management</title>
-    <meta name="description" content="Professional construction project management platform. Manage drawings, RFIs, submittals, daily logs, and safety reports.">
-    
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            min-height: 100vh;
         }
         
-        #root {
+        .hidden { display: none !important; }
+        
+        /* Auth */
+        .auth-container {
             min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .auth-box {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .auth-box h1 {
+            color: #1e40af;
+            font-size: 28px;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        
+        .auth-box p {
+            color: #6b7280;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+        
+        .auth-toggle {
+            text-align: center;
+            margin-top: 24px;
+            color: #6b7280;
+        }
+        
+        .auth-toggle a {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .auth-toggle a:hover {
+            text-decoration: underline;
+        }
+        
+        /* App */
+        .app {
+            min-height: 100vh;
+            background: #f9fafb;
+        }
+        
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0 20px;
+        }
+        
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 64px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e40af;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .user-details {
+            text-align: right;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            color: #111827;
+            font-size: 14px;
+        }
+        
+        .user-company {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        .btn-logout {
+            padding: 8px 16px;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            color: #374151;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .btn-logout:hover {
+            background: #e5e7eb;
+        }
+        
+        .main-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .page-header h2 {
+            font-size: 32px;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+        
+        .page-header p {
+            color: #6b7280;
+            margin-bottom: 32px;
+        }
+        
+        /* Projects Grid */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 24px;
+        }
+        
+        .project-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .project-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+        
+        .project-header {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            padding: 20px;
+        }
+        
+        .project-header h3 {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+        
+        .project-header p {
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+        }
+        
+        .project-body {
+            padding: 20px;
+        }
+        
+        .project-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        .project-dates {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #6b7280;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .new-project-card {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border: 2px dashed #60a5fa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 280px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .new-project-card:hover {
+            border-color: #3b82f6;
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        }
+        
+        .new-project-card .plus {
+            font-size: 48px;
+            color: #60a5fa;
+            margin-bottom: 12px;
+        }
+        
+        .new-project-card span {
+            color: #1e40af;
+            font-weight: 600;
+        }
+        
+        /* Project Detail */
+        .project-detail {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 24px;
+        }
+        
+        .back-btn {
+            color: #3b82f6;
+            text-decoration: none;
+            margin-bottom: 16px;
+            display: inline-block;
+        }
+        
+        .back-btn:hover {
+            text-decoration: underline;
+        }
+        
+        .project-detail h2 {
+            font-size: 28px;
+            color: #111827;
+            margin-bottom: 8px;
+        }
+        
+        .project-meta {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin: 24px 0;
+        }
+        
+        .meta-box {
+            background: #f9fafb;
+            padding: 16px;
+            border-radius: 8px;
+        }
+        
+        .meta-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+        
+        .meta-value {
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-top: 24px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            border-radius: 8px;
+            background: #f3f4f6;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #374151;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        
+        .tab:hover {
+            background: #e5e7eb;
+        }
+        
+        .tab.active {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .tab-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+        }
+        
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+        }
+        
+        .overview-card {
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+            padding: 24px;
+            border-radius: 12px;
+        }
+        
+        .overview-number {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .overview-label {
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        /* RFI List */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .section-header h3 {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        
+        .btn-new {
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .btn-new:hover {
+            background: #2563eb;
+        }
+        
+        .rfi-item {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        
+        .rfi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+        
+        .rfi-title {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .rfi-id {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-open {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .status-answered {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .rfi-description {
+            color: #374151;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+        
+        .rfi-footer {
+            font-size: 13px;
+            color: #6b7280;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #9ca3af;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-content h3 {
+            font-size: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        
+        .btn-secondary {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .btn-secondary:hover {
+            background: #f9fafb;
+        }
+        
+        /* Messages */
+        .messages-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        
+        .message-item {
+            background: #f9fafb;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .message-author {
+            font-weight: 600;
+        }
+        
+        .message-time {
+            font-size: 13px;
+            color: #6b7280;
+        }
+        
+        .message-input {
+            background: #f9fafb;
+            padding: 16px;
+            border-radius: 8px;
+        }
+        
+        .message-input textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            resize: none;
+            font-family: inherit;
+            margin-bottom: 12px;
+        }
+        
+        @media (max-width: 768px) {
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .project-meta, .overview-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
 </head>
 <body>
-    <div id="root"></div>
+    <!-- Auth View -->
+    <div id="authView" class="auth-container">
+        <div class="auth-box">
+            <h1>ProCoordinate</h1>
+            <p>Professional Construction Management</p>
+            
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="authEmail" placeholder="your@email.com">
+            </div>
+            
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="authPassword" placeholder="Your password">
+            </div>
+            
+            <div class="form-group hidden" id="nameGroup">
+                <label>Full Name</label>
+                <input type="text" id="authName" placeholder="John Smith">
+            </div>
+            
+            <div class="form-group hidden" id="companyGroup">
+                <label>Company Name</label>
+                <input type="text" id="authCompany" placeholder="Your Company Ltd">
+            </div>
+            
+            <div class="form-group hidden" id="roleGroup">
+                <label>Role</label>
+                <select id="authRole">
+                    <option value="main_contractor">Main Contractor</option>
+                    <option value="subcontractor">Subcontractor</option>
+                    <option value="project_owner">Project Owner</option>
+                    <option value="architect">Architect/Engineer</option>
+                </select>
+            </div>
+            
+            <button class="btn btn-primary" id="authBtn">Sign In</button>
+            
+            <div class="auth-toggle">
+                <span id="authToggleText">Don't have an account?</span>
+                <a href="#" id="authToggleLink">Sign up</a>
+            </div>
+        </div>
+    </div>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
+    <!-- App View -->
+    <div id="appView" class="app hidden">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">ProCoordinate</div>
+                <div class="user-info">
+                    <div class="user-details">
+                        <div class="user-name" id="userName"></div>
+                        <div class="user-company" id="userCompany"></div>
+                    </div>
+                    <button class="btn-logout" id="logoutBtn">Logout</button>
+                </div>
+            </div>
+        </nav>
 
-        const ProCoordinate = () => {
-            const [isAuthenticated, setIsAuthenticated] = useState(false);
-            const [isSignup, setIsSignup] = useState(false);
-            const [currentUser, setCurrentUser] = useState(null);
-            const [currentView, setCurrentView] = useState('dashboard');
-            const [currentProject, setCurrentProject] = useState(null);
-            const [projects, setProjects] = useState([]);
-            const [activeTab, setActiveTab] = useState('overview');
-            const [showModal, setShowModal] = useState(null);
-            const [formData, setFormData] = useState({});
+        <main class="main-content">
+            <!-- Dashboard View -->
+            <div id="dashboardView">
+                <div class="page-header">
+                    <h2>Your Projects</h2>
+                    <p>Manage all your construction projects in one place</p>
+                </div>
+                <div class="projects-grid" id="projectsGrid"></div>
+            </div>
 
-            useEffect(() => {
-                const savedUser = localStorage.getItem('pc_user');
-                if (savedUser) {
-                    const user = JSON.parse(savedUser);
-                    setCurrentUser(user);
-                    setIsAuthenticated(true);
-                    loadUserProjects(user.email);
-                }
-            }, []);
-
-            const loadUserProjects = (userEmail) => {
-                const allProjects = JSON.parse(localStorage.getItem('pc_projects') || '[]');
-                const userProjects = allProjects.filter(p => p.userEmail === userEmail);
-                setProjects(userProjects);
-            };
-
-            const saveProjectToStorage = (project) => {
-                const allProjects = JSON.parse(localStorage.getItem('pc_projects') || '[]');
-                const existingIndex = allProjects.findIndex(p => p.id === project.id);
+            <!-- Project Detail View -->
+            <div id="projectView" class="hidden">
+                <div class="project-detail">
+                    <a href="#" class="back-btn" id="backBtn">← Back to Projects</a>
+                    <h2 id="projectName"></h2>
+                    <p id="projectDescription"></p>
+                    
+                    <div class="project-meta" id="projectMeta"></div>
+                    
+                    <div class="tabs" id="tabs"></div>
+                </div>
                 
-                if (existingIndex !== -1) {
-                    allProjects[existingIndex] = project;
+                <div class="tab-content" id="tabContent"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content" id="modalContent"></div>
+    </div>
+
+    <script>
+        // State
+        let currentUser = null;
+        let currentProject = null;
+        let projects = [];
+        let isSignup = false;
+        let activeTab = 'overview';
+
+        // Initialize
+        checkAuth();
+
+        function checkAuth() {
+            const savedUser = localStorage.getItem('pc_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showApp();
+            }
+        }
+
+        function showApp() {
+            document.getElementById('authView').classList.add('hidden');
+            document.getElementById('appView').classList.remove('hidden');
+            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('userCompany').textContent = currentUser.company;
+            loadProjects();
+        }
+
+        function showAuth() {
+            document.getElementById('authView').classList.remove('hidden');
+            document.getElementById('appView').classList.add('hidden');
+        }
+
+        // Auth
+        document.getElementById('authToggleLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            isSignup = !isSignup;
+            document.getElementById('authBtn').textContent = isSignup ? 'Create Account' : 'Sign In';
+            document.getElementById('authToggleText').textContent = isSignup ? 'Already have an account?' : "Don't have an account?";
+            document.getElementById('authToggleLink').textContent = isSignup ? 'Sign in' : 'Sign up';
+            document.getElementById('nameGroup').classList.toggle('hidden');
+            document.getElementById('companyGroup').classList.toggle('hidden');
+            document.getElementById('roleGroup').classList.toggle('hidden');
+        });
+
+        document.getElementById('authBtn').addEventListener('click', () => {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+
+            if (isSignup) {
+                const name = document.getElementById('authName').value;
+                const company = document.getElementById('authCompany').value;
+                const role = document.getElementById('authRole').value;
+
+                const users = JSON.parse(localStorage.getItem('pc_users') || '[]');
+                if (users.find(u => u.email === email)) {
+                    alert('Email already registered');
+                    return;
+                }
+
+                users.push({ email, password, name, company, role });
+                localStorage.setItem('pc_users', JSON.stringify(users));
+                currentUser = { email, name, company, role };
+                localStorage.setItem('pc_user', JSON.stringify(currentUser));
+                showApp();
+            } else {
+                const users = JSON.parse(localStorage.getItem('pc_users') || '[]');
+                const user = users.find(u => u.email === email && u.password === password);
+                if (user) {
+                    currentUser = { email: user.email, name: user.name, company: user.company, role: user.role };
+                    localStorage.setItem('pc_user', JSON.stringify(currentUser));
+                    showApp();
                 } else {
-                    allProjects.push(project);
+                    alert('Invalid credentials');
                 }
-                
-                localStorage.setItem('pc_projects', JSON.stringify(allProjects));
-                loadUserProjects(currentUser.email);
-            };
+            }
+        });
 
-            const handleAuth = () => {
-                if (isSignup) {
-                    const users = JSON.parse(localStorage.getItem('pc_users') || '[]');
-                    if (users.find(u => u.email === formData.email)) {
-                        alert('Email already registered');
-                        return;
-                    }
-                    
-                    const newUser = { 
-                        email: formData.email, 
-                        password: formData.password, 
-                        name: formData.name, 
-                        company: formData.company, 
-                        role: formData.role,
-                        created: new Date().toISOString() 
-                    };
-                    users.push(newUser);
-                    localStorage.setItem('pc_users', JSON.stringify(users));
-                    
-                    const userSession = { email: formData.email, name: formData.name, company: formData.company, role: formData.role };
-                    localStorage.setItem('pc_user', JSON.stringify(userSession));
-                    setCurrentUser(userSession);
-                    setIsAuthenticated(true);
-                    loadUserProjects(formData.email);
-                } else {
-                    const users = JSON.parse(localStorage.getItem('pc_users') || '[]');
-                    const user = users.find(u => u.email === formData.email && u.password === formData.password);
-                    
-                    if (user) {
-                        const userSession = { email: user.email, name: user.name, company: user.company, role: user.role };
-                        localStorage.setItem('pc_user', JSON.stringify(userSession));
-                        setCurrentUser(userSession);
-                        setIsAuthenticated(true);
-                        loadUserProjects(formData.email);
-                    } else {
-                        alert('Invalid credentials');
-                    }
-                }
-                setFormData({});
-            };
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('pc_user');
+            currentUser = null;
+            currentProject = null;
+            projects = [];
+            showAuth();
+        });
 
-            const handleLogout = () => {
-                localStorage.removeItem('pc_user');
-                setCurrentUser(null);
-                setIsAuthenticated(false);
-                setCurrentProject(null);
-                setProjects([]);
-                setCurrentView('dashboard');
-            };
+        // Projects
+        function loadProjects() {
+            const allProjects = JSON.parse(localStorage.getItem('pc_projects') || '[]');
+            projects = allProjects.filter(p => p.userEmail === currentUser.email);
+            renderProjects();
+        }
 
-            const createProject = () => {
-                const newProject = {
-                    id: 'proj_' + Date.now(),
-                    ...formData,
-                    userEmail: currentUser.email,
-                    created: new Date().toISOString(),
-                    drawings: [], messages: [], variations: [], changes: [],
-                    rfis: [], submittals: [], dailyLogs: [], punchList: [],
-                    photos: [], safety: [], equipment: [],
-                    history: [{
-                        id: 'hist_' + Date.now(),
-                        action: 'Project Created',
-                        details: `Project created by ${currentUser.name}`,
-                        timestamp: new Date().toISOString(),
-                        user: currentUser.name
-                    }]
-                };
-                
-                saveProjectToStorage(newProject);
-                setShowModal(null);
-                setFormData({});
-            };
-
-            const openProject = (projectId) => {
-                const project = projects.find(p => p.id === projectId);
-                setCurrentProject(project);
-                setCurrentView('project');
-                setActiveTab('overview');
-            };
-
-            const addItemToProject = (category, item) => {
-                if (!currentProject) return;
-                
-                const updatedProject = {
-                    ...currentProject,
-                    [category]: [...(currentProject[category] || []), {
-                        id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-                        ...item,
-                        createdBy: currentUser.name,
-                        created: new Date().toISOString()
-                    }],
-                    history: [{
-                        id: 'hist_' + Date.now(),
-                        action: `${category} Added`,
-                        details: `${item.title || item.name || item.description} by ${currentUser.name}`,
-                        timestamp: new Date().toISOString(),
-                        user: currentUser.name
-                    }, ...(currentProject.history || [])]
-                };
-                
-                setCurrentProject(updatedProject);
-                saveProjectToStorage(updatedProject);
-                setShowModal(null);
-                setFormData({});
-            };
-
-            const sendMessage = () => {
-                const text = formData.messageText;
-                if (!text || !text.trim()) return;
-                
-                addItemToProject('messages', { 
-                    text: text.trim(), 
-                    author: currentUser.name, 
-                    timestamp: new Date().toISOString() 
-                });
-                setFormData({ ...formData, messageText: '' });
-            };
-
-            const getProjectStats = (project) => {
-                if (!project) return {};
-                return {
-                    drawings: (project.drawings || []).length,
-                    messages: (project.messages || []).length,
-                    rfis: (project.rfis || []).length,
-                    punchList: (project.punchList || []).length,
-                    submittals: (project.submittals || []).length,
-                    safety: (project.safety || []).length,
-                    openRFIs: (project.rfis || []).filter(r => r.status === 'open').length,
-                    pendingSubmittals: (project.submittals || []).filter(s => s.status === 'pending').length
-                };
-            };
-
-            const formatDate = (dateStr) => {
-                if (!dateStr) return '-';
-                return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-            };
-
-            const formatDateTime = (dateStr) => {
-                if (!dateStr) return '-';
-                return new Date(dateStr).toLocaleString('en-GB', { 
-                    day: 'numeric', month: 'short', year: 'numeric',
-                    hour: '2-digit', minute: '2-digit'
-                });
-            };
-
-            // AUTH VIEW
-            if (!isAuthenticated) {
-                return (
-                    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-700 to-blue-500 flex items-center justify-center p-4">
-                        <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
-                            <h1 className="text-3xl font-bold text-blue-900 text-center mb-2">ProCoordinate</h1>
-                            <p className="text-gray-600 text-center mb-8">Professional Construction Management</p>
-                            
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
-                                    <input type="email" value={formData.email || ''} 
-                                        onChange={(e) => setFormData({...formData, email: e.target.value})}
-                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
-                                        placeholder="your@email.com" />
-                                </div>
-                                
-                                <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
-                                    <input type="password" value={formData.password || ''}
-                                        onChange={(e) => setFormData({...formData, password: e.target.value})}
-                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
-                                        placeholder="Your password" />
-                                </div>
-                                
-                                {isSignup && (
-                                    <>
-                                        <div>
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
-                                            <input type="text" value={formData.name || ''}
-                                                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
-                                                placeholder="John Smith" />
-                                        </div>
-                                        
-                                        <div>
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">Company Name</label>
-                                            <input type="text" value={formData.company || ''}
-                                                onChange={(e) => setFormData({...formData, company: e.target.value})}
-                                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
-                                                placeholder="Your Company Ltd" />
-                                        </div>
-                                        
-                                        <div>
-                                            <label className="block text-sm font-semibold text-gray-700 mb-2">Role</label>
-                                            <select value={formData.role || 'main_contractor'}
-                                                onChange={(e) => setFormData({...formData, role: e.target.value})}
-                                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none">
-                                                <option value="main_contractor">Main Contractor</option>
-                                                <option value="subcontractor">Subcontractor</option>
-                                                <option value="project_owner">Project Owner</option>
-                                                <option value="architect">Architect/Engineer</option>
-                                            </select>
-                                        </div>
-                                    </>
-                                )}
-                                
-                                <button onClick={handleAuth}
-                                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all">
-                                    {isSignup ? 'Create Account' : 'Sign In'}
-                                </button>
+        function renderProjects() {
+            const grid = document.getElementById('projectsGrid');
+            grid.innerHTML = projects.map(p => `
+                <div class="project-card" onclick="openProject('${p.id}')">
+                    <div class="project-header">
+                        <h3>${p.name}</h3>
+                        <p>${p.location || 'No location'}</p>
+                    </div>
+                    <div class="project-body">
+                        <div class="project-stats">
+                            <div class="stat">
+                                <div class="stat-number">${(p.drawings || []).length}</div>
+                                <div class="stat-label">Drawings</div>
                             </div>
-                            
-                            <div className="mt-6 text-center">
-                                <button onClick={() => { setIsSignup(!isSignup); setFormData({}); }} className="text-blue-600 hover:underline">
-                                    {isSignup ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
-                                </button>
+                            <div class="stat">
+                                <div class="stat-number">${(p.rfis || []).length}</div>
+                                <div class="stat-label">RFIs</div>
                             </div>
+                            <div class="stat">
+                                <div class="stat-number">${(p.messages || []).length}</div>
+                                <div class="stat-label">Messages</div>
+                            </div>
+                        </div>
+                        <div class="project-dates">
+                            <span>Start: ${formatDate(p.startDate)}</span>
+                            <span>End: ${formatDate(p.endDate)}</span>
                         </div>
                     </div>
-                );
-            }
-
-            // MAIN APP
-            return (
-                <div className="min-h-screen bg-gray-50">
-                    <nav className="bg-white shadow-sm border-b border-gray-200">
-                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="flex justify-between h-16">
-                                <div className="flex items-center">
-                                    <h1 className="text-2xl font-bold text-blue-900">ProCoordinate</h1>
-                                    <div className="ml-10">
-                                        <button onClick={() => { setCurrentView('dashboard'); setCurrentProject(null); }}
-                                            className={`px-4 py-2 rounded-lg transition-colors ${
-                                                currentView === 'dashboard' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'
-                                            }`}>
-                                            Dashboard
-                                        </button>
-                                    </div>
-                                </div>
-                                
-                                <div className="flex items-center gap-4">
-                                    <div className="text-right">
-                                        <div className="text-sm font-semibold text-gray-900">{currentUser?.name}</div>
-                                        <div className="text-xs text-gray-500">{currentUser?.company}</div>
-                                    </div>
-                                    <button onClick={handleLogout}
-                                        className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                                        Logout
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </nav>
-
-                    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                        {currentView === 'dashboard' && (
-                            <div>
-                                <div className="mb-8">
-                                    <h2 className="text-3xl font-bold text-gray-900 mb-2">Your Projects</h2>
-                                    <p className="text-gray-600">Manage all your construction projects in one place</p>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {projects.map(project => {
-                                        const stats = getProjectStats(project);
-                                        return (
-                                            <div key={project.id} onClick={() => openProject(project.id)}
-                                                className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 overflow-hidden">
-                                                <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-4">
-                                                    <h3 className="text-white font-semibold text-lg mb-1">{project.name}</h3>
-                                                    <p className="text-blue-100 text-sm">{project.location || 'No location'}</p>
-                                                </div>
-                                                <div className="p-4">
-                                                    <div className="grid grid-cols-3 gap-3 mb-4">
-                                                        <div className="text-center">
-                                                            <div className="text-2xl font-bold text-blue-600">{stats.drawings}</div>
-                                                            <div className="text-xs text-gray-500">Drawings</div>
-                                                        </div>
-                                                        <div className="text-center">
-                                                            <div className="text-2xl font-bold text-green-600">{stats.rfis}</div>
-                                                            <div className="text-xs text-gray-500">RFIs</div>
-                                                        </div>
-                                                        <div className="text-center">
-                                                            <div className="text-2xl font-bold text-orange-600">{stats.punchList}</div>
-                                                            <div className="text-xs text-gray-500">Punch</div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex justify-between text-sm text-gray-600 pt-3 border-t">
-                                                        <span>Start: {formatDate(project.startDate)}</span>
-                                                        <span>End: {formatDate(project.endDate)}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                    
-                                    <button onClick={() => { setShowModal('project'); setFormData({}); }}
-                                        className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border-2 border-dashed border-blue-300 hover:border-blue-500 transition-colors flex flex-col items-center justify-center min-h-[280px]">
-                                        <div className="text-5xl text-blue-400 mb-3">+</div>
-                                        <span className="text-blue-600 font-semibold">Create New Project</span>
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-
-                        {currentView === 'project' && currentProject && (
-                            <div>
-                                <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-                                    <button onClick={() => { setCurrentView('dashboard'); setCurrentProject(null); }}
-                                        className="text-blue-600 hover:underline mb-4">
-                                        ← Back to Projects
-                                    </button>
-                                    <h2 className="text-3xl font-bold text-gray-900 mb-2">{currentProject.name}</h2>
-                                    <p className="text-gray-600 mb-6">{currentProject.description}</p>
-
-                                    <div className="grid grid-cols-4 gap-4 mb-6">
-                                        <div className="bg-gray-50 p-3 rounded-lg">
-                                            <div className="text-xs text-gray-500 mb-1">Start</div>
-                                            <div className="font-semibold">{formatDate(currentProject.startDate)}</div>
-                                        </div>
-                                        <div className="bg-gray-50 p-3 rounded-lg">
-                                            <div className="text-xs text-gray-500 mb-1">End</div>
-                                            <div className="font-semibold">{formatDate(currentProject.endDate)}</div>
-                                        </div>
-                                        <div className="bg-gray-50 p-3 rounded-lg">
-                                            <div className="text-xs text-gray-500 mb-1">Location</div>
-                                            <div className="font-semibold">{currentProject.location || 'N/A'}</div>
-                                        </div>
-                                        <div className="bg-gray-50 p-3 rounded-lg">
-                                            <div className="text-xs text-gray-500 mb-1">Budget</div>
-                                            <div className="font-semibold">£{(currentProject.budget || 0).toLocaleString()}</div>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex gap-2 overflow-x-auto pb-2">
-                                        {['overview', 'drawings', 'rfis', 'submittals', 'dailyLogs', 'punchList', 'photos', 'safety', 'messages'].map(tab => (
-                                            <button key={tab} onClick={() => setActiveTab(tab)}
-                                                className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
-                                                    activeTab === tab ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                                }`}>
-                                                {tab.charAt(0).toUpperCase() + tab.slice(1).replace(/([A-Z])/g, ' $1')}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div className="bg-white rounded-xl shadow-sm p-6">
-                                    {activeTab === 'overview' && (
-                                        <div className="grid grid-cols-4 gap-6">
-                                            {[
-                                                { label: 'Drawings', value: getProjectStats(currentProject).drawings, color: 'text-blue-600' },
-                                                { label: 'Open RFIs', value: getProjectStats(currentProject).openRFIs, color: 'text-red-600' },
-                                                { label: 'Pending Submittals', value: getProjectStats(currentProject).pendingSubmittals, color: 'text-yellow-600' },
-                                                { label: 'Punch List', value: getProjectStats(currentProject).punchList, color: 'text-green-600' },
-                                                { label: 'Daily Logs', value: (currentProject.dailyLogs || []).length, color: 'text-purple-600' },
-                                                { label: 'Safety', value: getProjectStats(currentProject).safety, color: 'text-orange-600' },
-                                                { label: 'Messages', value: getProjectStats(currentProject).messages, color: 'text-indigo-600' },
-                                                { label: 'Photos', value: (currentProject.photos || []).length, color: 'text-pink-600' },
-                                            ].map((stat, i) => (
-                                                <div key={i} className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl">
-                                                    <div className={`text-4xl font-bold ${stat.color} mb-2`}>{stat.value}</div>
-                                                    <div className="text-gray-600 font-medium">{stat.label}</div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-
-                                    {activeTab === 'rfis' && (
-                                        <div>
-                                            <div className="flex justify-between items-center mb-6">
-                                                <h3 className="text-xl font-bold">RFIs</h3>
-                                                <button onClick={() => { setShowModal('rfi'); setFormData({}); }}
-                                                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                                                    + New RFI
-                                                </button>
-                                            </div>
-                                            <div className="space-y-4">
-                                                {(currentProject.rfis || []).length === 0 ? (
-                                                    <div className="text-center py-12 text-gray-500">No RFIs yet</div>
-                                                ) : (
-                                                    (currentProject.rfis || []).map(rfi => (
-                                                        <div key={rfi.id} className="border border-gray-200 rounded-lg p-4">
-                                                            <div className="flex justify-between items-start mb-2">
-                                                                <div>
-                                                                    <h4 className="font-semibold text-lg">{rfi.title}</h4>
-                                                                    <p className="text-sm text-gray-600">RFI-{rfi.id.slice(-6)}</p>
-                                                                </div>
-                                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                                                    rfi.status === 'open' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
-                                                                }`}>
-                                                                    {rfi.status.toUpperCase()}
-                                                                </span>
-                                                            </div>
-                                                            <p className="text-gray-700 mb-3">{rfi.description}</p>
-                                                            <div className="text-sm text-gray-500">By: {rfi.createdBy} • {formatDateTime(rfi.created)}</div>
-                                                        </div>
-                                                    ))
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {activeTab === 'messages' && (
-                                        <div>
-                                            <h3 className="text-xl font-bold mb-6">Messages</h3>
-                                            <div className="space-y-4 mb-6 max-h-96 overflow-y-auto">
-                                                {(currentProject.messages || []).map(msg => (
-                                                    <div key={msg.id} className="bg-gray-50 rounded-lg p-4">
-                                                        <div className="flex justify-between mb-2">
-                                                            <span className="font-semibold">{msg.author}</span>
-                                                            <span className="text-sm text-gray-500">{formatDateTime(msg.timestamp)}</span>
-                                                        </div>
-                                                        <p className="text-gray-700">{msg.text}</p>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                            <div className="bg-gray-50 rounded-lg p-4">
-                                                <textarea value={formData.messageText || ''}
-                                                    onChange={(e) => setFormData({...formData, messageText: e.target.value})}
-                                                    placeholder="Type message..."
-                                                    className="w-full p-3 border border-gray-300 rounded-lg mb-3" rows="3" />
-                                                <button onClick={sendMessage}
-                                                    className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
-                                                    Send
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-                    </main>
-
-                    {/* Modal */}
-                    {showModal === 'project' && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setShowModal(null)}>
-                            <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-6" onClick={e => e.stopPropagation()}>
-                                <h3 className="text-2xl font-bold mb-6">Create Project</h3>
-                                <div className="space-y-4">
-                                    <input type="text" placeholder="Project Name" value={formData.name || ''}
-                                        onChange={(e) => setFormData({...formData, name: e.target.value})}
-                                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                                    <textarea placeholder="Description" value={formData.description || ''}
-                                        onChange={(e) => setFormData({...formData, description: e.target.value})} rows="3"
-                                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <input type="date" placeholder="Start Date" value={formData.startDate || ''}
-                                            onChange={(e) => setFormData({...formData, startDate: e.target.value})}
-                                            className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                                        <input type="date" placeholder="End Date" value={formData.endDate || ''}
-                                            onChange={(e) => setFormData({...formData, endDate: e.target.value})}
-                                            className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                                        <input type="text" placeholder="Location" value={formData.location || ''}
-                                            onChange={(e) => setFormData({...formData, location: e.target.value})}
-                                            className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                                        <input type="number" placeholder="Budget (£)" value={formData.budget || ''}
-                                            onChange={(e) => setFormData({...formData, budget: e.target.value})}
-                                            className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                                    </div>
-                                    <div className="flex gap-3 pt-4">
-                                        <button onClick={() => setShowModal(null)}
-                                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                                            Cancel
-                                        </button>
-                                        <button onClick={createProject}
-                                            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                                            Create
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {showModal === 'rfi' && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setShowModal(null)}>
-                            <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-6" onClick={e => e.stopPropagation()}>
-                                <h3 className="text-2xl font-bold mb-6">New RFI</h3>
-                                <div className="space-y-4">
-                                    <input type="text" placeholder="RFI Title" value={formData.title || ''}
-                                        onChange={(e) => setFormData({...formData, title: e.target.value})}
-                                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                                    <textarea placeholder="Description" value={formData.description || ''}
-                                        onChange={(e) => setFormData({...formData, description: e.target.value})} rows="4"
-                                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <select value={formData.status || 'open'}
-                                            onChange={(e) => setFormData({...formData, status: e.target.value})}
-                                            className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none">
-                                            <option value="open">Open</option>
-                                            <option value="answered">Answered</option>
-                                            <option value="closed">Closed</option>
-                                        </select>
-                                        <select value={formData.priority || 'medium'}
-                                            onChange={(e) => setFormData({...formData, priority: e.target.value})}
-                                            className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none">
-                                            <option value="low">Low</option>
-                                            <option value="medium">Medium</option>
-                                            <option value="high">High</option>
-                                        </select>
-                                    </div>
-                                    <div className="flex gap-3 pt-4">
-                                        <button onClick={() => setShowModal(null)}
-                                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                                            Cancel
-                                        </button>
-                                        <button onClick={() => addItemToProject('rfis', formData)}
-                                            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                                            Create RFI
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
                 </div>
-            );
-        };
+            `).join('') + `
+                <div class="new-project-card" onclick="openProjectModal()">
+                    <div class="plus">+</div>
+                    <span>Create New Project</span>
+                </div>
+            `;
+        }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<ProCoordinate />);
+        function openProject(projectId) {
+            currentProject = projects.find(p => p.id === projectId);
+            document.getElementById('dashboardView').classList.add('hidden');
+            document.getElementById('projectView').classList.remove('hidden');
+            renderProjectDetail();
+        }
+
+        document.getElementById('backBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            currentProject = null;
+            document.getElementById('dashboardView').classList.remove('hidden');
+            document.getElementById('projectView').classList.add('hidden');
+        });
+
+        function renderProjectDetail() {
+            document.getElementById('projectName').textContent = currentProject.name;
+            document.getElementById('projectDescription').textContent = currentProject.description || '';
+            
+            document.getElementById('projectMeta').innerHTML = `
+                <div class="meta-box">
+                    <div class="meta-label">Start Date</div>
+                    <div class="meta-value">${formatDate(currentProject.startDate)}</div>
+                </div>
+                <div class="meta-box">
+                    <div class="meta-label">End Date</div>
+                    <div class="meta-value">${formatDate(currentProject.endDate)}</div>
+                </div>
+                <div class="meta-box">
+                    <div class="meta-label">Location</div>
+                    <div class="meta-value">${currentProject.location || 'N/A'}</div>
+                </div>
+                <div class="meta-box">
+                    <div class="meta-label">Budget</div>
+                    <div class="meta-value">£${(currentProject.budget || 0).toLocaleString()}</div>
+                </div>
+            `;
+            
+            document.getElementById('tabs').innerHTML = `
+                <button class="tab active" onclick="switchTab('overview')">Overview</button>
+                <button class="tab" onclick="switchTab('rfis')">RFIs</button>
+                <button class="tab" onclick="switchTab('messages')">Messages</button>
+            `;
+            
+            switchTab('overview');
+        }
+
+        function switchTab(tab) {
+            activeTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const content = document.getElementById('tabContent');
+            
+            if (tab === 'overview') {
+                content.innerHTML = `
+                    <div class="overview-grid">
+                        <div class="overview-card">
+                            <div class="overview-number" style="color: #3b82f6">${(currentProject.drawings || []).length}</div>
+                            <div class="overview-label">Drawings</div>
+                        </div>
+                        <div class="overview-card">
+                            <div class="overview-number" style="color: #ef4444">${(currentProject.rfis || []).length}</div>
+                            <div class="overview-label">RFIs</div>
+                        </div>
+                        <div class="overview-card">
+                            <div class="overview-number" style="color: #8b5cf6">${(currentProject.messages || []).length}</div>
+                            <div class="overview-label">Messages</div>
+                        </div>
+                        <div class="overview-card">
+                            <div class="overview-number" style="color: #10b981">${(currentProject.punchList || []).length}</div>
+                            <div class="overview-label">Punch List</div>
+                        </div>
+                    </div>
+                `;
+            } else if (tab === 'rfis') {
+                const rfis = currentProject.rfis || [];
+                content.innerHTML = `
+                    <div class="section-header">
+                        <h3>Requests for Information</h3>
+                        <button class="btn-new" onclick="openRFIModal()">+ New RFI</button>
+                    </div>
+                    ${rfis.length === 0 ? '<div class="empty-state">No RFIs yet</div>' : 
+                    rfis.map(r => `
+                        <div class="rfi-item">
+                            <div class="rfi-header">
+                                <div>
+                                    <div class="rfi-title">${r.title}</div>
+                                    <div class="rfi-id">RFI-${r.id.slice(-6)}</div>
+                                </div>
+                                <span class="status-badge status-${r.status}">${r.status.toUpperCase()}</span>
+                            </div>
+                            <div class="rfi-description">${r.description}</div>
+                            <div class="rfi-footer">By: ${r.createdBy} • ${formatDateTime(r.created)}</div>
+                        </div>
+                    `).join('')}
+                `;
+            } else if (tab === 'messages') {
+                const messages = currentProject.messages || [];
+                content.innerHTML = `
+                    <h3>Project Messages</h3>
+                    <div class="messages-list">
+                        ${messages.map(m => `
+                            <div class="message-item">
+                                <div class="message-header">
+                                    <span class="message-author">${m.author}</span>
+                                    <span class="message-time">${formatDateTime(m.timestamp)}</span>
+                                </div>
+                                <div>${m.text}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="message-input">
+                        <textarea id="messageText" placeholder="Type your message..." rows="3"></textarea>
+                        <button class="btn btn-primary" onclick="sendMessage()">Send Message</button>
+                    </div>
+                `;
+            }
+        }
+
+        function sendMessage() {
+            const text = document.getElementById('messageText').value;
+            if (!text.trim()) return;
+            
+            currentProject.messages = currentProject.messages || [];
+            currentProject.messages.push({
+                id: Date.now(),
+                author: currentUser.name,
+                text: text,
+                timestamp: new Date().toISOString()
+            });
+            
+            saveProject(currentProject);
+            document.getElementById('messageText').value = '';
+            switchTab('messages');
+        }
+
+        function saveProject(project) {
+            const allProjects = JSON.parse(localStorage.getItem('pc_projects') || '[]');
+            const index = allProjects.findIndex(p => p.id === project.id);
+            if (index !== -1) {
+                allProjects[index] = project;
+            } else {
+                allProjects.push(project);
+            }
+            localStorage.setItem('pc_projects', JSON.stringify(allProjects));
+            loadProjects();
+        }
+
+        // Modals
+        function openProjectModal() {
+            document.getElementById('modal').classList.add('show');
+            document.getElementById('modalContent').innerHTML = `
+                <h3>Create New Project</h3>
+                <div class="form-group">
+                    <label>Project Name</label>
+                    <input type="text" id="projectName">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" id="projectDesc">
+                </div>
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <input type="date" id="projectStart">
+                </div>
+                <div class="form-group">
+                    <label>End Date</label>
+                    <input type="date" id="projectEnd">
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" id="projectLocation">
+                </div>
+                <div class="form-group">
+                    <label>Budget (£)</label>
+                    <input type="number" id="projectBudget">
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="createProject()">Create Project</button>
+                </div>
+            `;
+        }
+
+        function createProject() {
+            const project = {
+                id: 'proj_' + Date.now(),
+                name: document.getElementById('projectName').value,
+                description: document.getElementById('projectDesc').value,
+                startDate: document.getElementById('projectStart').value,
+                endDate: document.getElementById('projectEnd').value,
+                location: document.getElementById('projectLocation').value,
+                budget: parseInt(document.getElementById('projectBudget').value) || 0,
+                userEmail: currentUser.email,
+                created: new Date().toISOString(),
+                drawings: [],
+                rfis: [],
+                messages: [],
+                punchList: []
+            };
+            
+            saveProject(project);
+            closeModal();
+        }
+
+        function openRFIModal() {
+            document.getElementById('modal').classList.add('show');
+            document.getElementById('modalContent').innerHTML = `
+                <h3>New RFI</h3>
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="rfiTitle">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="rfiDesc" rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="rfiStatus">
+                        <option value="open">Open</option>
+                        <option value="answered">Answered</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button class="btn btn-primary" onclick="createRFI()">Create RFI</button>
+                </div>
+            `;
+        }
+
+        function createRFI() {
+            currentProject.rfis = currentProject.rfis || [];
+            currentProject.rfis.push({
+                id: Date.now(),
+                title: document.getElementById('rfiTitle').value,
+                description: document.getElementById('rfiDesc').value,
+                status: document.getElementById('rfiStatus').value,
+                createdBy: currentUser.name,
+                created: new Date().toISOString()
+            });
+            
+            saveProject(currentProject);
+            closeModal();
+            switchTab('rfis');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('show');
+        }
+
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') closeModal();
+        });
+
+        // Utilities
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        }
+
+        function formatDateTime(dateStr) {
+            if (!dateStr) return '-';
+            return new Date(dateStr).toLocaleString('en-GB', { 
+                day: 'numeric', month: 'short', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+        }
     </script>
 </body>
 </html>

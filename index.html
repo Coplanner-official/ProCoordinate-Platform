@@ -2,8 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>ProCoordinate - Professional Construction Management</title>
+    <meta name="description" content="Professional construction project management platform for contractors, architects, and engineers.">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#1e40af">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="ProCoordinate">
+    
+    <!-- Apple iOS Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ProCoordinate">
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' fill='%231e40af'/><text x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='80' fill='white' font-family='system-ui'>PC</text></svg>">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231e40af'/><text x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='60' fill='white' font-family='system-ui'>PC</text></svg>">
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlByb0Nvb3JkaW5hdGUiLAogICJzaG9ydF9uYW1lIjogIlByb0Nvb3JkaW5hdGUiLAogICJkZXNjcmlwdGlvbiI6ICJQcm9mZXNzaW9uYWwgY29uc3RydWN0aW9uIHByb2plY3QgbWFuYWdlbWVudCBwbGF0Zm9ybSIsCiAgInN0YXJ0X3VybCI6ICIvIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjZmZmZmZmIiwKICAidGhlbWVfY29sb3IiOiAiIzFlNDBhZiIsCiAgIm9yaWVudGF0aW9uIjogInBvcnRyYWl0IiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sLDxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgMTkyIDE5Mic+PHJlY3Qgd2lkdGg9JzE5MicgaGVpZ2h0PScxOTInIGZpbGw9JyUyMzFlNDBhZicvPjx0ZXh0IHg9JzUwJTI1JyB5PSc1MCUyNScgZG9taW5hbnQtYmFzZWxpbmU9J21pZGRsZScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPSc4MCcgZmlsbD0nd2hpdGUnIGZvbnQtZmFtaWx5PSdzeXN0ZW0tdWknPlBDPC90ZXh0Pjwvc3ZnPiIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sLDxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgNTEyIDUxMic+PHJlY3Qgd2lkdGg9JzUxMicgaGVpZ2h0PSc1MTInIGZpbGw9JyUyMzFlNDBhZicvPjx0ZXh0IHg9JzUwJTI1JyB5PSc1MCUyNScgZG9taW5hbnQtYmFzZWxpbmU9J21pZGRsZScgdGV4dC1hbmNob3I9J21pZGRsZScgZm9udC1zaXplPScyMjAnIGZpbGw9J3doaXRlJyBmb250LWZhbWlseT0nc3lzdGVtLXVpJz5QQzwvdGV4dD48L3N2Zz4iLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiLAogICAgICAicHVycG9zZSI6ICJhbnkgbWFza2FibGUiCiAgICB9CiAgXQp9">
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -768,6 +789,85 @@
             .photo-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+            
+            .nav-container {
+                height: auto;
+                padding: 12px 0;
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+            
+            .logo {
+                text-align: center;
+            }
+            
+            .user-info {
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+            }
+            
+            .modal-content {
+                padding: 20px;
+            }
+            
+            .tabs {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .tab {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+            
+            .item-actions {
+                flex-direction: column;
+            }
+            
+            .btn-small {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+        }
+        
+        /* Touch-friendly improvements */
+        @media (hover: none) {
+            .btn, .tab, .project-card, .nav-btn {
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+            .project-card:active {
+                transform: scale(0.98);
+            }
+            
+            .btn:active {
+                transform: scale(0.97);
+            }
+        }
+        
+        /* Prevent zoom on iOS */
+        input, select, textarea {
+            font-size: 16px !important;
+        }
+        
+        /* Safe area for iPhone notch */
+        @supports (padding: max(0px)) {
+            body {
+                padding-top: env(safe-area-inset-top);
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+            
+            .navbar {
+                padding-top: max(env(safe-area-inset-top), 0px);
+            }
+        }
+        
+        /* Smooth scrolling */
+        * {
+            -webkit-overflow-scrolling: touch;
         }
     </style>
 </head>
@@ -2058,6 +2158,67 @@
             const year = date.getFullYear();
             const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
             return `${day} ${month} ${year}, ${time}`;
+        }
+
+        // PWA Install Prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show install button if user is logged in
+            if (currentUser) {
+                showInstallBanner();
+            }
+        });
+
+        function showInstallBanner() {
+            // Only show once per session
+            if (sessionStorage.getItem('installBannerShown')) return;
+            sessionStorage.setItem('installBannerShown', 'true');
+            
+            const banner = document.createElement('div');
+            banner.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+                color: white;
+                padding: 16px 24px;
+                border-radius: 12px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                max-width: 90%;
+                animation: slideUp 0.3s ease;
+            `;
+            banner.innerHTML = `
+                <span style="font-weight: 600; font-size: 14px;">📱 Add ProCoordinate to your home screen</span>
+                <button onclick="installApp()" style="background: white; color: #1e40af; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px;">Install</button>
+                <button onclick="this.parentElement.remove()" style="background: transparent; color: white; border: none; padding: 8px; cursor: pointer; font-size: 18px;">×</button>
+            `;
+            document.body.appendChild(banner);
+        }
+
+        window.installApp = async function() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response: ${outcome}`);
+                deferredPrompt = null;
+                document.querySelector('[onclick="installApp()"]')?.parentElement?.remove();
+            }
+        };
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('data:text/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdpbnN0YWxsJywgKGUpID0+IHsKICBzZWxmLnNraXBXYWl0aW5nKCk7Cn0pOwoKc2VsZi5hZGRFdmVudExpc3RlbmVyKCdhY3RpdmF0ZScsIChlKSA9PiB7CiAgc2VsZi5jbGllbnRzLmNsYWltKCk7Cn0pOwoKc2VsZi5hZGRFdmVudExpc3RlbmVyKCdmZXRjaCcsIChlKSA9PiB7CiAgZS5yZXNwb25kV2l0aCgKICAgIGZldGNoKGUucmVxdWVzdCkuY2F0Y2goKCkgPT4gY2FjaGVzLm1hdGNoKGUucmVxdWVzdCkpCiAgKTsKfSk7')
+                    .catch(() => {}); // Silently fail if SW registration fails
+            });
         }
     </script>
 </body>

@@ -1,1128 +1,597 @@
-import React, { useState, useEffect } from 'react';
-import { Calendar, FileText, MessageSquare, AlertCircle, CheckSquare, Camera, Shield, Wrench, DollarSign, Users, Clock, TrendingUp, Upload, Download, Edit, Trash2, Plus, ChevronRight, Home, BarChart3, FolderOpen, Settings, LogOut } from 'lucide-react';
-
-const ProCoordinate = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isSignup, setIsSignup] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
-  const [currentView, setCurrentView] = useState('dashboard');
-  const [currentProject, setCurrentProject] = useState(null);
-  const [projects, setProjects] = useState([]);
-  const [activeTab, setActiveTab] = useState('overview');
-  const [showModal, setShowModal] = useState(null);
-  const [formData, setFormData] = useState({});
-
-  useEffect(() => {
-    const savedUser = localStorage.getItem('pc_user');
-    if (savedUser) {
-      const user = JSON.parse(savedUser);
-      setCurrentUser(user);
-      setIsAuthenticated(true);
-      loadUserProjects(user.email);
-    }
-  }, []);
-
-  const loadUserProjects = (userEmail) => {
-    const allProjects = JSON.parse(localStorage.getItem('pc_projects') || '[]');
-    const userProjects = allProjects.filter(p => p.userEmail === userEmail);
-    setProjects(userProjects);
-  };
-
-  const saveProjectToStorage = (project) => {
-    const allProjects = JSON.parse(localStorage.getItem('pc_projects') || '[]');
-    const existingIndex = allProjects.findIndex(p => p.id === project.id);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProCoordinate - Professional Construction Management</title>
+    <meta name="description" content="Professional construction project management platform. Manage drawings, RFIs, submittals, daily logs, and safety reports.">
     
-    if (existingIndex !== -1) {
-      allProjects[existingIndex] = project;
-    } else {
-      allProjects.push(project);
-    }
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    localStorage.setItem('pc_projects', JSON.stringify(allProjects));
-    loadUserProjects(currentUser.email);
-  };
-
-  const handleAuth = () => {
-    if (isSignup) {
-      const users = JSON.parse(localStorage.getItem('pc_users') || '[]');
-      if (users.find(u => u.email === formData.email)) {
-        alert('Email already registered');
-        return;
-      }
-      
-      const newUser = { 
-        email: formData.email, 
-        password: formData.password, 
-        name: formData.name, 
-        company: formData.company, 
-        role: formData.role,
-        created: new Date().toISOString() 
-      };
-      users.push(newUser);
-      localStorage.setItem('pc_users', JSON.stringify(users));
-      
-      const userSession = { email: formData.email, name: formData.name, company: formData.company, role: formData.role };
-      localStorage.setItem('pc_user', JSON.stringify(userSession));
-      setCurrentUser(userSession);
-      setIsAuthenticated(true);
-      loadUserProjects(formData.email);
-    } else {
-      const users = JSON.parse(localStorage.getItem('pc_users') || '[]');
-      const user = users.find(u => u.email === formData.email && u.password === formData.password);
-      
-      if (user) {
-        const userSession = { email: user.email, name: user.name, company: user.company, role: user.role };
-        localStorage.setItem('pc_user', JSON.stringify(userSession));
-        setCurrentUser(userSession);
-        setIsAuthenticated(true);
-        loadUserProjects(formData.email);
-      } else {
-        alert('Invalid credentials');
-      }
-    }
-    setFormData({});
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('pc_user');
-    setCurrentUser(null);
-    setIsAuthenticated(false);
-    setCurrentProject(null);
-    setProjects([]);
-    setCurrentView('dashboard');
-  };
-
-  const createProject = () => {
-    const newProject = {
-      id: 'proj_' + Date.now(),
-      ...formData,
-      userEmail: currentUser.email,
-      created: new Date().toISOString(),
-      drawings: [],
-      messages: [],
-      variations: [],
-      changes: [],
-      rfis: [],
-      submittals: [],
-      dailyLogs: [],
-      punchList: [],
-      photos: [],
-      safety: [],
-      equipment: [],
-      history: [{
-        id: 'hist_' + Date.now(),
-        action: 'Project Created',
-        details: `Project created by ${currentUser.name}`,
-        timestamp: new Date().toISOString(),
-        user: currentUser.name
-      }]
-    };
+    <script src="https://cdn.tailwindcss.com"></script>
     
-    saveProjectToStorage(newProject);
-    setShowModal(null);
-    setFormData({});
-  };
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        
+        #root {
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
 
-  const openProject = (projectId) => {
-    const project = projects.find(p => p.id === projectId);
-    setCurrentProject(project);
-    setCurrentView('project');
-    setActiveTab('overview');
-  };
+    <script type="text/babel">
+        const { useState, useEffect } = React;
 
-  const addItemToProject = (category, item) => {
-    if (!currentProject) return;
-    
-    const updatedProject = {
-      ...currentProject,
-      [category]: [...(currentProject[category] || []), {
-        id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-        ...item,
-        createdBy: currentUser.name,
-        created: new Date().toISOString()
-      }],
-      history: [{
-        id: 'hist_' + Date.now(),
-        action: `${category} Added`,
-        details: `${item.title || item.name || item.description} by ${currentUser.name}`,
-        timestamp: new Date().toISOString(),
-        user: currentUser.name
-      }, ...(currentProject.history || [])]
-    };
-    
-    setCurrentProject(updatedProject);
-    saveProjectToStorage(updatedProject);
-    setShowModal(null);
-    setFormData({});
-  };
+        const ProCoordinate = () => {
+            const [isAuthenticated, setIsAuthenticated] = useState(false);
+            const [isSignup, setIsSignup] = useState(false);
+            const [currentUser, setCurrentUser] = useState(null);
+            const [currentView, setCurrentView] = useState('dashboard');
+            const [currentProject, setCurrentProject] = useState(null);
+            const [projects, setProjects] = useState([]);
+            const [activeTab, setActiveTab] = useState('overview');
+            const [showModal, setShowModal] = useState(null);
+            const [formData, setFormData] = useState({});
 
-  const sendMessage = () => {
-    const text = formData.messageText;
-    if (!text || !text.trim()) return;
-    
-    addItemToProject('messages', { 
-      text: text.trim(), 
-      author: currentUser.name, 
-      timestamp: new Date().toISOString() 
-    });
-    setFormData({ ...formData, messageText: '' });
-  };
+            useEffect(() => {
+                const savedUser = localStorage.getItem('pc_user');
+                if (savedUser) {
+                    const user = JSON.parse(savedUser);
+                    setCurrentUser(user);
+                    setIsAuthenticated(true);
+                    loadUserProjects(user.email);
+                }
+            }, []);
 
-  const getProjectStats = (project) => {
-    if (!project) return {};
-    return {
-      drawings: (project.drawings || []).length,
-      messages: (project.messages || []).length,
-      rfis: (project.rfis || []).length,
-      punchList: (project.punchList || []).length,
-      submittals: (project.submittals || []).length,
-      safety: (project.safety || []).length,
-      openRFIs: (project.rfis || []).filter(r => r.status === 'open').length,
-      pendingSubmittals: (project.submittals || []).filter(s => s.status === 'pending').length
-    };
-  };
+            const loadUserProjects = (userEmail) => {
+                const allProjects = JSON.parse(localStorage.getItem('pc_projects') || '[]');
+                const userProjects = allProjects.filter(p => p.userEmail === userEmail);
+                setProjects(userProjects);
+            };
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return '-';
-    return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-  };
-
-  const formatDateTime = (dateStr) => {
-    if (!dateStr) return '-';
-    return new Date(dateStr).toLocaleString('en-GB', { 
-      day: 'numeric', month: 'short', year: 'numeric',
-      hour: '2-digit', minute: '2-digit'
-    });
-  };
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-700 to-blue-500 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
-          <h1 className="text-3xl font-bold text-blue-900 text-center mb-2">ProCoordinate</h1>
-          <p className="text-gray-600 text-center mb-8">Professional Construction Management</p>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
-              <input type="email" value={formData.email || ''} 
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
-                placeholder="your@email.com" />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
-              <input type="password" value={formData.password || ''}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
-                placeholder="Your password" />
-            </div>
-            
-            {isSignup && (
-              <>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
-                  <input type="text" value={formData.name || ''}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
-                    placeholder="John Smith" />
-                </div>
+            const saveProjectToStorage = (project) => {
+                const allProjects = JSON.parse(localStorage.getItem('pc_projects') || '[]');
+                const existingIndex = allProjects.findIndex(p => p.id === project.id);
                 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Company Name</label>
-                  <input type="text" value={formData.company || ''}
-                    onChange={(e) => setFormData({...formData, company: e.target.value})}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
-                    placeholder="Your Company Ltd" />
-                </div>
+                if (existingIndex !== -1) {
+                    allProjects[existingIndex] = project;
+                } else {
+                    allProjects.push(project);
+                }
                 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Role</label>
-                  <select value={formData.role || 'main_contractor'}
-                    onChange={(e) => setFormData({...formData, role: e.target.value})}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none">
-                    <option value="main_contractor">Main Contractor</option>
-                    <option value="subcontractor">Subcontractor</option>
-                    <option value="project_owner">Project Owner</option>
-                    <option value="architect">Architect/Engineer</option>
-                  </select>
-                </div>
-              </>
-            )}
-            
-            <button onClick={handleAuth}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all">
-              {isSignup ? 'Create Account' : 'Sign In'}
-            </button>
-          </div>
-          
-          <div className="mt-6 text-center">
-            <button onClick={() => { setIsSignup(!isSignup); setFormData({}); }} className="text-blue-600 hover:underline">
-              {isSignup ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+                localStorage.setItem('pc_projects', JSON.stringify(allProjects));
+                loadUserProjects(currentUser.email);
+            };
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-blue-900">ProCoordinate</h1>
-              <div className="ml-10 flex space-x-1">
-                <button onClick={() => { setCurrentView('dashboard'); setCurrentProject(null); }}
-                  className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
-                    currentView === 'dashboard' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'
-                  }`}>
-                  <Home size={18} /> Dashboard
-                </button>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <div className="text-sm font-semibold text-gray-900">{currentUser?.name}</div>
-                <div className="text-xs text-gray-500">{currentUser?.company}</div>
-              </div>
-              <button onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                <LogOut size={18} /> Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+            const handleAuth = () => {
+                if (isSignup) {
+                    const users = JSON.parse(localStorage.getItem('pc_users') || '[]');
+                    if (users.find(u => u.email === formData.email)) {
+                        alert('Email already registered');
+                        return;
+                    }
+                    
+                    const newUser = { 
+                        email: formData.email, 
+                        password: formData.password, 
+                        name: formData.name, 
+                        company: formData.company, 
+                        role: formData.role,
+                        created: new Date().toISOString() 
+                    };
+                    users.push(newUser);
+                    localStorage.setItem('pc_users', JSON.stringify(users));
+                    
+                    const userSession = { email: formData.email, name: formData.name, company: formData.company, role: formData.role };
+                    localStorage.setItem('pc_user', JSON.stringify(userSession));
+                    setCurrentUser(userSession);
+                    setIsAuthenticated(true);
+                    loadUserProjects(formData.email);
+                } else {
+                    const users = JSON.parse(localStorage.getItem('pc_users') || '[]');
+                    const user = users.find(u => u.email === formData.email && u.password === formData.password);
+                    
+                    if (user) {
+                        const userSession = { email: user.email, name: user.name, company: user.company, role: user.role };
+                        localStorage.setItem('pc_user', JSON.stringify(userSession));
+                        setCurrentUser(userSession);
+                        setIsAuthenticated(true);
+                        loadUserProjects(formData.email);
+                    } else {
+                        alert('Invalid credentials');
+                    }
+                }
+                setFormData({});
+            };
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {currentView === 'dashboard' && (
-          <div>
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Your Projects</h2>
-              <p className="text-gray-600">Manage all your construction projects in one place</p>
-            </div>
+            const handleLogout = () => {
+                localStorage.removeItem('pc_user');
+                setCurrentUser(null);
+                setIsAuthenticated(false);
+                setCurrentProject(null);
+                setProjects([]);
+                setCurrentView('dashboard');
+            };
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {projects.map(project => {
-                const stats = getProjectStats(project);
+            const createProject = () => {
+                const newProject = {
+                    id: 'proj_' + Date.now(),
+                    ...formData,
+                    userEmail: currentUser.email,
+                    created: new Date().toISOString(),
+                    drawings: [], messages: [], variations: [], changes: [],
+                    rfis: [], submittals: [], dailyLogs: [], punchList: [],
+                    photos: [], safety: [], equipment: [],
+                    history: [{
+                        id: 'hist_' + Date.now(),
+                        action: 'Project Created',
+                        details: `Project created by ${currentUser.name}`,
+                        timestamp: new Date().toISOString(),
+                        user: currentUser.name
+                    }]
+                };
+                
+                saveProjectToStorage(newProject);
+                setShowModal(null);
+                setFormData({});
+            };
+
+            const openProject = (projectId) => {
+                const project = projects.find(p => p.id === projectId);
+                setCurrentProject(project);
+                setCurrentView('project');
+                setActiveTab('overview');
+            };
+
+            const addItemToProject = (category, item) => {
+                if (!currentProject) return;
+                
+                const updatedProject = {
+                    ...currentProject,
+                    [category]: [...(currentProject[category] || []), {
+                        id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                        ...item,
+                        createdBy: currentUser.name,
+                        created: new Date().toISOString()
+                    }],
+                    history: [{
+                        id: 'hist_' + Date.now(),
+                        action: `${category} Added`,
+                        details: `${item.title || item.name || item.description} by ${currentUser.name}`,
+                        timestamp: new Date().toISOString(),
+                        user: currentUser.name
+                    }, ...(currentProject.history || [])]
+                };
+                
+                setCurrentProject(updatedProject);
+                saveProjectToStorage(updatedProject);
+                setShowModal(null);
+                setFormData({});
+            };
+
+            const sendMessage = () => {
+                const text = formData.messageText;
+                if (!text || !text.trim()) return;
+                
+                addItemToProject('messages', { 
+                    text: text.trim(), 
+                    author: currentUser.name, 
+                    timestamp: new Date().toISOString() 
+                });
+                setFormData({ ...formData, messageText: '' });
+            };
+
+            const getProjectStats = (project) => {
+                if (!project) return {};
+                return {
+                    drawings: (project.drawings || []).length,
+                    messages: (project.messages || []).length,
+                    rfis: (project.rfis || []).length,
+                    punchList: (project.punchList || []).length,
+                    submittals: (project.submittals || []).length,
+                    safety: (project.safety || []).length,
+                    openRFIs: (project.rfis || []).filter(r => r.status === 'open').length,
+                    pendingSubmittals: (project.submittals || []).filter(s => s.status === 'pending').length
+                };
+            };
+
+            const formatDate = (dateStr) => {
+                if (!dateStr) return '-';
+                return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+            };
+
+            const formatDateTime = (dateStr) => {
+                if (!dateStr) return '-';
+                return new Date(dateStr).toLocaleString('en-GB', { 
+                    day: 'numeric', month: 'short', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
+                });
+            };
+
+            // AUTH VIEW
+            if (!isAuthenticated) {
                 return (
-                  <div key={project.id} onClick={() => openProject(project.id)}
-                    className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 overflow-hidden">
-                    <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-4">
-                      <h3 className="text-white font-semibold text-lg mb-1">{project.name}</h3>
-                      <p className="text-blue-100 text-sm">{project.location || 'No location'}</p>
+                    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-700 to-blue-500 flex items-center justify-center p-4">
+                        <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+                            <h1 className="text-3xl font-bold text-blue-900 text-center mb-2">ProCoordinate</h1>
+                            <p className="text-gray-600 text-center mb-8">Professional Construction Management</p>
+                            
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                                    <input type="email" value={formData.email || ''} 
+                                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
+                                        placeholder="your@email.com" />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+                                    <input type="password" value={formData.password || ''}
+                                        onChange={(e) => setFormData({...formData, password: e.target.value})}
+                                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
+                                        placeholder="Your password" />
+                                </div>
+                                
+                                {isSignup && (
+                                    <>
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+                                            <input type="text" value={formData.name || ''}
+                                                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
+                                                placeholder="John Smith" />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-700 mb-2">Company Name</label>
+                                            <input type="text" value={formData.company || ''}
+                                                onChange={(e) => setFormData({...formData, company: e.target.value})}
+                                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none"
+                                                placeholder="Your Company Ltd" />
+                                        </div>
+                                        
+                                        <div>
+                                            <label className="block text-sm font-semibold text-gray-700 mb-2">Role</label>
+                                            <select value={formData.role || 'main_contractor'}
+                                                onChange={(e) => setFormData({...formData, role: e.target.value})}
+                                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none">
+                                                <option value="main_contractor">Main Contractor</option>
+                                                <option value="subcontractor">Subcontractor</option>
+                                                <option value="project_owner">Project Owner</option>
+                                                <option value="architect">Architect/Engineer</option>
+                                            </select>
+                                        </div>
+                                    </>
+                                )}
+                                
+                                <button onClick={handleAuth}
+                                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all">
+                                    {isSignup ? 'Create Account' : 'Sign In'}
+                                </button>
+                            </div>
+                            
+                            <div className="mt-6 text-center">
+                                <button onClick={() => { setIsSignup(!isSignup); setFormData({}); }} className="text-blue-600 hover:underline">
+                                    {isSignup ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div className="p-4">
-                      <div className="grid grid-cols-3 gap-3 mb-4">
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-blue-600">{stats.drawings}</div>
-                          <div className="text-xs text-gray-500">Drawings</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-green-600">{stats.rfis}</div>
-                          <div className="text-xs text-gray-500">RFIs</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-orange-600">{stats.punchList}</div>
-                          <div className="text-xs text-gray-500">Punch</div>
-                        </div>
-                      </div>
-                      <div className="flex justify-between text-sm text-gray-600 pt-3 border-t">
-                        <span>Start: {formatDate(project.startDate)}</span>
-                        <span>End: {formatDate(project.endDate)}</span>
-                      </div>
-                    </div>
-                  </div>
                 );
-              })}
-              
-              <button onClick={() => { setShowModal('project'); setFormData({}); }}
-                className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border-2 border-dashed border-blue-300 hover:border-blue-500 transition-colors flex flex-col items-center justify-center min-h-[280px] group">
-                <Plus size={48} className="text-blue-400 group-hover:text-blue-600 mb-3" />
-                <span className="text-blue-600 font-semibold">Create New Project</span>
-              </button>
-            </div>
-          </div>
-        )}
+            }
 
-        {currentView === 'project' && currentProject && (
-          <div>
-            <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <button onClick={() => { setCurrentView('dashboard'); setCurrentProject(null); }}
-                    className="text-blue-600 hover:underline mb-2 flex items-center gap-1">
-                    ← Back to Projects
-                  </button>
-                  <h2 className="text-3xl font-bold text-gray-900">{currentProject.name}</h2>
-                  <p className="text-gray-600 mt-1">{currentProject.description}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-4 gap-4 mb-6">
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <div className="text-xs text-gray-500 mb-1">Start Date</div>
-                  <div className="font-semibold">{formatDate(currentProject.startDate)}</div>
-                </div>
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <div className="text-xs text-gray-500 mb-1">End Date</div>
-                  <div className="font-semibold">{formatDate(currentProject.endDate)}</div>
-                </div>
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <div className="text-xs text-gray-500 mb-1">Location</div>
-                  <div className="font-semibold">{currentProject.location || 'N/A'}</div>
-                </div>
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <div className="text-xs text-gray-500 mb-1">Budget</div>
-                  <div className="font-semibold">£{(currentProject.budget || 0).toLocaleString()}</div>
-                </div>
-              </div>
-
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                {[
-                  { id: 'overview', label: 'Overview', icon: BarChart3 },
-                  { id: 'drawings', label: 'Drawings', icon: FileText },
-                  { id: 'rfis', label: 'RFIs', icon: AlertCircle },
-                  { id: 'submittals', label: 'Submittals', icon: Upload },
-                  { id: 'dailyLogs', label: 'Daily Logs', icon: Calendar },
-                  { id: 'punchList', label: 'Punch List', icon: CheckSquare },
-                  { id: 'photos', label: 'Photos', icon: Camera },
-                  { id: 'safety', label: 'Safety', icon: Shield },
-                  { id: 'messages', label: 'Messages', icon: MessageSquare },
-                ].map(tab => (
-                  <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
-                      activeTab === tab.id
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}>
-                    <tab.icon size={16} /> {tab.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              {activeTab === 'overview' && (
-                <div className="grid grid-cols-4 gap-6">
-                  {[
-                    { label: 'Drawings', value: getProjectStats(currentProject).drawings, color: 'text-blue-600' },
-                    { label: 'Open RFIs', value: getProjectStats(currentProject).openRFIs, color: 'text-red-600' },
-                    { label: 'Pending Submittals', value: getProjectStats(currentProject).pendingSubmittals, color: 'text-yellow-600' },
-                    { label: 'Punch List', value: getProjectStats(currentProject).punchList, color: 'text-green-600' },
-                    { label: 'Daily Logs', value: (currentProject.dailyLogs || []).length, color: 'text-purple-600' },
-                    { label: 'Safety Incidents', value: getProjectStats(currentProject).safety, color: 'text-orange-600' },
-                    { label: 'Messages', value: getProjectStats(currentProject).messages, color: 'text-indigo-600' },
-                    { label: 'Photos', value: (currentProject.photos || []).length, color: 'text-pink-600' },
-                  ].map((stat, i) => (
-                    <div key={i} className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl">
-                      <div className={`text-4xl font-bold ${stat.color} mb-2`}>{stat.value}</div>
-                      <div className="text-gray-600 font-medium">{stat.label}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {activeTab === 'rfis' && (
-                <div>
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold">Requests for Information</h3>
-                    <button onClick={() => { setShowModal('rfi'); setFormData({}); }}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2">
-                      <Plus size={18} /> New RFI
-                    </button>
-                  </div>
-                  <div className="space-y-4">
-                    {(currentProject.rfis || []).length === 0 ? (
-                      <div className="text-center py-12 text-gray-500">
-                        <AlertCircle size={48} className="mx-auto mb-3 opacity-30" />
-                        <p>No RFIs yet</p>
-                      </div>
-                    ) : (
-                      (currentProject.rfis || []).map(rfi => (
-                        <div key={rfi.id} className="border border-gray-200 rounded-lg p-4">
-                          <div className="flex justify-between items-start mb-2">
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-lg">{rfi.title}</h4>
-                              <p className="text-sm text-gray-600">RFI-{rfi.id.slice(-6)}</p>
+            // MAIN APP
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    <nav className="bg-white shadow-sm border-b border-gray-200">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between h-16">
+                                <div className="flex items-center">
+                                    <h1 className="text-2xl font-bold text-blue-900">ProCoordinate</h1>
+                                    <div className="ml-10">
+                                        <button onClick={() => { setCurrentView('dashboard'); setCurrentProject(null); }}
+                                            className={`px-4 py-2 rounded-lg transition-colors ${
+                                                currentView === 'dashboard' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'
+                                            }`}>
+                                            Dashboard
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex items-center gap-4">
+                                    <div className="text-right">
+                                        <div className="text-sm font-semibold text-gray-900">{currentUser?.name}</div>
+                                        <div className="text-xs text-gray-500">{currentUser?.company}</div>
+                                    </div>
+                                    <button onClick={handleLogout}
+                                        className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                                        Logout
+                                    </button>
+                                </div>
                             </div>
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                              rfi.status === 'open' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
-                            }`}>
-                              {rfi.status.toUpperCase()}
-                            </span>
-                          </div>
-                          <p className="text-gray-700 mb-3">{rfi.description}</p>
-                          <div className="flex justify-between text-sm text-gray-500">
-                            <span>By: {rfi.createdBy}</span>
-                            <span>{formatDateTime(rfi.created)}</span>
-                          </div>
                         </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
+                    </nav>
 
-              {activeTab === 'submittals' && (
-                <div>
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold">Submittals</h3>
-                    <button onClick={() => { setShowModal('submittal'); setFormData({}); }}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2">
-                      <Plus size={18} /> New Submittal
-                    </button>
-                  </div>
-                  <div className="space-y-4">
-                    {(currentProject.submittals || []).length === 0 ? (
-                      <div className="text-center py-12 text-gray-500">
-                        <Upload size={48} className="mx-auto mb-3 opacity-30" />
-                        <p>No submittals yet</p>
-                      </div>
-                    ) : (
-                      (currentProject.submittals || []).map(submittal => (
-                        <div key={submittal.id} className="border border-gray-200 rounded-lg p-4">
-                          <div className="flex justify-between items-start mb-2">
+                    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        {currentView === 'dashboard' && (
                             <div>
-                              <h4 className="font-semibold">{submittal.title}</h4>
-                              <p className="text-sm text-gray-600">SUB-{submittal.id.slice(-6)}</p>
-                            </div>
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                              submittal.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                              submittal.status === 'approved' ? 'bg-green-100 text-green-700' :
-                              'bg-red-100 text-red-700'
-                            }`}>
-                              {submittal.status.toUpperCase()}
-                            </span>
-                          </div>
-                          <p className="text-gray-700 mb-2">{submittal.description}</p>
-                          <div className="text-sm text-gray-500">Type: {submittal.type}</div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
+                                <div className="mb-8">
+                                    <h2 className="text-3xl font-bold text-gray-900 mb-2">Your Projects</h2>
+                                    <p className="text-gray-600">Manage all your construction projects in one place</p>
+                                </div>
 
-              {activeTab === 'dailyLogs' && (
-                <div>
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold">Daily Field Logs</h3>
-                    <button onClick={() => { setShowModal('dailyLog'); setFormData({ date: new Date().toISOString().split('T')[0] }); }}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2">
-                      <Plus size={18} /> New Log
-                    </button>
-                  </div>
-                  <div className="space-y-4">
-                    {(currentProject.dailyLogs || []).length === 0 ? (
-                      <div className="text-center py-12 text-gray-500">
-                        <Calendar size={48} className="mx-auto mb-3 opacity-30" />
-                        <p>No daily logs yet</p>
-                      </div>
-                    ) : (
-                      (currentProject.dailyLogs || []).map(log => (
-                        <div key={log.id} className="border border-gray-200 rounded-lg p-4">
-                          <div className="flex justify-between mb-2">
-                            <h4 className="font-semibold">{formatDate(log.date)}</h4>
-                            <span className="text-sm text-gray-500">Weather: {log.weather}</span>
-                          </div>
-                          <div className="grid grid-cols-3 gap-4 mb-3">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {projects.map(project => {
+                                        const stats = getProjectStats(project);
+                                        return (
+                                            <div key={project.id} onClick={() => openProject(project.id)}
+                                                className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-gray-200 overflow-hidden">
+                                                <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-4">
+                                                    <h3 className="text-white font-semibold text-lg mb-1">{project.name}</h3>
+                                                    <p className="text-blue-100 text-sm">{project.location || 'No location'}</p>
+                                                </div>
+                                                <div className="p-4">
+                                                    <div className="grid grid-cols-3 gap-3 mb-4">
+                                                        <div className="text-center">
+                                                            <div className="text-2xl font-bold text-blue-600">{stats.drawings}</div>
+                                                            <div className="text-xs text-gray-500">Drawings</div>
+                                                        </div>
+                                                        <div className="text-center">
+                                                            <div className="text-2xl font-bold text-green-600">{stats.rfis}</div>
+                                                            <div className="text-xs text-gray-500">RFIs</div>
+                                                        </div>
+                                                        <div className="text-center">
+                                                            <div className="text-2xl font-bold text-orange-600">{stats.punchList}</div>
+                                                            <div className="text-xs text-gray-500">Punch</div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex justify-between text-sm text-gray-600 pt-3 border-t">
+                                                        <span>Start: {formatDate(project.startDate)}</span>
+                                                        <span>End: {formatDate(project.endDate)}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                    
+                                    <button onClick={() => { setShowModal('project'); setFormData({}); }}
+                                        className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border-2 border-dashed border-blue-300 hover:border-blue-500 transition-colors flex flex-col items-center justify-center min-h-[280px]">
+                                        <div className="text-5xl text-blue-400 mb-3">+</div>
+                                        <span className="text-blue-600 font-semibold">Create New Project</span>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {currentView === 'project' && currentProject && (
                             <div>
-                              <div className="text-xs text-gray-500">Workers</div>
-                              <div className="font-semibold">{log.workers}</div>
+                                <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+                                    <button onClick={() => { setCurrentView('dashboard'); setCurrentProject(null); }}
+                                        className="text-blue-600 hover:underline mb-4">
+                                        ← Back to Projects
+                                    </button>
+                                    <h2 className="text-3xl font-bold text-gray-900 mb-2">{currentProject.name}</h2>
+                                    <p className="text-gray-600 mb-6">{currentProject.description}</p>
+
+                                    <div className="grid grid-cols-4 gap-4 mb-6">
+                                        <div className="bg-gray-50 p-3 rounded-lg">
+                                            <div className="text-xs text-gray-500 mb-1">Start</div>
+                                            <div className="font-semibold">{formatDate(currentProject.startDate)}</div>
+                                        </div>
+                                        <div className="bg-gray-50 p-3 rounded-lg">
+                                            <div className="text-xs text-gray-500 mb-1">End</div>
+                                            <div className="font-semibold">{formatDate(currentProject.endDate)}</div>
+                                        </div>
+                                        <div className="bg-gray-50 p-3 rounded-lg">
+                                            <div className="text-xs text-gray-500 mb-1">Location</div>
+                                            <div className="font-semibold">{currentProject.location || 'N/A'}</div>
+                                        </div>
+                                        <div className="bg-gray-50 p-3 rounded-lg">
+                                            <div className="text-xs text-gray-500 mb-1">Budget</div>
+                                            <div className="font-semibold">£{(currentProject.budget || 0).toLocaleString()}</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-2 overflow-x-auto pb-2">
+                                        {['overview', 'drawings', 'rfis', 'submittals', 'dailyLogs', 'punchList', 'photos', 'safety', 'messages'].map(tab => (
+                                            <button key={tab} onClick={() => setActiveTab(tab)}
+                                                className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
+                                                    activeTab === tab ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                }`}>
+                                                {tab.charAt(0).toUpperCase() + tab.slice(1).replace(/([A-Z])/g, ' $1')}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="bg-white rounded-xl shadow-sm p-6">
+                                    {activeTab === 'overview' && (
+                                        <div className="grid grid-cols-4 gap-6">
+                                            {[
+                                                { label: 'Drawings', value: getProjectStats(currentProject).drawings, color: 'text-blue-600' },
+                                                { label: 'Open RFIs', value: getProjectStats(currentProject).openRFIs, color: 'text-red-600' },
+                                                { label: 'Pending Submittals', value: getProjectStats(currentProject).pendingSubmittals, color: 'text-yellow-600' },
+                                                { label: 'Punch List', value: getProjectStats(currentProject).punchList, color: 'text-green-600' },
+                                                { label: 'Daily Logs', value: (currentProject.dailyLogs || []).length, color: 'text-purple-600' },
+                                                { label: 'Safety', value: getProjectStats(currentProject).safety, color: 'text-orange-600' },
+                                                { label: 'Messages', value: getProjectStats(currentProject).messages, color: 'text-indigo-600' },
+                                                { label: 'Photos', value: (currentProject.photos || []).length, color: 'text-pink-600' },
+                                            ].map((stat, i) => (
+                                                <div key={i} className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl">
+                                                    <div className={`text-4xl font-bold ${stat.color} mb-2`}>{stat.value}</div>
+                                                    <div className="text-gray-600 font-medium">{stat.label}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {activeTab === 'rfis' && (
+                                        <div>
+                                            <div className="flex justify-between items-center mb-6">
+                                                <h3 className="text-xl font-bold">RFIs</h3>
+                                                <button onClick={() => { setShowModal('rfi'); setFormData({}); }}
+                                                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                                    + New RFI
+                                                </button>
+                                            </div>
+                                            <div className="space-y-4">
+                                                {(currentProject.rfis || []).length === 0 ? (
+                                                    <div className="text-center py-12 text-gray-500">No RFIs yet</div>
+                                                ) : (
+                                                    (currentProject.rfis || []).map(rfi => (
+                                                        <div key={rfi.id} className="border border-gray-200 rounded-lg p-4">
+                                                            <div className="flex justify-between items-start mb-2">
+                                                                <div>
+                                                                    <h4 className="font-semibold text-lg">{rfi.title}</h4>
+                                                                    <p className="text-sm text-gray-600">RFI-{rfi.id.slice(-6)}</p>
+                                                                </div>
+                                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                                                    rfi.status === 'open' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+                                                                }`}>
+                                                                    {rfi.status.toUpperCase()}
+                                                                </span>
+                                                            </div>
+                                                            <p className="text-gray-700 mb-3">{rfi.description}</p>
+                                                            <div className="text-sm text-gray-500">By: {rfi.createdBy} • {formatDateTime(rfi.created)}</div>
+                                                        </div>
+                                                    ))
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {activeTab === 'messages' && (
+                                        <div>
+                                            <h3 className="text-xl font-bold mb-6">Messages</h3>
+                                            <div className="space-y-4 mb-6 max-h-96 overflow-y-auto">
+                                                {(currentProject.messages || []).map(msg => (
+                                                    <div key={msg.id} className="bg-gray-50 rounded-lg p-4">
+                                                        <div className="flex justify-between mb-2">
+                                                            <span className="font-semibold">{msg.author}</span>
+                                                            <span className="text-sm text-gray-500">{formatDateTime(msg.timestamp)}</span>
+                                                        </div>
+                                                        <p className="text-gray-700">{msg.text}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="bg-gray-50 rounded-lg p-4">
+                                                <textarea value={formData.messageText || ''}
+                                                    onChange={(e) => setFormData({...formData, messageText: e.target.value})}
+                                                    placeholder="Type message..."
+                                                    className="w-full p-3 border border-gray-300 rounded-lg mb-3" rows="3" />
+                                                <button onClick={sendMessage}
+                                                    className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                                                    Send
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                            <div>
-                              <div className="text-xs text-gray-500">Hours</div>
-                              <div className="font-semibold">{log.hours}</div>
+                        )}
+                    </main>
+
+                    {/* Modal */}
+                    {showModal === 'project' && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setShowModal(null)}>
+                            <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-6" onClick={e => e.stopPropagation()}>
+                                <h3 className="text-2xl font-bold mb-6">Create Project</h3>
+                                <div className="space-y-4">
+                                    <input type="text" placeholder="Project Name" value={formData.name || ''}
+                                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
+                                    <textarea placeholder="Description" value={formData.description || ''}
+                                        onChange={(e) => setFormData({...formData, description: e.target.value})} rows="3"
+                                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <input type="date" placeholder="Start Date" value={formData.startDate || ''}
+                                            onChange={(e) => setFormData({...formData, startDate: e.target.value})}
+                                            className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
+                                        <input type="date" placeholder="End Date" value={formData.endDate || ''}
+                                            onChange={(e) => setFormData({...formData, endDate: e.target.value})}
+                                            className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
+                                        <input type="text" placeholder="Location" value={formData.location || ''}
+                                            onChange={(e) => setFormData({...formData, location: e.target.value})}
+                                            className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
+                                        <input type="number" placeholder="Budget (£)" value={formData.budget || ''}
+                                            onChange={(e) => setFormData({...formData, budget: e.target.value})}
+                                            className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
+                                    </div>
+                                    <div className="flex gap-3 pt-4">
+                                        <button onClick={() => setShowModal(null)}
+                                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                                            Cancel
+                                        </button>
+                                        <button onClick={createProject}
+                                            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                            Create
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                              <div className="text-xs text-gray-500">Temp</div>
-                              <div className="font-semibold">{log.temperature}°C</div>
+                        </div>
+                    )}
+
+                    {showModal === 'rfi' && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setShowModal(null)}>
+                            <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full p-6" onClick={e => e.stopPropagation()}>
+                                <h3 className="text-2xl font-bold mb-6">New RFI</h3>
+                                <div className="space-y-4">
+                                    <input type="text" placeholder="RFI Title" value={formData.title || ''}
+                                        onChange={(e) => setFormData({...formData, title: e.target.value})}
+                                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
+                                    <textarea placeholder="Description" value={formData.description || ''}
+                                        onChange={(e) => setFormData({...formData, description: e.target.value})} rows="4"
+                                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <select value={formData.status || 'open'}
+                                            onChange={(e) => setFormData({...formData, status: e.target.value})}
+                                            className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none">
+                                            <option value="open">Open</option>
+                                            <option value="answered">Answered</option>
+                                            <option value="closed">Closed</option>
+                                        </select>
+                                        <select value={formData.priority || 'medium'}
+                                            onChange={(e) => setFormData({...formData, priority: e.target.value})}
+                                            className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none">
+                                            <option value="low">Low</option>
+                                            <option value="medium">Medium</option>
+                                            <option value="high">High</option>
+                                        </select>
+                                    </div>
+                                    <div className="flex gap-3 pt-4">
+                                        <button onClick={() => setShowModal(null)}
+                                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                                            Cancel
+                                        </button>
+                                        <button onClick={() => addItemToProject('rfis', formData)}
+                                            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                            Create RFI
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                          </div>
-                          <p className="text-gray-700">{log.notes}</p>
                         </div>
-                      ))
                     )}
-                  </div>
                 </div>
-              )}
+            );
+        };
 
-              {activeTab === 'punchList' && (
-                <div>
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold">Punch List</h3>
-                    <button onClick={() => { setShowModal('punchList'); setFormData({}); }}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2">
-                      <Plus size={18} /> Add Item
-                    </button>
-                  </div>
-                  <div className="space-y-4">
-                    {(currentProject.punchList || []).length === 0 ? (
-                      <div className="text-center py-12 text-gray-500">
-                        <CheckSquare size={48} className="mx-auto mb-3 opacity-30" />
-                        <p>No punch list items</p>
-                      </div>
-                    ) : (
-                      (currentProject.punchList || []).map(item => (
-                        <div key={item.id} className="border border-gray-200 rounded-lg p-4">
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <h4 className="font-semibold">{item.title}</h4>
-                              <p className="text-sm text-gray-600">{item.location}</p>
-                            </div>
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                              item.status === 'open' ? 'bg-red-100 text-red-700' :
-                              item.status === 'in_progress' ? 'bg-yellow-100 text-yellow-700' :
-                              'bg-green-100 text-green-700'
-                            }`}>
-                              {item.status.replace('_', ' ').toUpperCase()}
-                            </span>
-                          </div>
-                          <p className="text-gray-700 mb-2">{item.description}</p>
-                          <div className="text-sm text-gray-500">Priority: {item.priority}</div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'safety' && (
-                <div>
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold">Safety Reports</h3>
-                    <button onClick={() => { setShowModal('safety'); setFormData({}); }}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2">
-                      <Plus size={18} /> Report
-                    </button>
-                  </div>
-                  <div className="space-y-4">
-                    {(currentProject.safety || []).length === 0 ? (
-                      <div className="text-center py-12 text-gray-500">
-                        <Shield size={48} className="mx-auto mb-3 opacity-30" />
-                        <p>No safety incidents</p>
-                      </div>
-                    ) : (
-                      (currentProject.safety || []).map(incident => (
-                        <div key={incident.id} className="border-l-4 border-red-500 bg-red-50 rounded-lg p-4">
-                          <div className="flex justify-between mb-2">
-                            <h4 className="font-semibold text-red-900">{incident.title}</h4>
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                              incident.severity === 'high' ? 'bg-red-200 text-red-800' : 'bg-yellow-200 text-yellow-800'
-                            }`}>
-                              {incident.severity.toUpperCase()}
-                            </span>
-                          </div>
-                          <p className="text-gray-700 mb-2">{incident.description}</p>
-                          <div className="text-sm text-gray-600">Location: {incident.location}</div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'photos' && (
-                <div>
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold">Photos</h3>
-                    <button onClick={() => { setShowModal('photo'); setFormData({}); }}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2">
-                      <Plus size={18} /> Upload
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    {(currentProject.photos || []).length === 0 ? (
-                      <div className="col-span-3 text-center py-12 text-gray-500">
-                        <Camera size={48} className="mx-auto mb-3 opacity-30" />
-                        <p>No photos yet</p>
-                      </div>
-                    ) : (
-                      (currentProject.photos || []).map(photo => (
-                        <div key={photo.id} className="border border-gray-200 rounded-lg overflow-hidden">
-                          <div className="bg-gray-100 h-48 flex items-center justify-center">
-                            <Camera size={48} className="text-gray-400" />
-                          </div>
-                          <div className="p-3">
-                            <h4 className="font-semibold text-sm">{photo.title}</h4>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'messages' && (
-                <div>
-                  <h3 className="text-xl font-bold mb-6">Messages</h3>
-                  <div className="space-y-4 mb-6 max-h-96 overflow-y-auto">
-                    {(currentProject.messages || []).map(msg => (
-                      <div key={msg.id} className="bg-gray-50 rounded-lg p-4">
-                        <div className="flex justify-between mb-2">
-                          <span className="font-semibold">{msg.author}</span>
-                          <span className="text-sm text-gray-500">{formatDateTime(msg.timestamp)}</span>
-                        </div>
-                        <p className="text-gray-700">{msg.text}</p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <textarea value={formData.messageText || ''}
-                      onChange={(e) => setFormData({...formData, messageText: e.target.value})}
-                      placeholder="Type message..."
-                      className="w-full p-3 border border-gray-300 rounded-lg mb-3 resize-none" rows="3" />
-                    <button onClick={sendMessage}
-                      className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
-                      Send
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'drawings' && (
-                <div>
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold">Drawings</h3>
-                    <button onClick={() => { setShowModal('drawing'); setFormData({}); }}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2">
-                      <Plus size={18} /> Upload
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    {(currentProject.drawings || []).length === 0 ? (
-                      <div className="col-span-3 text-center py-12 text-gray-500">
-                        <FileText size={48} className="mx-auto mb-3 opacity-30" />
-                        <p>No drawings yet</p>
-                      </div>
-                    ) : (
-                      (currentProject.drawings || []).map(drawing => (
-                        <div key={drawing.id} className="border border-gray-200 rounded-lg p-4">
-                          <div className="bg-blue-50 h-32 rounded flex items-center justify-center mb-3">
-                            <FileText size={48} className="text-blue-400" />
-                          </div>
-                          <h4 className="font-semibold">{drawing.name}</h4>
-                          <div className="flex justify-between text-xs text-gray-500">
-                            <span>v{drawing.version}</span>
-                            <span>{formatDate(drawing.uploaded)}</span>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </main>
-
-      {/* MODALS */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setShowModal(null)}>
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="p-6">
-              {showModal === 'project' && (
-                <>
-                  <h3 className="text-2xl font-bold mb-6">Create Project</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Project Name</label>
-                      <input type="text" value={formData.name || ''}
-                        onChange={(e) => setFormData({...formData, name: e.target.value})}
-                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-                      <textarea value={formData.description || ''}
-                        onChange={(e) => setFormData({...formData, description: e.target.value})} rows="3"
-                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Start Date</label>
-                        <input type="date" value={formData.startDate || ''}
-                          onChange={(e) => setFormData({...formData, startDate: e.target.value})}
-                          className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">End Date</label>
-                        <input type="date" value={formData.endDate || ''}
-                          onChange={(e) => setFormData({...formData, endDate: e.target.value})}
-                          className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Location</label>
-                        <input type="text" value={formData.location || ''}
-                          onChange={(e) => setFormData({...formData, location: e.target.value})}
-                          className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Budget (£)</label>
-                        <input type="number" value={formData.budget || ''}
-                          onChange={(e) => setFormData({...formData, budget: e.target.value})}
-                          className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                      </div>
-                    </div>
-                    <div className="flex gap-3 pt-4">
-                      <button onClick={() => setShowModal(null)}
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Cancel
-                      </button>
-                      <button onClick={createProject}
-                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                        Create
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {showModal === 'rfi' && (
-                <>
-                  <h3 className="text-2xl font-bold mb-6">New RFI</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Title</label>
-                      <input type="text" value={formData.title || ''}
-                        onChange={(e) => setFormData({...formData, title: e.target.value})}
-                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-                      <textarea value={formData.description || ''}
-                        onChange={(e) => setFormData({...formData, description: e.target.value})} rows="4"
-                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Status</label>
-                        <select value={formData.status || 'open'}
-                          onChange={(e) => setFormData({...formData, status: e.target.value})}
-                          className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none">
-                          <option value="open">Open</option>
-                          <option value="answered">Answered</option>
-                          <option value="closed">Closed</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Priority</label>
-                        <select value={formData.priority || 'medium'}
-                          onChange={(e) => setFormData({...formData, priority: e.target.value})}
-                          className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none">
-                          <option value="low">Low</option>
-                          <option value="medium">Medium</option>
-                          <option value="high">High</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div className="flex gap-3 pt-4">
-                      <button onClick={() => setShowModal(null)}
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Cancel
-                      </button>
-                      <button onClick={() => addItemToProject('rfis', formData)}
-                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                        Create
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {showModal === 'submittal' && (
-                <>
-                  <h3 className="text-2xl font-bold mb-6">New Submittal</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Title</label>
-                      <input type="text" value={formData.title || ''}
-                        onChange={(e) => setFormData({...formData, title: e.target.value})}
-                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-                      <textarea value={formData.description || ''}
-                        onChange={(e) => setFormData({...formData, description: e.target.value})} rows="4"
-                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Type</label>
-                        <select value={formData.type || 'material'}
-                          onChange={(e) => setFormData({...formData, type: e.target.value})}
-                          className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none">
-                          <option value="material">Material</option>
-                          <option value="equipment">Equipment</option>
-                          <option value="shop_drawing">Shop Drawing</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Status</label>
-                        <select value={formData.status || 'pending'}
-                          onChange={(e) => setFormData({...formData, status: e.target.value})}
-                          className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none">
-                          <option value="pending">Pending</option>
-                          <option value="approved">Approved</option>
-                          <option value="rejected">Rejected</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div className="flex gap-3 pt-4">
-                      <button onClick={() => setShowModal(null)}
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Cancel
-                      </button>
-                      <button onClick={() => addItemToProject('submittals', formData)}
-                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                        Create
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {showModal === 'dailyLog' && (
-                <>
-                  <h3 className="text-2xl font-bold mb-6">Daily Log</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Date</label>
-                      <input type="date" value={formData.date || ''}
-                        onChange={(e) => setFormData({...formData, date: e.target.value})}
-                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                    </div>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Workers</label>
-                        <input type="number" value={formData.workers || ''}
-                          onChange={(e) => setFormData({...formData, workers: e.target.value})}
-                          className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Hours</label>
-                        <input type="number" value={formData.hours || ''}
-                          onChange={(e) => setFormData({...formData, hours: e.target.value})}
-                          className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Temp (°C)</label>
-                        <input type="number" value={formData.temperature || ''}
-                          onChange={(e) => setFormData({...formData, temperature: e.target.value})}
-                          className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Weather</label>
-                      <select value={formData.weather || 'sunny'}
-                        onChange={(e) => setFormData({...formData, weather: e.target.value})}
-                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none">
-                        <option value="sunny">Sunny</option>
-                        <option value="cloudy">Cloudy</option>
-                        <option value="rainy">Rainy</option>
-                        <option value="snowy">Snowy</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Notes</label>
-                      <textarea value={formData.notes || ''}
-                        onChange={(e) => setFormData({...formData, notes: e.target.value})} rows="4"
-                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                    </div>
-                    <div className="flex gap-3 pt-4">
-                      <button onClick={() => setShowModal(null)}
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Cancel
-                      </button>
-                      <button onClick={() => addItemToProject('dailyLogs', formData)}
-                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                        Save
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {showModal === 'punchList' && (
-                <>
-                  <h3 className="text-2xl font-bold mb-6">Punch List Item</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Title</label>
-                      <input type="text" value={formData.title || ''}
-                        onChange={(e) => setFormData({...formData, title: e.target.value})}
-                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-                      <textarea value={formData.description || ''}
-                        onChange={(e) => setFormData({...formData, description: e.target.value})} rows="3"
-                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Location</label>
-                      <input type="text" value={formData.location || ''}
-                        onChange={(e) => setFormData({...formData, location: e.target.value})}
-                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Priority</label>
-                        <select value={formData.priority || 'medium'}
-                          onChange={(e) => setFormData({...formData, priority: e.target.value})}
-                          className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none">
-                          <option value="low">Low</option>
-                          <option value="medium">Medium</option>
-                          <option value="high">High</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Status</label>
-                        <select value={formData.status || 'open'}
-                          onChange={(e) => setFormData({...formData, status: e.target.value})}
-                          className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none">
-                          <option value="open">Open</option>
-                          <option value="in_progress">In Progress</option>
-                          <option value="completed">Completed</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div className="flex gap-3 pt-4">
-                      <button onClick={() => setShowModal(null)}
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Cancel
-                      </button>
-                      <button onClick={() => addItemToProject('punchList', formData)}
-                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                        Add
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {showModal === 'safety' && (
-                <>
-                  <h3 className="text-2xl font-bold mb-6">Safety Incident</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Title</label>
-                      <input type="text" value={formData.title || ''}
-                        onChange={(e) => setFormData({...formData, title: e.target.value})}
-                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-                      <textarea value={formData.description || ''}
-                        onChange={(e) => setFormData({...formData, description: e.target.value})} rows="4"
-                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Severity</label>
-                        <select value={formData.severity || 'medium'}
-                          onChange={(e) => setFormData({...formData, severity: e.target.value})}
-                          className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none">
-                          <option value="low">Low</option>
-                          <option value="medium">Medium</option>
-                          <option value="high">High</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Location</label>
-                        <input type="text" value={formData.location || ''}
-                          onChange={(e) => setFormData({...formData, location: e.target.value})}
-                          className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                      </div>
-                    </div>
-                    <div className="flex gap-3 pt-4">
-                      <button onClick={() => setShowModal(null)}
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Cancel
-                      </button>
-                      <button onClick={() => addItemToProject('safety', formData)}
-                        className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-                        Report
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {showModal === 'photo' && (
-                <>
-                  <h3 className="text-2xl font-bold mb-6">Upload Photo</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Title</label>
-                      <input type="text" value={formData.title || ''}
-                        onChange={(e) => setFormData({...formData, title: e.target.value})}
-                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-                      <textarea value={formData.description || ''}
-                        onChange={(e) => setFormData({...formData, description: e.target.value})} rows="3"
-                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                    </div>
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                      <Camera size={48} className="mx-auto text-gray-400 mb-3" />
-                      <p className="text-gray-600">Click to upload</p>
-                    </div>
-                    <div className="flex gap-3 pt-4">
-                      <button onClick={() => setShowModal(null)}
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Cancel
-                      </button>
-                      <button onClick={() => addItemToProject('photos', formData)}
-                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                        Upload
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {showModal === 'drawing' && (
-                <>
-                  <h3 className="text-2xl font-bold mb-6">Upload Drawing</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Drawing Name</label>
-                      <input type="text" value={formData.name || ''}
-                        onChange={(e) => setFormData({...formData, name: e.target.value})}
-                        className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none" />
-                    </div>
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-                      <FileText size={48} className="mx-auto text-gray-400 mb-3" />
-                      <p className="text-gray-600">Click to upload drawing</p>
-                    </div>
-                    <div className="flex gap-3 pt-4">
-                      <button onClick={() => setShowModal(null)}
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        Cancel
-                      </button>
-                      <button onClick={() => addItemToProject('drawings', { name: formData.name, version: 1, uploaded: new Date().toISOString() })}
-                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                        Upload
-                      </button>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default ProCoordinate;
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<ProCoordinate />);
+    </script>
+</body>
+</html>

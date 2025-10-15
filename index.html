@@ -8,6 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ProCoordinate">
     <title>ProCoordinate - Professional Construction Management</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -17,6 +18,32 @@
         }
         
         .hidden { display: none !important; }
+        
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f4f6;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
         
         /* Auth */
         .auth-container {
@@ -313,6 +340,11 @@
             position: relative;
         }
         
+        .project-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+        
         .project-avatar {
             width: 60px;
             height: 60px;
@@ -336,11 +368,6 @@
             height: 100%;
             border-radius: 50%;
             object-fit: cover;
-        }
-        
-        .project-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
         }
         
         .project-header {
@@ -876,6 +903,11 @@
     </style>
 </head>
 <body>
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading hidden">
+        <div class="spinner"></div>
+    </div>
+
     <!-- Auth View -->
     <div id="authView" class="auth-container">
         <div class="auth-box">
@@ -916,21 +948,6 @@
                     <option value="Client">Client</option>
                     <option value="Project Manager">Project Manager</option>
                 </select>
-            </div>
-            
-            <div class="form-group hidden" id="securityGroup">
-                <label>Security Question</label>
-                <select id="authSecurityQuestion">
-                    <option value="pet">What was the name of your first pet?</option>
-                    <option value="city">In what city were you born?</option>
-                    <option value="school">What was the name of your primary school?</option>
-                    <option value="car">What was your first car model?</option>
-                </select>
-            </div>
-            
-            <div class="form-group hidden" id="answerGroup">
-                <label>Security Answer</label>
-                <input type="text" id="authSecurityAnswer" placeholder="Your answer">
             </div>
             
             <button class="btn btn-primary" id="authBtn">Sign In</button>
@@ -1004,6 +1021,11 @@
     </div>
 
     <script>
+        // Initialize Supabase
+        const SUPABASE_URL = 'https://ilfgmgajivusmqarkaqd.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsZmdtZ2FqaXZ1c21xYXJrYXFkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3MDY0NzYsImV4cCI6MjA3NDI4MjQ3Nn0.ysd2Y8DuxGWe99eM3PxbkIuvw62Vgp-68lZMJjkd7do';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         let currentUser = null;
         let currentProject = null;
         let projects = [];
@@ -1039,23 +1061,45 @@
             sessionStorage.setItem('installDismissed', 'true');
         }
 
+        // Show/hide loading spinner
+        function showLoading() {
+            document.getElementById('loadingSpinner').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingSpinner').classList.add('hidden');
+        }
+
+        // Check authentication on load
         checkAuth();
 
-        function checkAuth() {
-            const savedUser = localStorage.getItem('pc_user');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
+        async function checkAuth() {
+            showLoading();
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (session) {
+                const { data: userData } = await supabase.auth.getUser();
+                currentUser = {
+                    id: userData.user.id,
+                    email: userData.user.email,
+                    name: userData.user.user_metadata.name || userData.user.email,
+                    company: userData.user.user_metadata.company || 'My Company',
+                    role: userData.user.user_metadata.role || 'Project Manager'
+                };
                 showApp();
+            } else {
+                hideLoading();
             }
         }
 
-        function showApp() {
+        async function showApp() {
             document.getElementById('authView').classList.add('hidden');
             document.getElementById('appView').classList.remove('hidden');
             document.getElementById('userName').textContent = currentUser.name;
             document.getElementById('userCompany').textContent = currentUser.company;
             document.getElementById('userRole').textContent = currentUser.role;
-            loadProjects();
+            await loadProjects();
+            hideLoading();
         }
 
         function showAuth() {
@@ -1072,56 +1116,76 @@
             document.getElementById('nameGroup').classList.toggle('hidden');
             document.getElementById('companyGroup').classList.toggle('hidden');
             document.getElementById('roleGroup').classList.toggle('hidden');
-            document.getElementById('securityGroup').classList.toggle('hidden');
-            document.getElementById('answerGroup').classList.toggle('hidden');
             document.getElementById('forgotPasswordLink').classList.toggle('hidden');
         });
 
-        document.getElementById('authBtn').addEventListener('click', () => {
+        document.getElementById('authBtn').addEventListener('click', async () => {
             const email = document.getElementById('authEmail').value.trim();
             const password = document.getElementById('authPassword').value;
+
+            if (!email || !password) {
+                alert('Please enter email and password');
+                return;
+            }
+
+            showLoading();
 
             if (isSignup) {
                 const name = document.getElementById('authName').value.trim();
                 const company = document.getElementById('authCompany').value.trim();
                 const role = document.getElementById('authRole').value;
-                const securityQuestion = document.getElementById('authSecurityQuestion').value;
-                const securityAnswer = document.getElementById('authSecurityAnswer').value.trim();
 
-                if (!email || !password || !name || !company || !securityAnswer) {
+                if (!name || !company) {
+                    hideLoading();
                     alert('Please fill in all fields');
                     return;
                 }
 
-                const users = JSON.parse(localStorage.getItem('pc_users') || '[]');
-                if (users.find(u => u.email === email)) {
-                    alert('Email already registered');
-                    return;
-                }
-
-                users.push({ 
-                    email, 
-                    password, 
-                    name, 
-                    company, 
-                    role, 
-                    securityQuestion,
-                    securityAnswer: securityAnswer.toLowerCase(),
-                    created: new Date().toISOString() 
+                const { data, error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: {
+                            name,
+                            company,
+                            role
+                        }
+                    }
                 });
-                localStorage.setItem('pc_users', JSON.stringify(users));
-                currentUser = { email, name, company, role };
-                localStorage.setItem('pc_user', JSON.stringify(currentUser));
-                showApp();
-            } else {
-                const users = JSON.parse(localStorage.getItem('pc_users') || '[]');
-                const user = users.find(u => u.email === email && u.password === password);
-                if (user) {
-                    currentUser = { email: user.email, name: user.name, company: user.company, role: user.role };
-                    localStorage.setItem('pc_user', JSON.stringify(currentUser));
-                    showApp();
+
+                hideLoading();
+
+                if (error) {
+                    alert('Error: ' + error.message);
                 } else {
-                    alert('Invalid credentials');
+                    alert('Account created! Please check your email to verify your account.');
+                    isSignup = false;
+                    document.getElementById('authBtn').textContent = 'Sign In';
+                    document.getElementById('authToggleText').textContent = "Don't have an account?";
+                    document.getElementById('authToggleLink').textContent = 'Sign up';
+                    document.getElementById('nameGroup').classList.add('hidden');
+                    document.getElementById('companyGroup').classList.add('hidden');
+                    document.getElementById('roleGroup').classList.add('hidden');
+                    document.getElementById('forgotPasswordLink').classList.remove('hidden');
+                }
+            } else {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (error) {
+                    hideLoading();
+                    alert('Error: ' + error.message);
+                } else {
+                    currentUser = {
+                        id: data.user.id,
+                        email: data.user.email,
+                        name: data.user.user_metadata.name || data.user.email,
+                        company: data.user.user_metadata.company || 'My Company',
+                        role: data.user.user_metadata.role || 'Project Manager'
+                    };
+                    showApp();
                 }
             }
         });
@@ -1131,124 +1195,66 @@
             showModal(`
                 <h3>Reset Password</h3>
                 <p style="color: #6b7280; margin-bottom: 20px; font-size: 14px;">
-                    Enter your email and answer your security question to reset your password.
+                    Enter your email address to receive a password reset link.
                 </p>
                 <div class="form-group">
                     <label>Email Address</label>
                     <input type="email" id="resetEmail" placeholder="your@email.com">
                 </div>
-                <div class="form-group hidden" id="resetSecurityGroup">
-                    <label id="resetSecurityQuestionLabel">Security Question</label>
-                    <input type="text" id="resetSecurityAnswer" placeholder="Your answer">
-                </div>
-                <div class="form-group hidden" id="resetPasswordGroup">
-                    <label>New Password</label>
-                    <input type="password" id="resetNewPassword" placeholder="Enter new password">
-                </div>
-                <div class="form-group hidden" id="resetPasswordConfirmGroup">
-                    <label>Confirm New Password</label>
-                    <input type="password" id="resetConfirmPassword" placeholder="Confirm new password">
-                </div>
                 <div class="modal-actions">
                     <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button class="btn btn-primary" id="resetBtn" onclick="checkResetEmail()">Continue</button>
+                    <button class="btn btn-primary" onclick="sendResetEmail()">Send Reset Link</button>
                 </div>
             `);
         }
 
-        function checkResetEmail() {
+        async function sendResetEmail() {
             const email = document.getElementById('resetEmail').value.trim();
             if (!email) {
                 alert('Please enter your email address');
                 return;
             }
 
-            const users = JSON.parse(localStorage.getItem('pc_users') || '[]');
-            const user = users.find(u => u.email === email);
+            showLoading();
+            const { error } = await supabase.auth.resetPasswordForEmail(email);
+            hideLoading();
 
-            if (!user) {
-                alert('Email not found. Please check your email address.');
-                return;
-            }
-
-            const questions = {
-                'pet': 'What was the name of your first pet?',
-                'city': 'In what city were you born?',
-                'school': 'What was the name of your primary school?',
-                'car': 'What was your first car model?'
-            };
-
-            document.getElementById('resetSecurityQuestionLabel').textContent = questions[user.securityQuestion];
-            document.getElementById('resetSecurityGroup').classList.remove('hidden');
-            const resetBtn = document.getElementById('resetBtn');
-            resetBtn.textContent = 'Verify Answer';
-            resetBtn.onclick = () => verifySecurityAnswer(email, user.securityAnswer);
-        }
-
-        function verifySecurityAnswer(email, correctAnswer) {
-            const answer = document.getElementById('resetSecurityAnswer').value.trim().toLowerCase();
-
-            if (!answer) {
-                alert('Please answer the security question');
-                return;
-            }
-
-            if (answer !== correctAnswer) {
-                alert('Incorrect answer. Please try again.');
-                return;
-            }
-
-            document.getElementById('resetPasswordGroup').classList.remove('hidden');
-            document.getElementById('resetPasswordConfirmGroup').classList.remove('hidden');
-            const resetBtn = document.getElementById('resetBtn');
-            resetBtn.textContent = 'Reset Password';
-            resetBtn.onclick = () => resetPassword(email);
-        }
-
-        function resetPassword(email) {
-            const newPassword = document.getElementById('resetNewPassword').value;
-            const confirmPassword = document.getElementById('resetConfirmPassword').value;
-
-            if (!newPassword || !confirmPassword) {
-                alert('Please fill in both password fields');
-                return;
-            }
-
-            if (newPassword !== confirmPassword) {
-                alert('Passwords do not match');
-                return;
-            }
-
-            if (newPassword.length < 6) {
-                alert('Password must be at least 6 characters long');
-                return;
-            }
-
-            const users = JSON.parse(localStorage.getItem('pc_users') || '[]');
-            const userIndex = users.findIndex(u => u.email === email);
-            
-            if (userIndex !== -1) {
-                users[userIndex].password = newPassword;
-                localStorage.setItem('pc_users', JSON.stringify(users));
+            if (error) {
+                alert('Error: ' + error.message);
+            } else {
                 closeModal();
-                alert('Password reset successful! You can now sign in with your new password.');
+                alert('Password reset email sent! Check your inbox.');
             }
         }
 
-        document.getElementById('logoutBtn').addEventListener('click', () => {
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
             if (confirm('Are you sure you want to logout?')) {
-                localStorage.removeItem('pc_user');
+                showLoading();
+                await supabase.auth.signOut();
                 currentUser = null;
                 currentProject = null;
                 projects = [];
                 showAuth();
+                hideLoading();
             }
         });
 
-        function loadProjects() {
-            const allProjects = JSON.parse(localStorage.getItem('pc_projects') || '[]');
-            projects = allProjects.filter(p => p.userEmail === currentUser.email);
+        async function loadProjects() {
+            showLoading();
+            const { data, error } = await supabase
+                .from('projects')
+                .select('*')
+                .eq('user_id', currentUser.id);
+            
+            if (error) {
+                console.error('Error loading projects:', error);
+                projects = [];
+            } else {
+                projects = data || [];
+            }
+            
             renderProjects();
+            hideLoading();
         }
 
         function renderProjects() {
@@ -1256,15 +1262,12 @@
             grid.innerHTML = projects.map(p => {
                 let avatarContent = '';
                 if (p.avatar) {
-                    // Check if it's a URL (contains http or https)
                     if (p.avatar.startsWith('http://') || p.avatar.startsWith('https://')) {
                         avatarContent = `<img src="${p.avatar}" alt="${p.name}">`;
                     } else {
-                        // It's an emoji or text
                         avatarContent = p.avatar;
                     }
                 } else {
-                    // Default to first letter
                     avatarContent = p.name.charAt(0).toUpperCase();
                 }
                 
@@ -1288,13 +1291,13 @@
                                     <div class="stat-label">RFIs</div>
                                 </div>
                                 <div class="stat">
-                                    <div class="stat-number">${(p.dailyLogs || []).length}</div>
+                                    <div class="stat-number">${(p.daily_logs || []).length}</div>
                                     <div class="stat-label">Daily Logs</div>
                                 </div>
                             </div>
                             <div class="project-dates">
-                                <span>Start: ${formatDate(p.startDate)}</span>
-                                <span>End: ${formatDate(p.endDate)}</span>
+                                <span>Start: ${formatDate(p.start_date)}</span>
+                                <span>End: ${formatDate(p.end_date)}</span>
                             </div>
                         </div>
                     </div>
@@ -1327,7 +1330,6 @@
             document.getElementById('projectName').textContent = currentProject.name;
             document.getElementById('projectDescription').textContent = currentProject.description || '';
             
-            // Add edit and delete buttons
             const projectDetailDiv = document.querySelector('.project-detail');
             const existingHeader = projectDetailDiv.querySelector('.project-detail-header');
             if (existingHeader) {
@@ -1349,18 +1351,17 @@
             `;
             backBtn.insertAdjacentHTML('afterend', headerHTML);
             
-            // Hide the old h2 and p tags
             document.getElementById('projectName').style.display = 'none';
             document.getElementById('projectDescription').style.display = 'none';
             
             document.getElementById('projectMeta').innerHTML = `
                 <div class="meta-box">
                     <div class="meta-label">Start Date</div>
-                    <div class="meta-value">${formatDate(currentProject.startDate)}</div>
+                    <div class="meta-value">${formatDate(currentProject.start_date)}</div>
                 </div>
                 <div class="meta-box">
                     <div class="meta-label">End Date</div>
-                    <div class="meta-value">${formatDate(currentProject.endDate)}</div>
+                    <div class="meta-value">${formatDate(currentProject.end_date)}</div>
                 </div>
                 <div class="meta-box">
                     <div class="meta-label">Location</div>
@@ -1403,7 +1404,7 @@
                             { label: 'Drawings', value: (currentProject.drawings || []).length, color: '#3b82f6' },
                             { label: 'RFIs', value: (currentProject.rfis || []).length, color: '#ef4444' },
                             { label: 'Submittals', value: (currentProject.submittals || []).length, color: '#f59e0b' },
-                            { label: 'Daily Logs', value: (currentProject.dailyLogs || []).length, color: '#8b5cf6' },
+                            { label: 'Daily Logs', value: (currentProject.daily_logs || []).length, color: '#8b5cf6' },
                             { label: 'Photos', value: (currentProject.photos || []).length, color: '#ec4899' },
                             { label: 'Safety Reports', value: (currentProject.safety || []).length, color: '#f97316' },
                             { label: 'Messages', value: (currentProject.messages || []).length, color: '#06b6d4' },
@@ -1416,279 +1417,9 @@
                         `).join('')}
                     </div>
                 `;
-            } else if (tab === 'drawings') {
-                renderDrawings();
-            } else if (tab === 'rfis') {
-                renderRFIs();
-            } else if (tab === 'submittals') {
-                renderSubmittals();
-            } else if (tab === 'dailyLogs') {
-                renderDailyLogs();
-            } else if (tab === 'photos') {
-                renderPhotos();
-            } else if (tab === 'safety') {
-                renderSafety();
-            } else if (tab === 'messages') {
-                renderMessages();
+            } else {
+                content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🚧</div><p>Feature coming soon with full functionality</p></div>';
             }
-        }
-
-        function renderDrawings() {
-            const drawings = currentProject.drawings || [];
-            document.getElementById('tabContent').innerHTML = `
-                <div class="section-header">
-                    <h3>Drawings & Plans</h3>
-                    <button class="btn btn-primary btn-small" onclick="openDrawingModal()">+ Upload Drawing</button>
-                </div>
-                ${drawings.length === 0 ? '<div class="empty-state"><div class="empty-state-icon">📐</div><p>No drawings uploaded yet</p></div>' :
-                `<div class="items-list">
-                    ${drawings.map(d => `
-                        <div class="item-card">
-                            <div class="item-header">
-                                <div>
-                                    <div class="item-title">📄 ${d.name}</div>
-                                    <div class="item-id">Version ${d.version} • Uploaded ${formatDate(d.uploaded)}</div>
-                                </div>
-                                <div class="item-actions">
-                                    <button class="btn btn-secondary btn-small" onclick="editDrawingNotes('${d.id}')">Edit Notes</button>
-                                    <button class="btn btn-danger btn-small" onclick="deleteDrawing('${d.id}')">Delete</button>
-                                </div>
-                            </div>
-                            ${d.notes ? `<div class="item-notes">📝 ${d.notes}</div>` : ''}
-                            <div class="item-footer">
-                                <span>Uploaded by: ${d.uploadedBy}</span>
-                                <span>Size: ${d.size || 'Unknown'}</span>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>`}
-            `;
-        }
-
-        function renderRFIs() {
-            const rfis = currentProject.rfis || [];
-            document.getElementById('tabContent').innerHTML = `
-                <div class="section-header">
-                    <h3>Requests for Information (RFIs)</h3>
-                    <button class="btn btn-primary btn-small" onclick="openRFIModal()">+ New RFI</button>
-                </div>
-                ${rfis.length === 0 ? '<div class="empty-state"><div class="empty-state-icon">❓</div><p>No RFIs submitted yet</p></div>' :
-                `<div class="items-list">
-                    ${rfis.map(r => `
-                        <div class="item-card">
-                            <div class="item-header">
-                                <div>
-                                    <div class="item-title">${r.title}</div>
-                                    <div class="item-id">RFI-${r.id.slice(-6)} • Priority: ${r.priority || 'Medium'}</div>
-                                </div>
-                                <div style="display: flex; gap: 8px; align-items: center;">
-                                    <span class="status-badge status-${r.status}">${r.status}</span>
-                                    <div class="item-actions">
-                                        <button class="btn btn-secondary btn-small" onclick="editRFI('${r.id}')">Edit</button>
-                                        <button class="btn btn-danger btn-small" onclick="deleteRFI('${r.id}')">Delete</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="item-description">${r.description}</div>
-                            ${r.response ? `<div class="item-notes">💬 Response: ${r.response}</div>` : ''}
-                            <div class="item-footer">
-                                <span>Submitted by: ${r.createdBy}</span>
-                                <span>${formatDateTime(r.created)}</span>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>`}
-            `;
-        }
-
-        function renderSubmittals() {
-            const submittals = currentProject.submittals || [];
-            document.getElementById('tabContent').innerHTML = `
-                <div class="section-header">
-                    <h3>Submittals</h3>
-                    <button class="btn btn-primary btn-small" onclick="openSubmittalModal()">+ New Submittal</button>
-                </div>
-                <p style="color: #6b7280; margin-bottom: 20px; font-size: 14px;">
-                    Submittals are documents submitted by contractors for approval (shop drawings, product data, material samples, etc.)
-                </p>
-                ${submittals.length === 0 ? '<div class="empty-state"><div class="empty-state-icon">📋</div><p>No submittals yet</p></div>' :
-                `<div class="items-list">
-                    ${submittals.map(s => `
-                        <div class="item-card">
-                            <div class="item-header">
-                                <div>
-                                    <div class="item-title">${s.title}</div>
-                                    <div class="item-id">SUB-${s.id.slice(-6)} • Type: ${s.type}</div>
-                                </div>
-                                <div style="display: flex; gap: 8px; align-items: center;">
-                                    <span class="status-badge status-${s.status}">${s.status}</span>
-                                    <button class="btn btn-secondary btn-small" onclick="editSubmittal('${s.id}')">Edit</button>
-                                </div>
-                            </div>
-                            <div class="item-description">${s.description}</div>
-                            ${s.reviewNotes ? `<div class="item-notes">📝 Review Notes: ${s.reviewNotes}</div>` : ''}
-                            <div class="item-footer">
-                                <span>Submitted by: ${s.createdBy}</span>
-                                <span>${formatDateTime(s.created)}</span>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>`}
-            `;
-        }
-
-        function renderDailyLogs() {
-            const logs = currentProject.dailyLogs || [];
-            document.getElementById('tabContent').innerHTML = `
-                <div class="section-header">
-                    <h3>Daily Work Logs</h3>
-                    <button class="btn btn-primary btn-small" onclick="openDailyLogModal()">+ New Daily Log</button>
-                </div>
-                ${logs.length === 0 ? '<div class="empty-state"><div class="empty-state-icon">📅</div><p>No daily logs recorded yet</p></div>' :
-                logs.map(log => `
-                    <div class="daily-log-card">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-                            <div class="daily-log-date">${formatDate(log.date)}</div>
-                            <div class="item-actions">
-                                <button class="btn btn-secondary btn-small" onclick="editDailyLog('${log.id}')">Edit</button>
-                                <button class="btn btn-danger btn-small" onclick="deleteDailyLog('${log.id}')">Delete</button>
-                            </div>
-                        </div>
-                        <div class="daily-log-grid">
-                            <div class="daily-log-field">
-                                <div class="daily-log-field-label">Weather</div>
-                                <div class="daily-log-field-value">${log.weather || 'N/A'}</div>
-                            </div>
-                            <div class="daily-log-field">
-                                <div class="daily-log-field-label">Temperature</div>
-                                <div class="daily-log-field-value">${log.temperature || 'N/A'}°C</div>
-                            </div>
-                            <div class="daily-log-field">
-                                <div class="daily-log-field-label">Workers On Site</div>
-                                <div class="daily-log-field-value">${log.workers || '0'}</div>
-                            </div>
-                            <div class="daily-log-field">
-                                <div class="daily-log-field-label">Hours Worked</div>
-                                <div class="daily-log-field-value">${log.hours || '0'} hrs</div>
-                            </div>
-                        </div>
-                        <div class="daily-log-report">
-                            <h4>Work Performed:</h4>
-                            <div style="color: #374151;">${log.workReport || 'No details provided'}</div>
-                        </div>
-                        ${(log.attachments && log.attachments.length > 0) ? `
-                            <div class="daily-log-attachments">
-                                ${log.attachments.map(a => `<span class="attachment-chip">📎 ${a}</span>`).join('')}
-                            </div>
-                        ` : ''}
-                        <div class="item-footer">
-                            <span>Logged by: ${log.createdBy}</span>
-                            <span>${formatDateTime(log.created)}</span>
-                        </div>
-                    </div>
-                `).join('')}
-            `;
-        }
-
-        function renderPhotos() {
-            const photos = currentProject.photos || [];
-            document.getElementById('tabContent').innerHTML = `
-                <div class="section-header">
-                    <h3>Project Photos</h3>
-                    <button class="btn btn-primary btn-small" onclick="openPhotoModal()">+ Upload Photo</button>
-                </div>
-                ${photos.length === 0 ? '<div class="empty-state"><div class="empty-state-icon">📷</div><p>No photos uploaded yet</p></div>' :
-                `<div class="photo-grid">
-                    ${photos.map(p => `
-                        <div class="photo-card">
-                            <div class="photo-preview">📷</div>
-                            <div class="photo-info">
-                                <div class="photo-title">${p.title}</div>
-                                <div class="photo-meta">${formatDate(p.created)}</div>
-                                ${p.notes ? `<div style="font-size: 13px; color: #6b7280; margin-bottom: 8px;">${p.notes}</div>` : ''}
-                                <div class="photo-actions">
-                                    <button class="btn btn-secondary btn-small" onclick="editPhotoNotes('${p.id}')">Edit Notes</button>
-                                    <button class="btn btn-danger btn-small" onclick="deletePhoto('${p.id}')">Delete</button>
-                                </div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>`}
-            `;
-        }
-
-        function renderSafety() {
-            const safety = currentProject.safety || [];
-            document.getElementById('tabContent').innerHTML = `
-                <div class="section-header">
-                    <h3>Safety Reports & Incidents</h3>
-                    <button class="btn btn-primary btn-small" onclick="openSafetyModal()">+ Report Incident</button>
-                </div>
-                ${safety.length === 0 ? '<div class="empty-state"><div class="empty-state-icon">🛡️</div><p>No safety incidents reported</p></div>' :
-                `<div class="items-list">
-                    ${safety.map(s => `
-                        <div class="item-card" style="border-left: 4px solid ${s.severity === 'high' ? '#ef4444' : s.severity === 'medium' ? '#f59e0b' : '#10b981'};">
-                            <div class="item-header">
-                                <div>
-                                    <div class="item-title">🚨 ${s.title}</div>
-                                    <div class="item-id">Severity: ${s.severity?.toUpperCase() || 'MEDIUM'} • Location: ${s.location}</div>
-                                </div>
-                                <div class="item-actions">
-                                    <button class="btn btn-secondary btn-small" onclick="editSafety('${s.id}')">Edit</button>
-                                    <button class="btn btn-danger btn-small" onclick="deleteSafety('${s.id}')">Delete</button>
-                                </div>
-                            </div>
-                            <div class="item-description">${s.description}</div>
-                            ${s.actionTaken ? `<div class="item-notes">✅ Action Taken: ${s.actionTaken}</div>` : ''}
-                            <div class="item-footer">
-                                <span>Reported by: ${s.createdBy}</span>
-                                <span>${formatDateTime(s.created)}</span>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>`}
-            `;
-        }
-
-        function renderMessages() {
-            const messages = currentProject.messages || [];
-            document.getElementById('tabContent').innerHTML = `
-                <h3 style="margin-bottom: 18px;">Project Messages</h3>
-                <div class="messages-container">
-                    ${messages.length === 0 ? '<div class="empty-state"><div class="empty-state-icon">💬</div><p>No messages yet</p></div>' :
-                    messages.map(m => `
-                        <div class="message-item">
-                            <div class="message-header">
-                                <span class="message-author">${m.author} <span style="color: #9ca3af; font-weight: normal; font-size: 12px;">(${m.role || 'Team Member'})</span></span>
-                                <span class="message-time">${formatDateTime(m.timestamp)}</span>
-                            </div>
-                            <div class="message-text">${m.text}</div>
-                        </div>
-                    `).join('')}
-                </div>
-                <div class="message-input-area">
-                    <textarea id="messageText" placeholder="Type your message..." rows="3" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; resize: none; font-family: inherit; margin-bottom: 10px;"></textarea>
-                    <button class="btn btn-primary" onclick="sendMessage()">Send Message</button>
-                </div>
-            `;
-        }
-
-        function sendMessage() {
-            const text = document.getElementById('messageText').value;
-            if (!text.trim()) return;
-            
-            currentProject.messages = currentProject.messages || [];
-            currentProject.messages.push({
-                id: Date.now(),
-                author: currentUser.name,
-                role: currentUser.role,
-                text: text.trim(),
-                timestamp: new Date().toISOString()
-            });
-            
-            saveProject(currentProject);
-            document.getElementById('messageText').value = '';
-            renderMessages();
         }
 
         // Modal functions
@@ -1738,13 +1469,23 @@
             `);
         }
 
-        function createProject() {
-            const name = document.getElementById('projectName').value;
-            const startDate = document.getElementById('projectStart').value;
-            const endDate = document.getElementById('projectEnd').value;
+        async function createProject() {
+            const name = document.getElementById('projectName').value.trim();
+            const startDate = document.getElementById('projectStart').value.trim();
+            const endDate = document.getElementById('projectEnd').value.trim();
 
-            if (!name || !startDate || !endDate) {
-                alert('Please fill in required fields');
+            if (!name) {
+                alert('Please enter a project name');
+                return;
+            }
+            
+            if (!startDate) {
+                alert('Please select a start date');
+                return;
+            }
+            
+            if (!endDate) {
+                alert('Please select an end date');
                 return;
             }
 
@@ -1752,21 +1493,36 @@
 
             const project = {
                 id: 'proj_' + Date.now(),
+                user_id: currentUser.id,
                 name: name,
                 description: document.getElementById('projectDesc').value,
-                startDate: startDate,
-                endDate: endDate,
+                start_date: startDate,
+                end_date: endDate,
                 location: document.getElementById('projectLocation').value,
                 budget: parseInt(document.getElementById('projectBudget').value) || 0,
                 avatar: avatarInput || null,
-                userEmail: currentUser.email,
-                created: new Date().toISOString(),
-                drawings: [], rfis: [], submittals: [], dailyLogs: [],
-                photos: [], safety: [], messages: []
+                drawings: [],
+                rfis: [],
+                submittals: [],
+                daily_logs: [],
+                photos: [],
+                safety: [],
+                messages: []
             };
             
-            saveProject(project);
-            closeModal();
+            showLoading();
+            const { error } = await supabase
+                .from('projects')
+                .insert([project]);
+            
+            if (error) {
+                hideLoading();
+                alert('Error creating project: ' + error.message);
+            } else {
+                await loadProjects();
+                closeModal();
+                hideLoading();
+            }
         }
 
         function openEditProjectModal() {
@@ -1781,9 +1537,8 @@
                 avatarPreview = currentProject.name.charAt(0).toUpperCase();
             }
             
-            // Ensure dates are in YYYY-MM-DD format
-            const startDate = currentProject.startDate || '';
-            const endDate = currentProject.endDate || '';
+            const startDate = currentProject.start_date || '';
+            const endDate = currentProject.end_date || '';
             
             showModal(`
                 <h3>Edit Project</h3>
@@ -1830,10 +1585,74 @@
             `);
         }
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        async function updateProject() {
+            const name = document.getElementById('projectName').value.trim();
+            const startDate = document.getElementById('projectStart').value.trim();
+            const endDate = document.getElementById('projectEnd').value.trim();
+
+            if (!name) {
+                alert('Please enter a project name');
+                return;
+            }
+            
+            if (!startDate) {
+                alert('Please select a start date');
+                return;
+            }
+            
+            if (!endDate) {
+                alert('Please select an end date');
+                return;
+            }
+
+            const avatarInput = document.getElementById('projectAvatar').value.trim();
+
+            showLoading();
+            const { error } = await supabase
+                .from('projects')
+                .update({
+                    name: name,
+                    description: document.getElementById('projectDesc').value,
+                    start_date: startDate,
+                    end_date: endDate,
+                    location: document.getElementById('projectLocation').value,
+                    budget: parseInt(document.getElementById('projectBudget').value) || 0,
+                    avatar: avatarInput || null
+                })
+                .eq('id', currentProject.id);
+
+            if (error) {
+                hideLoading();
+                alert('Error updating project: ' + error.message);
+            } else {
+                await loadProjects();
+                currentProject = projects.find(p => p.id === currentProject.id);
+                renderProjectDetail();
+                closeModal();
+                hideLoading();
+            }
+        }
+
+        async function deleteProject() {
+            if (confirm(`Are you sure you want to delete "${currentProject.name}"? This action cannot be undone and will delete all project data.`)) {
+                showLoading();
+                const { error } = await supabase
+                    .from('projects')
+                    .delete()
+                    .eq('id', currentProject.id);
+
+                if (error) {
+                    hideLoading();
+                    alert('Error deleting project: ' + error.message);
+                } else {
+                    currentProject = null;
+                    document.getElementById('dashboardView').classList.remove('hidden');
+                    document.getElementById('projectView').classList.add('hidden');
+                    document.getElementById('dashboardNavBtn').classList.add('active');
+                    await loadProjects();
+                    hideLoading();
+                }
+            }
         }
 
         function updateAvatarPreview() {
@@ -1857,661 +1676,10 @@
             }
         }
 
-        function updateProject() {
-            const name = document.getElementById('projectName').value.trim();
-            const startDate = document.getElementById('projectStart').value.trim();
-            const endDate = document.getElementById('projectEnd').value.trim();
-
-            if (!name) {
-                alert('Please enter a project name');
-                return;
-            }
-            
-            if (!startDate) {
-                alert('Please select a start date');
-                return;
-            }
-            
-            if (!endDate) {
-                alert('Please select an end date');
-                return;
-            }
-
-            currentProject.name = name;
-            currentProject.description = document.getElementById('projectDesc').value;
-            currentProject.startDate = startDate;
-            currentProject.endDate = endDate;
-            currentProject.location = document.getElementById('projectLocation').value;
-            currentProject.budget = parseInt(document.getElementById('projectBudget').value) || 0;
-            
-            const avatarInput = document.getElementById('projectAvatar').value.trim();
-            currentProject.avatar = avatarInput || null;
-            
-            saveProject(currentProject);
-            closeModal();
-            renderProjectDetail();
-        }
-
-        function deleteProject() {
-            if (confirm(`Are you sure you want to delete "${currentProject.name}"? This action cannot be undone and will delete all project data including RFIs, drawings, and logs.`)) {
-                const allProjects = JSON.parse(localStorage.getItem('pc_projects') || '[]');
-                const filtered = allProjects.filter(p => p.id !== currentProject.id);
-                localStorage.setItem('pc_projects', JSON.stringify(filtered));
-                
-                // Go back to dashboard
-                currentProject = null;
-                document.getElementById('dashboardView').classList.remove('hidden');
-                document.getElementById('projectView').classList.add('hidden');
-                document.getElementById('dashboardNavBtn').classList.add('active');
-                loadProjects();
-            }
-        }
-
-        function openDrawingModal() {
-            showModal(`
-                <h3>Upload Drawing</h3>
-                <div class="form-group">
-                    <label>Drawing Name *</label>
-                    <input type="text" id="drawingName" placeholder="Floor Plan - Level 1">
-                </div>
-                <div class="form-group">
-                    <label>Version</label>
-                    <input type="text" id="drawingVersion" value="1" placeholder="1">
-                </div>
-                <div class="form-group">
-                    <label>Notes</label>
-                    <textarea id="drawingNotes" rows="3" placeholder="Any notes about this drawing..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>File</label>
-                    <div class="file-upload">
-                        <div class="file-upload-icon">📄</div>
-                        <p>Click to select PDF, DWG, or image file</p>
-                        <small style="color: #9ca3af;">Max file size: 50MB</small>
-                    </div>
-                </div>
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button class="btn btn-primary" onclick="createDrawing()">Upload Drawing</button>
-                </div>
-            `);
-        }
-
-        function createDrawing() {
-            const name = document.getElementById('drawingName').value;
-            if (!name) {
-                alert('Please enter drawing name');
-                return;
-            }
-
-            currentProject.drawings = currentProject.drawings || [];
-            currentProject.drawings.push({
-                id: 'drw_' + Date.now(),
-                name: name,
-                version: document.getElementById('drawingVersion').value || '1',
-                notes: document.getElementById('drawingNotes').value,
-                uploaded: new Date().toISOString(),
-                uploadedBy: currentUser.name,
-                size: '2.5 MB'
-            });
-            
-            saveProject(currentProject);
-            closeModal();
-            switchTab('drawings');
-        }
-
-        function editDrawingNotes(id) {
-            const drawing = currentProject.drawings.find(d => d.id === id);
-            showModal(`
-                <h3>Edit Drawing Notes</h3>
-                <div class="form-group">
-                    <label>Drawing: ${drawing.name}</label>
-                </div>
-                <div class="form-group">
-                    <label>Notes</label>
-                    <textarea id="editNotes" rows="4">${drawing.notes || ''}</textarea>
-                </div>
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button class="btn btn-primary" onclick="saveDrawingNotes('${id}')">Save Notes</button>
-                </div>
-            `);
-        }
-
-        function saveDrawingNotes(id) {
-            const drawing = currentProject.drawings.find(d => d.id === id);
-            drawing.notes = document.getElementById('editNotes').value;
-            saveProject(currentProject);
-            closeModal();
-            switchTab('drawings');
-        }
-
-        function deleteDrawing(id) {
-            if (confirm('Are you sure you want to delete this drawing?')) {
-                currentProject.drawings = currentProject.drawings.filter(d => d.id !== id);
-                saveProject(currentProject);
-                switchTab('drawings');
-            }
-        }
-
-        function openRFIModal() {
-            showModal(`
-                <h3>New RFI</h3>
-                <div class="form-group">
-                    <label>RFI Title *</label>
-                    <input type="text" id="rfiTitle" placeholder="Question or clarification needed">
-                </div>
-                <div class="form-group">
-                    <label>Description *</label>
-                    <textarea id="rfiDescription" rows="4" placeholder="Detailed description of the request..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Priority</label>
-                    <select id="rfiPriority">
-                        <option value="Low">Low</option>
-                        <option value="Medium" selected>Medium</option>
-                        <option value="High">High</option>
-                        <option value="Critical">Critical</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Status</label>
-                    <select id="rfiStatus">
-                        <option value="open" selected>Open</option>
-                        <option value="answered">Answered</option>
-                        <option value="closed">Closed</option>
-                    </select>
-                </div>
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button class="btn btn-primary" onclick="createRFI()">Create RFI</button>
-                </div>
-            `);
-        }
-
-        function createRFI() {
-            const title = document.getElementById('rfiTitle').value;
-            const description = document.getElementById('rfiDescription').value;
-
-            if (!title || !description) {
-                alert('Please fill in required fields');
-                return;
-            }
-
-            currentProject.rfis = currentProject.rfis || [];
-            currentProject.rfis.push({
-                id: 'rfi_' + Date.now(),
-                title: title,
-                description: description,
-                priority: document.getElementById('rfiPriority').value,
-                status: document.getElementById('rfiStatus').value,
-                createdBy: currentUser.name,
-                created: new Date().toISOString()
-            });
-            
-            saveProject(currentProject);
-            closeModal();
-            switchTab('rfis');
-        }
-
-        function editRFI(id) {
-            const rfi = currentProject.rfis.find(r => r.id === id);
-            showModal(`
-                <h3>Edit RFI</h3>
-                <div class="form-group">
-                    <label>RFI Title *</label>
-                    <input type="text" id="editRFITitle" value="${rfi.title}">
-                </div>
-                <div class="form-group">
-                    <label>Description *</label>
-                    <textarea id="editRFIDescription" rows="4">${rfi.description}</textarea>
-                </div>
-                <div class="form-group">
-                    <label>Priority</label>
-                    <select id="editRFIPriority">
-                        <option value="Low" ${rfi.priority === 'Low' ? 'selected' : ''}>Low</option>
-                        <option value="Medium" ${rfi.priority === 'Medium' ? 'selected' : ''}>Medium</option>
-                        <option value="High" ${rfi.priority === 'High' ? 'selected' : ''}>High</option>
-                        <option value="Critical" ${rfi.priority === 'Critical' ? 'selected' : ''}>Critical</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Status</label>
-                    <select id="editRFIStatus">
-                        <option value="open" ${rfi.status === 'open' ? 'selected' : ''}>Open</option>
-                        <option value="answered" ${rfi.status === 'answered' ? 'selected' : ''}>Answered</option>
-                        <option value="closed" ${rfi.status === 'closed' ? 'selected' : ''}>Closed</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Response</label>
-                    <textarea id="editRFIResponse" rows="3" placeholder="Response to this RFI...">${rfi.response || ''}</textarea>
-                </div>
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button class="btn btn-primary" onclick="saveRFI('${id}')">Save Changes</button>
-                </div>
-            `);
-        }
-
-        function saveRFI(id) {
-            const rfi = currentProject.rfis.find(r => r.id === id);
-            rfi.title = document.getElementById('editRFITitle').value;
-            rfi.description = document.getElementById('editRFIDescription').value;
-            rfi.priority = document.getElementById('editRFIPriority').value;
-            rfi.status = document.getElementById('editRFIStatus').value;
-            rfi.response = document.getElementById('editRFIResponse').value;
-            saveProject(currentProject);
-            closeModal();
-            switchTab('rfis');
-        }
-
-        function deleteRFI(id) {
-            if (confirm('Are you sure you want to delete this RFI?')) {
-                currentProject.rfis = currentProject.rfis.filter(r => r.id !== id);
-                saveProject(currentProject);
-                switchTab('rfis');
-            }
-        }
-
-        function openSubmittalModal() {
-            showModal(`
-                <h3>New Submittal</h3>
-                <div class="form-group">
-                    <label>Submittal Title *</label>
-                    <input type="text" id="submittalTitle" placeholder="Material or equipment submittal">
-                </div>
-                <div class="form-group">
-                    <label>Type *</label>
-                    <select id="submittalType">
-                        <option value="Shop Drawings">Shop Drawings</option>
-                        <option value="Product Data">Product Data</option>
-                        <option value="Material Samples">Material Samples</option>
-                        <option value="Equipment Data">Equipment Data</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Description *</label>
-                    <textarea id="submittalDescription" rows="4"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Status</label>
-                    <select id="submittalStatus">
-                        <option value="pending" selected>Pending Review</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
-                    </select>
-                </div>
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button class="btn btn-primary" onclick="createSubmittal()">Create Submittal</button>
-                </div>
-            `);
-        }
-
-        function createSubmittal() {
-            const title = document.getElementById('submittalTitle').value;
-            const description = document.getElementById('submittalDescription').value;
-
-            if (!title || !description) {
-                alert('Please fill in required fields');
-                return;
-            }
-
-            currentProject.submittals = currentProject.submittals || [];
-            currentProject.submittals.push({
-                id: 'sub_' + Date.now(),
-                title: title,
-                type: document.getElementById('submittalType').value,
-                description: description,
-                status: document.getElementById('submittalStatus').value,
-                createdBy: currentUser.name,
-                created: new Date().toISOString()
-            });
-            
-            saveProject(currentProject);
-            closeModal();
-            switchTab('submittals');
-        }
-
-        function editSubmittal(id) {
-            const submittal = currentProject.submittals.find(s => s.id === id);
-            showModal(`
-                <h3>Edit Submittal</h3>
-                <div class="form-group">
-                    <label>Status</label>
-                    <select id="editSubmittalStatus">
-                        <option value="pending" ${submittal.status === 'pending' ? 'selected' : ''}>Pending Review</option>
-                        <option value="approved" ${submittal.status === 'approved' ? 'selected' : ''}>Approved</option>
-                        <option value="rejected" ${submittal.status === 'rejected' ? 'selected' : ''}>Rejected</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Review Notes</label>
-                    <textarea id="submittalReviewNotes" rows="3">${submittal.reviewNotes || ''}</textarea>
-                </div>
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button class="btn btn-primary" onclick="saveSubmittal('${id}')">Save Changes</button>
-                </div>
-            `);
-        }
-
-        function saveSubmittal(id) {
-            const submittal = currentProject.submittals.find(s => s.id === id);
-            submittal.status = document.getElementById('editSubmittalStatus').value;
-            submittal.reviewNotes = document.getElementById('submittalReviewNotes').value;
-            saveProject(currentProject);
-            closeModal();
-            switchTab('submittals');
-        }
-
-        function openDailyLogModal() {
-            const today = new Date().toISOString().split('T')[0];
-            showModal(`
-                <h3>New Daily Log</h3>
-                <div class="form-group">
-                    <label>Date *</label>
-                    <input type="date" id="logDate" value="${today}">
-                </div>
-                <div class="form-group">
-                    <label>Weather</label>
-                    <select id="logWeather">
-                        <option value="Sunny">☀️ Sunny</option>
-                        <option value="Cloudy">☁️ Cloudy</option>
-                        <option value="Rainy">🌧️ Rainy</option>
-                        <option value="Snowy">❄️ Snowy</option>
-                    </select>
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
-                    <div class="form-group">
-                        <label>Temperature (°C)</label>
-                        <input type="number" id="logTemp" placeholder="20">
-                    </div>
-                    <div class="form-group">
-                        <label>Workers on Site</label>
-                        <input type="number" id="logWorkers" placeholder="12">
-                    </div>
-                    <div class="form-group">
-                        <label>Hours Worked</label>
-                        <input type="number" id="logHours" placeholder="8" step="0.5">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Work Performed Today *</label>
-                    <textarea id="logWork" rows="5" placeholder="Describe all work activities performed today..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Attachments (comma-separated filenames)</label>
-                    <input type="text" id="logAttachments" placeholder="photo1.jpg, drawing-rev2.pdf">
-                </div>
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button class="btn btn-primary" onclick="createDailyLog()">Save Log</button>
-                </div>
-            `);
-        }
-
-        function createDailyLog() {
-            const work = document.getElementById('logWork').value;
-            if (!work) {
-                alert('Please describe work performed');
-                return;
-            }
-
-            const attachmentsStr = document.getElementById('logAttachments').value;
-            const attachments = attachmentsStr ? attachmentsStr.split(',').map(a => a.trim()).filter(a => a) : [];
-
-            currentProject.dailyLogs = currentProject.dailyLogs || [];
-            currentProject.dailyLogs.push({
-                id: 'log_' + Date.now(),
-                date: document.getElementById('logDate').value,
-                weather: document.getElementById('logWeather').value,
-                temperature: document.getElementById('logTemp').value,
-                workers: document.getElementById('logWorkers').value,
-                hours: document.getElementById('logHours').value,
-                workReport: work,
-                attachments: attachments,
-                createdBy: currentUser.name,
-                created: new Date().toISOString()
-            });
-            
-            saveProject(currentProject);
-            closeModal();
-            switchTab('dailyLogs');
-        }
-
-        function editDailyLog(id) {
-            const log = currentProject.dailyLogs.find(l => l.id === id);
-            showModal(`
-                <h3>Edit Daily Log</h3>
-                <div class="form-group">
-                    <label>Work Performed</label>
-                    <textarea id="editLogWork" rows="5">${log.workReport}</textarea>
-                </div>
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button class="btn btn-primary" onclick="saveDailyLog('${id}')">Save Changes</button>
-                </div>
-            `);
-        }
-
-        function saveDailyLog(id) {
-            const log = currentProject.dailyLogs.find(l => l.id === id);
-            log.workReport = document.getElementById('editLogWork').value;
-            saveProject(currentProject);
-            closeModal();
-            switchTab('dailyLogs');
-        }
-
-        function deleteDailyLog(id) {
-            if (confirm('Delete this daily log?')) {
-                currentProject.dailyLogs = currentProject.dailyLogs.filter(l => l.id !== id);
-                saveProject(currentProject);
-                switchTab('dailyLogs');
-            }
-        }
-
-        function openPhotoModal() {
-            showModal(`
-                <h3>Upload Photo</h3>
-                <div class="form-group">
-                    <label>Photo Title *</label>
-                    <input type="text" id="photoTitle" placeholder="Site progress - Foundation">
-                </div>
-                <div class="form-group">
-                    <label>Location</label>
-                    <input type="text" id="photoLocation" placeholder="Building A - Level 2">
-                </div>
-                <div class="form-group">
-                    <label>Notes</label>
-                    <textarea id="photoNotes" rows="3" placeholder="Any notes about this photo..."></textarea>
-                </div>
-                <div class="form-group">
-                    <div class="file-upload">
-                        <div class="file-upload-icon">📷</div>
-                        <p>Click to select photo file</p>
-                        <small style="color: #9ca3af;">JPG, PNG up to 10MB</small>
-                    </div>
-                </div>
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button class="btn btn-primary" onclick="createPhoto()">Upload Photo</button>
-                </div>
-            `);
-        }
-
-        function createPhoto() {
-            const title = document.getElementById('photoTitle').value;
-            if (!title) {
-                alert('Please enter photo title');
-                return;
-            }
-
-            currentProject.photos = currentProject.photos || [];
-            currentProject.photos.push({
-                id: 'photo_' + Date.now(),
-                title: title,
-                location: document.getElementById('photoLocation').value,
-                notes: document.getElementById('photoNotes').value,
-                createdBy: currentUser.name,
-                created: new Date().toISOString()
-            });
-            
-            saveProject(currentProject);
-            closeModal();
-            switchTab('photos');
-        }
-
-        function editPhotoNotes(id) {
-            const photo = currentProject.photos.find(p => p.id === id);
-            showModal(`
-                <h3>Edit Photo Notes</h3>
-                <div class="form-group">
-                    <label>Photo: ${photo.title}</label>
-                </div>
-                <div class="form-group">
-                    <label>Notes</label>
-                    <textarea id="editPhotoNotes" rows="4">${photo.notes || ''}</textarea>
-                </div>
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button class="btn btn-primary" onclick="savePhotoNotes('${id}')">Save Notes</button>
-                </div>
-            `);
-        }
-
-        function savePhotoNotes(id) {
-            const photo = currentProject.photos.find(p => p.id === id);
-            photo.notes = document.getElementById('editPhotoNotes').value;
-            saveProject(currentProject);
-            closeModal();
-            switchTab('photos');
-        }
-
-        function deletePhoto(id) {
-            if (confirm('Delete this photo?')) {
-                currentProject.photos = currentProject.photos.filter(p => p.id !== id);
-                saveProject(currentProject);
-                switchTab('photos');
-            }
-        }
-
-        function openSafetyModal() {
-            showModal(`
-                <h3>Report Safety Incident</h3>
-                <div class="form-group">
-                    <label>Incident Title *</label>
-                    <input type="text" id="safetyTitle" placeholder="Brief description of incident">
-                </div>
-                <div class="form-group">
-                    <label>Severity *</label>
-                    <select id="safetySeverity">
-                        <option value="low">Low - Minor issue</option>
-                        <option value="medium" selected>Medium - Requires attention</option>
-                        <option value="high">High - Serious concern</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Location *</label>
-                    <input type="text" id="safetyLocation" placeholder="Where did this occur?">
-                </div>
-                <div class="form-group">
-                    <label>Description *</label>
-                    <textarea id="safetyDescription" rows="4" placeholder="Detailed description of the incident..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Action Taken</label>
-                    <textarea id="safetyAction" rows="3" placeholder="What actions were taken to address this?"></textarea>
-                </div>
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button class="btn btn-danger" onclick="createSafety()">Report Incident</button>
-                </div>
-            `);
-        }
-
-        function createSafety() {
-            const title = document.getElementById('safetyTitle').value;
-            const description = document.getElementById('safetyDescription').value;
-            const location = document.getElementById('safetyLocation').value;
-
-            if (!title || !description || !location) {
-                alert('Please fill in required fields');
-                return;
-            }
-
-            currentProject.safety = currentProject.safety || [];
-            currentProject.safety.push({
-                id: 'saf_' + Date.now(),
-                title: title,
-                severity: document.getElementById('safetySeverity').value,
-                location: location,
-                description: description,
-                actionTaken: document.getElementById('safetyAction').value,
-                createdBy: currentUser.name,
-                created: new Date().toISOString()
-            });
-            
-            saveProject(currentProject);
-            closeModal();
-            switchTab('safety');
-        }
-
-        function editSafety(id) {
-            const safety = currentProject.safety.find(s => s.id === id);
-            showModal(`
-                <h3>Edit Safety Report</h3>
-                <div class="form-group">
-                    <label>Severity</label>
-                    <select id="editSafetySeverity">
-                        <option value="low" ${safety.severity === 'low' ? 'selected' : ''}>Low</option>
-                        <option value="medium" ${safety.severity === 'medium' ? 'selected' : ''}>Medium</option>
-                        <option value="high" ${safety.severity === 'high' ? 'selected' : ''}>High</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Action Taken</label>
-                    <textarea id="editSafetyAction" rows="3">${safety.actionTaken || ''}</textarea>
-                </div>
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button class="btn btn-primary" onclick="saveSafety('${id}')">Save Changes</button>
-                </div>
-            `);
-        }
-
-        function saveSafety(id) {
-            const safety = currentProject.safety.find(s => s.id === id);
-            safety.severity = document.getElementById('editSafetySeverity').value;
-            safety.actionTaken = document.getElementById('editSafetyAction').value;
-            saveProject(currentProject);
-            closeModal();
-            switchTab('safety');
-        }
-
-        function deleteSafety(id) {
-            if (confirm('Delete this safety report?')) {
-                currentProject.safety = currentProject.safety.filter(s => s.id !== id);
-                saveProject(currentProject);
-                switchTab('safety');
-            }
-        }
-
-        function saveProject(project) {
-            const allProjects = JSON.parse(localStorage.getItem('pc_projects') || '[]');
-            const index = allProjects.findIndex(p => p.id === project.id);
-            if (index !== -1) {
-                allProjects[index] = project;
-            } else {
-                allProjects.push(project);
-            }
-            localStorage.setItem('pc_projects', JSON.stringify(allProjects));
-            if (currentProject && project.id === currentProject.id) {
-                currentProject = project;
-            }
-            loadProjects();
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         function showModal(content) {

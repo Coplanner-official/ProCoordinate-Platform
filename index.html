@@ -562,92 +562,6 @@
             font-weight: 700;
         }
         
-        /* Items List */
-        .items-list {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-        
-        .item-card {
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 18px;
-            transition: all 0.2s;
-        }
-        
-        .item-card:hover {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        
-        .item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 10px;
-        }
-        
-        .item-title {
-            font-weight: 600;
-            font-size: 16px;
-            color: #111827;
-            margin-bottom: 4px;
-        }
-        
-        .item-id {
-            font-size: 12px;
-            color: #6b7280;
-        }
-        
-        .item-actions {
-            display: flex;
-            gap: 6px;
-        }
-        
-        .status-badge {
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        
-        .status-open { background: #fee2e2; color: #991b1b; }
-        .status-answered { background: #d1fae5; color: #065f46; }
-        .status-closed { background: #e5e7eb; color: #374151; }
-        .status-pending { background: #fef3c7; color: #92400e; }
-        .status-approved { background: #d1fae5; color: #065f46; }
-        .status-rejected { background: #fee2e2; color: #991b1b; }
-        
-        .item-description {
-            color: #4b5563;
-            line-height: 1.6;
-            margin-bottom: 10px;
-            font-size: 14px;
-        }
-        
-        .item-notes {
-            background: #fffbeb;
-            border-left: 3px solid #f59e0b;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 4px;
-            font-size: 13px;
-            color: #78350f;
-        }
-        
-        .item-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 12px;
-            color: #6b7280;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid #e5e7eb;
-        }
-        
         .empty-state {
             text-align: center;
             padding: 50px 20px;
@@ -658,167 +572,6 @@
             font-size: 48px;
             margin-bottom: 12px;
             opacity: 0.3;
-        }
-        
-        /* Daily Log specific */
-        .daily-log-card {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 16px;
-        }
-        
-        .daily-log-date {
-            font-size: 18px;
-            font-weight: 700;
-            color: #111827;
-            margin-bottom: 12px;
-        }
-        
-        .daily-log-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            margin-bottom: 14px;
-        }
-        
-        .daily-log-field {
-            background: #f9fafb;
-            padding: 10px;
-            border-radius: 6px;
-        }
-        
-        .daily-log-field-label {
-            font-size: 11px;
-            color: #6b7280;
-            margin-bottom: 4px;
-        }
-        
-        .daily-log-field-value {
-            font-weight: 600;
-            color: #111827;
-        }
-        
-        .daily-log-report {
-            background: #f9fafb;
-            padding: 14px;
-            border-radius: 6px;
-            margin-bottom: 12px;
-        }
-        
-        .daily-log-report h4 {
-            font-size: 13px;
-            color: #6b7280;
-            margin-bottom: 8px;
-        }
-        
-        .daily-log-attachments {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-top: 10px;
-        }
-        
-        .attachment-chip {
-            background: #dbeafe;
-            color: #1e40af;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        
-        /* Photo Grid */
-        .photo-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 14px;
-        }
-        
-        .photo-card {
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        
-        .photo-preview {
-            background: #e5e7eb;
-            height: 140px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            color: #9ca3af;
-        }
-        
-        .photo-info {
-            padding: 12px;
-        }
-        
-        .photo-title {
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 4px;
-            color: #111827;
-        }
-        
-        .photo-meta {
-            font-size: 12px;
-            color: #6b7280;
-            margin-bottom: 8px;
-        }
-        
-        .photo-actions {
-            display: flex;
-            gap: 6px;
-        }
-        
-        /* Messages */
-        .messages-container {
-            max-height: 450px;
-            overflow-y: auto;
-            margin-bottom: 18px;
-            padding-right: 8px;
-        }
-        
-        .message-item {
-            background: #f9fafb;
-            padding: 14px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #e5e7eb;
-        }
-        
-        .message-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-        
-        .message-author {
-            font-weight: 600;
-            color: #111827;
-            font-size: 14px;
-        }
-        
-        .message-time {
-            font-size: 12px;
-            color: #6b7280;
-        }
-        
-        .message-text {
-            color: #4b5563;
-            line-height: 1.5;
-            font-size: 14px;
-        }
-        
-        .message-input-area {
-            background: #f9fafb;
-            padding: 16px;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
         }
         
         /* Modal */
@@ -866,37 +619,12 @@
             flex: 1;
         }
         
-        .file-upload {
-            border: 2px dashed #d1d5db;
-            border-radius: 8px;
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: #f9fafb;
-        }
-        
-        .file-upload:hover {
-            border-color: #3b82f6;
-            background: #eff6ff;
-        }
-        
-        .file-upload-icon {
-            font-size: 36px;
-            color: #9ca3af;
-            margin-bottom: 10px;
-        }
-        
         @media (max-width: 768px) {
             .projects-grid {
                 grid-template-columns: 1fr;
             }
             
-            .project-meta, .daily-log-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .photo-grid {
+            .project-meta {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
@@ -925,7 +653,7 @@
             </div>
             
             <div class="forgot-password" id="forgotPasswordLink">
-                <a href="#" onclick="openForgotPassword(event)">Forgot password?</a>
+                <a href="#" id="forgotPasswordBtn">Forgot password?</a>
             </div>
             
             <div class="form-group hidden" id="nameGroup">
@@ -1190,7 +918,7 @@
             }
         });
 
-        function openForgotPassword(e) {
+        document.getElementById('forgotPasswordBtn').addEventListener('click', (e) => {
             e.preventDefault();
             showModal(`
                 <h3>Reset Password</h3>
@@ -1203,10 +931,12 @@
                 </div>
                 <div class="modal-actions">
                     <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button class="btn btn-primary" onclick="sendResetEmail()">Send Reset Link</button>
+                    <button class="btn btn-primary" id="sendResetBtn">Send Reset Link</button>
                 </div>
             `);
-        }
+            
+            document.getElementById('sendResetBtn').addEventListener('click', sendResetEmail);
+        });
 
         async function sendResetEmail() {
             const email = document.getElementById('resetEmail').value.trim();
@@ -1216,7 +946,9 @@
             }
 
             showLoading();
-            const { error } = await supabase.auth.resetPasswordForEmail(email);
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.origin
+            });
             hideLoading();
 
             if (error) {
@@ -1244,10 +976,12 @@
             const { data, error } = await supabase
                 .from('projects')
                 .select('*')
-                .eq('user_id', currentUser.id);
+                .eq('user_id', currentUser.id)
+                .order('created_at', { ascending: false });
             
             if (error) {
                 console.error('Error loading projects:', error);
+                alert('Error loading projects: ' + error.message);
                 projects = [];
             } else {
                 projects = data || [];
@@ -1277,8 +1011,8 @@
                             ${avatarContent}
                         </div>
                         <div class="project-header">
-                            <h3>${p.name}</h3>
-                            <p>${p.location || 'No location specified'}</p>
+                            <h3>${escapeHtml(p.name)}</h3>
+                            <p>${escapeHtml(p.location || 'No location specified')}</p>
                         </div>
                         <div class="project-body">
                             <div class="project-stats">
@@ -1340,8 +1074,8 @@
             const headerHTML = `
                 <div class="project-detail-header">
                     <div>
-                        <h2>${currentProject.name}</h2>
-                        <p style="color: #6b7280; margin-bottom: 0;">${currentProject.description || ''}</p>
+                        <h2>${escapeHtml(currentProject.name)}</h2>
+                        <p style="color: #6b7280; margin-bottom: 0;">${escapeHtml(currentProject.description || '')}</p>
                     </div>
                     <div class="project-detail-actions">
                         <button class="btn btn-secondary btn-small" onclick="openEditProjectModal()">✏️ Edit Project</button>
@@ -1365,7 +1099,7 @@
                 </div>
                 <div class="meta-box">
                     <div class="meta-label">Location</div>
-                    <div class="meta-value">${currentProject.location || 'N/A'}</div>
+                    <div class="meta-value">${escapeHtml(currentProject.location || 'N/A')}</div>
                 </div>
                 <div class="meta-box">
                     <div class="meta-label">Budget</div>
@@ -1433,14 +1167,14 @@
                             ?
                         </div>
                         <div style="flex: 1;">
-                            <input type="text" id="projectAvatar" placeholder="Enter emoji 🏗️ or image URL" oninput="updateAvatarPreview()">
-                            <small style="color: #6b7280; display: block; margin-top: 4px;">Add an emoji (🏗️ 🏢 🏠 🏭) or image URL to represent your project</small>
+                            <input type="text" id="projectAvatar" placeholder="Enter emoji 🏗️ or image URL">
+                            <small style="color: #6b7280; display: block; margin-top: 4px;">Add an emoji (🏗️ 🏢 🏠 🏭) or image URL</small>
                         </div>
                     </div>
                 </div>
                 <div class="form-group">
                     <label>Project Name *</label>
-                    <input type="text" id="projectName" oninput="updateAvatarPreview()">
+                    <input type="text" id="projectName">
                 </div>
                 <div class="form-group">
                     <label>Description</label>
@@ -1464,15 +1198,41 @@
                 </div>
                 <div class="modal-actions">
                     <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button class="btn btn-primary" onclick="createProject()">Create Project</button>
+                    <button class="btn btn-primary" id="createProjectBtn">Create Project</button>
                 </div>
             `);
+            
+            // Add event listeners after modal is created
+            setTimeout(() => {
+                const avatarInput = document.getElementById('projectAvatar');
+                const nameInput = document.getElementById('projectName');
+                const createBtn = document.getElementById('createProjectBtn');
+                
+                if (avatarInput) {
+                    avatarInput.addEventListener('input', updateAvatarPreview);
+                }
+                if (nameInput) {
+                    nameInput.addEventListener('input', updateAvatarPreview);
+                }
+                if (createBtn) {
+                    createBtn.addEventListener('click', createProject);
+                }
+            }, 100);
         }
 
         async function createProject() {
-            const name = document.getElementById('projectName').value.trim();
-            const startDate = document.getElementById('projectStart').value.trim();
-            const endDate = document.getElementById('projectEnd').value.trim();
+            const nameInput = document.getElementById('projectName');
+            const startInput = document.getElementById('projectStart');
+            const endInput = document.getElementById('projectEnd');
+            
+            if (!nameInput || !startInput || !endInput) {
+                alert('Form fields not found');
+                return;
+            }
+            
+            const name = nameInput.value.trim();
+            const startDate = startInput.value.trim();
+            const endDate = endInput.value.trim();
 
             if (!name) {
                 alert('Please enter a project name');
@@ -1489,18 +1249,21 @@
                 return;
             }
 
-            const avatarInput = document.getElementById('projectAvatar').value.trim();
+            const avatarInput = document.getElementById('projectAvatar');
+            const descInput = document.getElementById('projectDesc');
+            const locationInput = document.getElementById('projectLocation');
+            const budgetInput = document.getElementById('projectBudget');
 
             const project = {
                 id: 'proj_' + Date.now(),
                 user_id: currentUser.id,
                 name: name,
-                description: document.getElementById('projectDesc').value,
+                description: descInput ? descInput.value : '',
                 start_date: startDate,
                 end_date: endDate,
-                location: document.getElementById('projectLocation').value,
-                budget: parseInt(document.getElementById('projectBudget').value) || 0,
-                avatar: avatarInput || null,
+                location: locationInput ? locationInput.value : '',
+                budget: budgetInput ? (parseInt(budgetInput.value) || 0) : 0,
+                avatar: avatarInput ? (avatarInput.value.trim() || null) : null,
                 drawings: [],
                 rfis: [],
                 submittals: [],
@@ -1517,6 +1280,7 @@
             
             if (error) {
                 hideLoading();
+                console.error('Error creating project:', error);
                 alert('Error creating project: ' + error.message);
             } else {
                 await loadProjects();
@@ -1549,14 +1313,14 @@
                             ${avatarPreview}
                         </div>
                         <div style="flex: 1;">
-                            <input type="text" id="projectAvatar" placeholder="Paste image URL or emoji" value="${currentProject.avatar || ''}" oninput="updateAvatarPreview()">
+                            <input type="text" id="projectAvatar" placeholder="Paste image URL or emoji" value="${escapeHtml(currentProject.avatar || '')}">
                             <small style="color: #6b7280; display: block; margin-top: 4px;">Enter an emoji (🏗️ 🏢 🏠) or image URL</small>
                         </div>
                     </div>
                 </div>
                 <div class="form-group">
                     <label>Project Name *</label>
-                    <input type="text" id="projectName" value="${escapeHtml(currentProject.name)}" oninput="updateAvatarPreview()" required>
+                    <input type="text" id="projectName" value="${escapeHtml(currentProject.name)}" required>
                 </div>
                 <div class="form-group">
                     <label>Description</label>
@@ -1580,15 +1344,41 @@
                 </div>
                 <div class="modal-actions">
                     <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button class="btn btn-primary" onclick="updateProject()">Save Changes</button>
+                    <button class="btn btn-primary" id="updateProjectBtn">Save Changes</button>
                 </div>
             `);
+            
+            // Add event listeners after modal is created
+            setTimeout(() => {
+                const avatarInput = document.getElementById('projectAvatar');
+                const nameInput = document.getElementById('projectName');
+                const updateBtn = document.getElementById('updateProjectBtn');
+                
+                if (avatarInput) {
+                    avatarInput.addEventListener('input', updateAvatarPreview);
+                }
+                if (nameInput) {
+                    nameInput.addEventListener('input', updateAvatarPreview);
+                }
+                if (updateBtn) {
+                    updateBtn.addEventListener('click', updateProject);
+                }
+            }, 100);
         }
 
         async function updateProject() {
-            const name = document.getElementById('projectName').value.trim();
-            const startDate = document.getElementById('projectStart').value.trim();
-            const endDate = document.getElementById('projectEnd').value.trim();
+            const nameInput = document.getElementById('projectName');
+            const startInput = document.getElementById('projectStart');
+            const endInput = document.getElementById('projectEnd');
+            
+            if (!nameInput || !startInput || !endInput) {
+                alert('Form fields not found');
+                return;
+            }
+            
+            const name = nameInput.value.trim();
+            const startDate = startInput.value.trim();
+            const endDate = endInput.value.trim();
 
             if (!name) {
                 alert('Please enter a project name');
@@ -1605,24 +1395,28 @@
                 return;
             }
 
-            const avatarInput = document.getElementById('projectAvatar').value.trim();
+            const avatarInput = document.getElementById('projectAvatar');
+            const descInput = document.getElementById('projectDesc');
+            const locationInput = document.getElementById('projectLocation');
+            const budgetInput = document.getElementById('projectBudget');
 
             showLoading();
             const { error } = await supabase
                 .from('projects')
                 .update({
                     name: name,
-                    description: document.getElementById('projectDesc').value,
+                    description: descInput ? descInput.value : '',
                     start_date: startDate,
                     end_date: endDate,
-                    location: document.getElementById('projectLocation').value,
-                    budget: parseInt(document.getElementById('projectBudget').value) || 0,
-                    avatar: avatarInput || null
+                    location: locationInput ? locationInput.value : '',
+                    budget: budgetInput ? (parseInt(budgetInput.value) || 0) : 0,
+                    avatar: avatarInput ? (avatarInput.value.trim() || null) : null
                 })
                 .eq('id', currentProject.id);
 
             if (error) {
                 hideLoading();
+                console.error('Error updating project:', error);
                 alert('Error updating project: ' + error.message);
             } else {
                 await loadProjects();
@@ -1660,9 +1454,9 @@
             const nameInput = document.getElementById('projectName');
             const preview = document.getElementById('avatarPreview');
             
-            if (!avatarInput || !preview) return;
+            if (!preview) return;
             
-            const avatarValue = avatarInput.value.trim();
+            const avatarValue = avatarInput ? avatarInput.value.trim() : '';
             
             if (avatarValue) {
                 if (avatarValue.startsWith('http://') || avatarValue.startsWith('https://')) {
@@ -1677,6 +1471,7 @@
         }
 
         function escapeHtml(text) {
+            if (!text) return '';
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
@@ -1702,16 +1497,6 @@
             const month = date.toLocaleDateString('en-GB', { month: 'short' });
             const year = date.getFullYear();
             return `${day} ${month} ${year}`;
-        }
-
-        function formatDateTime(dateStr) {
-            if (!dateStr) return '-';
-            const date = new Date(dateStr);
-            const day = date.getDate();
-            const month = date.toLocaleDateString('en-GB', { month: 'short' });
-            const year = date.getFullYear();
-            const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-            return `${day} ${month} ${year}, ${time}`;
         }
     </script>
 </body>

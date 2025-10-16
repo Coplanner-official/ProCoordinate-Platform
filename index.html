@@ -909,7 +909,7 @@
         });
 
         async function handleSendResetEmail() {
-            const email = document.getElementById('resetEmail')?.value?.trim();
+            const email = document.querySelector('#resetEmail')?.value?.trim();
             if (!email) {
                 alert('Please enter your email address');
                 return;
@@ -1115,68 +1115,87 @@
         }
 
         function openProjectModal() {
+            const modalId = 'projectModal_' + Date.now();
             showModal(`
-                <h3>Create New Project</h3>
-                <div class="form-group">
-                    <label>Project Avatar (Optional)</label>
-                    <div style="display: flex; gap: 16px; align-items: center;">
-                        <div id="avatarPreview" style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); display: flex; align-items: center; justify-content: center; font-size: 32px; color: white; font-weight: 700;">?</div>
-                        <div style="flex: 1;">
-                            <input type="text" id="projectAvatar" placeholder="🏗️ or image URL">
-                            <small style="color: #6b7280; display: block; margin-top: 4px;">Emoji or image URL</small>
+                <form id="${modalId}" onsubmit="return false;">
+                    <h3>Create New Project</h3>
+                    <div class="form-group">
+                        <label>Project Avatar (Optional)</label>
+                        <div style="display: flex; gap: 16px; align-items: center;">
+                            <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); display: flex; align-items: center; justify-content: center; font-size: 32px; color: white; font-weight: 700;">?</div>
+                            <div style="flex: 1;">
+                                <input type="text" name="avatar" placeholder="🏗️ or image URL">
+                                <small style="color: #6b7280; display: block; margin-top: 4px;">Emoji or image URL</small>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label>Project Name *</label>
-                    <input type="text" id="projectName">
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="projectDesc" rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Start Date *</label>
-                    <input type="date" id="projectStart">
-                </div>
-                <div class="form-group">
-                    <label>End Date *</label>
-                    <input type="date" id="projectEnd">
-                </div>
-                <div class="form-group">
-                    <label>Location</label>
-                    <input type="text" id="projectLocation">
-                </div>
-                <div class="form-group">
-                    <label>Budget (£)</label>
-                    <input type="number" id="projectBudget">
-                </div>
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button class="btn btn-primary" onclick="handleCreateProject()">Create Project</button>
-                </div>
+                    <div class="form-group">
+                        <label>Project Name *</label>
+                        <input type="text" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea name="description" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Start Date *</label>
+                        <input type="date" name="startDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>End Date *</label>
+                        <input type="date" name="endDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" name="location">
+                    </div>
+                    <div class="form-group">
+                        <label>Budget (£)</label>
+                        <input type="number" name="budget">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="handleCreateProject('${modalId}')">Create Project</button>
+                    </div>
+                </form>
             `);
         }
 
-        async function handleCreateProject() {
-            const name = document.getElementById('projectName')?.value?.trim();
-            const startDate = document.getElementById('projectStart')?.value?.trim();
-            const endDate = document.getElementById('projectEnd')?.value?.trim();
+        async function handleCreateProject(formId) {
+            const form = document.getElementById(formId);
+            if (!form) {
+                alert('Form not found');
+                return;
+            }
 
-            if (!name) { alert('Please enter project name'); return; }
-            if (!startDate) { alert('Please select start date'); return; }
-            if (!endDate) { alert('Please select end date'); return; }
+            const formData = new FormData(form);
+            const name = formData.get('name')?.trim();
+            const startDate = formData.get('startDate')?.trim();
+            const endDate = formData.get('endDate')?.trim();
+
+            if (!name) { 
+                alert('Please enter project name'); 
+                return; 
+            }
+            if (!startDate) { 
+                alert('Please select start date'); 
+                return; 
+            }
+            if (!endDate) { 
+                alert('Please select end date'); 
+                return; 
+            }
 
             const project = {
                 id: 'proj_' + Date.now(),
                 user_id: currentUser.id,
                 name,
-                description: document.getElementById('projectDesc')?.value || '',
+                description: formData.get('description') || '',
                 start_date: startDate,
                 end_date: endDate,
-                location: document.getElementById('projectLocation')?.value || '',
-                budget: parseInt(document.getElementById('projectBudget')?.value) || 0,
-                avatar: document.getElementById('projectAvatar')?.value?.trim() || null,
+                location: formData.get('location') || '',
+                budget: parseInt(formData.get('budget')) || 0,
+                avatar: formData.get('avatar')?.trim() || null,
                 drawings: [], rfis: [], submittals: [], daily_logs: [], photos: [], safety: [], messages: []
             };
             
@@ -1197,53 +1216,63 @@
             if (currentProject.avatar?.startsWith('http')) {
                 avatarPreview = `<img src="${currentProject.avatar}" style="width: 100%; height: 100%; object-fit: cover;">`;
             }
-            
+
+            const modalId = 'editModal_' + Date.now();
             showModal(`
-                <h3>Edit Project</h3>
-                <div class="form-group">
-                    <label>Project Avatar</label>
-                    <div style="display: flex; gap: 16px; align-items: center;">
-                        <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); display: flex; align-items: center; justify-content: center; font-size: 32px; color: white; font-weight: 700; overflow: hidden;">${avatarPreview}</div>
-                        <div style="flex: 1;">
-                            <input type="text" id="projectAvatar" value="${escapeHtml(currentProject.avatar || '')}" placeholder="🏗️ or URL">
+                <form id="${modalId}" onsubmit="return false;">
+                    <h3>Edit Project</h3>
+                    <div class="form-group">
+                        <label>Project Avatar</label>
+                        <div style="display: flex; gap: 16px; align-items: center;">
+                            <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); display: flex; align-items: center; justify-content: center; font-size: 32px; color: white; font-weight: 700; overflow: hidden;">${avatarPreview}</div>
+                            <div style="flex: 1;">
+                                <input type="text" name="avatar" value="${escapeHtml(currentProject.avatar || '')}" placeholder="🏗️ or URL">
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label>Project Name *</label>
-                    <input type="text" id="projectName" value="${escapeHtml(currentProject.name)}">
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="projectDesc" rows="3">${escapeHtml(currentProject.description || '')}</textarea>
-                </div>
-                <div class="form-group">
-                    <label>Start Date *</label>
-                    <input type="date" id="projectStart" value="${currentProject.start_date || ''}">
-                </div>
-                <div class="form-group">
-                    <label>End Date *</label>
-                    <input type="date" id="projectEnd" value="${currentProject.end_date || ''}">
-                </div>
-                <div class="form-group">
-                    <label>Location</label>
-                    <input type="text" id="projectLocation" value="${escapeHtml(currentProject.location || '')}">
-                </div>
-                <div class="form-group">
-                    <label>Budget (£)</label>
-                    <input type="number" id="projectBudget" value="${currentProject.budget || ''}">
-                </div>
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button class="btn btn-primary" onclick="handleUpdateProject()">Save Changes</button>
-                </div>
+                    <div class="form-group">
+                        <label>Project Name *</label>
+                        <input type="text" name="name" value="${escapeHtml(currentProject.name)}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea name="description" rows="3">${escapeHtml(currentProject.description || '')}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Start Date *</label>
+                        <input type="date" name="startDate" value="${currentProject.start_date || ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>End Date *</label>
+                        <input type="date" name="endDate" value="${currentProject.end_date || ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" name="location" value="${escapeHtml(currentProject.location || '')}">
+                    </div>
+                    <div class="form-group">
+                        <label>Budget (£)</label>
+                        <input type="number" name="budget" value="${currentProject.budget || ''}">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="handleUpdateProject('${modalId}')">Save Changes</button>
+                    </div>
+                </form>
             `);
         }
 
-        async function handleUpdateProject() {
-            const name = document.getElementById('projectName')?.value?.trim();
-            const startDate = document.getElementById('projectStart')?.value?.trim();
-            const endDate = document.getElementById('projectEnd')?.value?.trim();
+        async function handleUpdateProject(formId) {
+            const form = document.getElementById(formId);
+            if (!form) {
+                alert('Form not found');
+                return;
+            }
+
+            const formData = new FormData(form);
+            const name = formData.get('name')?.trim();
+            const startDate = formData.get('startDate')?.trim();
+            const endDate = formData.get('endDate')?.trim();
 
             if (!name) { alert('Please enter project name'); return; }
             if (!startDate) { alert('Please select start date'); return; }
@@ -1252,12 +1281,12 @@
             showLoading();
             const { error } = await supabase.from('projects').update({
                 name,
-                description: document.getElementById('projectDesc')?.value || '',
+                description: formData.get('description') || '',
                 start_date: startDate,
                 end_date: endDate,
-                location: document.getElementById('projectLocation')?.value || '',
-                budget: parseInt(document.getElementById('projectBudget')?.value) || 0,
-                avatar: document.getElementById('projectAvatar')?.value?.trim() || null
+                location: formData.get('location') || '',
+                budget: parseInt(formData.get('budget')) || 0,
+                avatar: formData.get('avatar')?.trim() || null
             }).eq('id', currentProject.id);
 
             if (error) {

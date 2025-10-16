@@ -186,51 +186,6 @@
             cursor: pointer;
         }
         
-        .install-banner {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: white;
-            padding: 16px 24px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-            display: none;
-            align-items: center;
-            gap: 16px;
-            z-index: 1001;
-            max-width: 90%;
-            width: 400px;
-        }
-        
-        .install-banner.show {
-            display: flex;
-        }
-        
-        .install-banner-icon {
-            font-size: 32px;
-        }
-        
-        .install-banner-content {
-            flex: 1;
-        }
-        
-        .install-banner-title {
-            font-weight: 600;
-            color: #111827;
-            margin-bottom: 4px;
-        }
-        
-        .install-banner-text {
-            font-size: 13px;
-            color: #6b7280;
-        }
-        
-        .install-banner-buttons {
-            display: flex;
-            gap: 8px;
-        }
-        
         .navbar {
             background: white;
             border-bottom: 1px solid #e5e7eb;
@@ -573,6 +528,59 @@
             opacity: 0.3;
         }
         
+        .item-card {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 8px;
+        }
+        
+        .item-title {
+            font-weight: 600;
+            color: #111827;
+            font-size: 15px;
+        }
+        
+        .item-meta {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        
+        .item-actions {
+            display: flex;
+            gap: 6px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-open { background: #dbeafe; color: #1e40af; }
+        .status-answered { background: #d1fae5; color: #065f46; }
+        .status-closed { background: #e5e7eb; color: #374151; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-approved { background: #d1fae5; color: #065f46; }
+        .status-rejected { background: #fee2e2; color: #991b1b; }
+        
+        .priority-low { color: #10b981; }
+        .priority-medium { color: #f59e0b; }
+        .priority-high { color: #ef4444; }
+        .priority-critical { color: #dc2626; font-weight: 700; }
+        
         .modal {
             display: none;
             position: fixed;
@@ -615,6 +623,38 @@
         
         .modal-actions .btn {
             flex: 1;
+        }
+        
+        .message-bubble {
+            background: #eff6ff;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border-left: 3px solid #3b82f6;
+        }
+        
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        
+        .message-author {
+            font-weight: 600;
+            color: #1e40af;
+            font-size: 14px;
+        }
+        
+        .message-time {
+            font-size: 11px;
+            color: #6b7280;
+        }
+        
+        .message-text {
+            color: #374151;
+            font-size: 14px;
+            line-height: 1.5;
         }
         
         @media (max-width: 768px) {
@@ -727,18 +767,6 @@
         <div class="modal-content" id="modalContent"></div>
     </div>
 
-    <div id="installBanner" class="install-banner">
-        <div class="install-banner-icon">📱</div>
-        <div class="install-banner-content">
-            <div class="install-banner-title">Install ProCoordinate</div>
-            <div class="install-banner-text">Add to home screen for quick access</div>
-        </div>
-        <div class="install-banner-buttons">
-            <button class="btn btn-secondary btn-small" onclick="dismissInstallBanner()">Later</button>
-            <button class="btn btn-primary btn-small" onclick="installApp()">Install</button>
-        </div>
-    </div>
-
     <script>
         const SUPABASE_URL = 'https://ilfgmgajivusmqarkaqd.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsZmdtZ2FqaXZ1c21xYXJrYXFkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3MDY0NzYsImV4cCI6MjA3NDI4MjQ3Nn0.ysd2Y8DuxGWe99eM3PxbkIuvw62Vgp-68lZMJjkd7do';
@@ -749,33 +777,6 @@
         let projects = [];
         let isSignup = false;
         let activeTab = 'overview';
-        let deferredPrompt = null;
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            const dismissed = sessionStorage.getItem('installDismissed');
-            if (!dismissed && currentUser) {
-                setTimeout(() => {
-                    document.getElementById('installBanner').classList.add('show');
-                }, 3000);
-            }
-        });
-
-        function installApp() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then(() => {
-                    deferredPrompt = null;
-                    document.getElementById('installBanner').classList.remove('show');
-                });
-            }
-        }
-
-        function dismissInstallBanner() {
-            document.getElementById('installBanner').classList.remove('show');
-            sessionStorage.setItem('installDismissed', 'true');
-        }
 
         function showLoading() {
             document.getElementById('loadingSpinner').classList.remove('hidden');
@@ -864,14 +865,6 @@
                     alert('Error: ' + error.message);
                 } else {
                     alert('Account created! Please check your email to verify your account.');
-                    isSignup = false;
-                    document.getElementById('authBtn').textContent = 'Sign In';
-                    document.getElementById('authToggleText').textContent = "Don't have an account?";
-                    document.getElementById('authToggleLink').textContent = 'Sign up';
-                    document.getElementById('nameGroup').classList.add('hidden');
-                    document.getElementById('companyGroup').classList.add('hidden');
-                    document.getElementById('roleGroup').classList.add('hidden');
-                    document.getElementById('forgotPasswordLink').classList.remove('hidden');
                 }
             } else {
                 const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -1088,46 +1081,262 @@
             }
             
             const content = document.getElementById('tabContent');
+            
             if (tab === 'overview') {
-                content.innerHTML = `
-                    <h3 style="margin-bottom: 20px;">Project Overview</h3>
-                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
-                        ${[
-                            { label: 'Drawings', value: (currentProject.drawings || []).length, color: '#3b82f6' },
-                            { label: 'RFIs', value: (currentProject.rfis || []).length, color: '#ef4444' },
-                            { label: 'Submittals', value: (currentProject.submittals || []).length, color: '#f59e0b' },
-                            { label: 'Daily Logs', value: (currentProject.daily_logs || []).length, color: '#8b5cf6' },
-                            { label: 'Photos', value: (currentProject.photos || []).length, color: '#ec4899' },
-                            { label: 'Safety Reports', value: (currentProject.safety || []).length, color: '#f97316' },
-                            { label: 'Messages', value: (currentProject.messages || []).length, color: '#06b6d4' },
-                            { label: 'Team Members', value: '1', color: '#10b981' },
-                        ].map(stat => `
-                            <div style="background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%); padding: 20px; border-radius: 10px;">
-                                <div style="font-size: 32px; font-weight: 700; color: ${stat.color}; margin-bottom: 6px;">${stat.value}</div>
-                                <div style="color: #6b7280; font-weight: 500; font-size: 14px;">${stat.label}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            } else {
-                content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🚧</div><p>Feature coming soon</p></div>';
+                renderOverview(content);
+            } else if (tab === 'drawings') {
+                renderDrawings(content);
+            } else if (tab === 'rfis') {
+                renderRFIs(content);
+            } else if (tab === 'submittals') {
+                renderSubmittals(content);
+            } else if (tab === 'dailyLogs') {
+                renderDailyLogs(content);
+            } else if (tab === 'photos') {
+                renderPhotos(content);
+            } else if (tab === 'safety') {
+                renderSafety(content);
+            } else if (tab === 'messages') {
+                renderMessages(content);
             }
+        }
+
+        function renderOverview(content) {
+            content.innerHTML = `
+                <h3 style="margin-bottom: 20px;">Project Overview</h3>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
+                    ${[
+                        { label: 'Drawings', value: (currentProject.drawings || []).length, color: '#3b82f6' },
+                        { label: 'RFIs', value: (currentProject.rfis || []).length, color: '#ef4444' },
+                        { label: 'Submittals', value: (currentProject.submittals || []).length, color: '#f59e0b' },
+                        { label: 'Daily Logs', value: (currentProject.daily_logs || []).length, color: '#8b5cf6' },
+                        { label: 'Photos', value: (currentProject.photos || []).length, color: '#ec4899' },
+                        { label: 'Safety Reports', value: (currentProject.safety || []).length, color: '#f97316' },
+                        { label: 'Messages', value: (currentProject.messages || []).length, color: '#06b6d4' },
+                        { label: 'Team Members', value: '1', color: '#10b981' },
+                    ].map(stat => `
+                        <div style="background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%); padding: 20px; border-radius: 10px;">
+                            <div style="font-size: 32px; font-weight: 700; color: ${stat.color}; margin-bottom: 6px;">${stat.value}</div>
+                            <div style="color: #6b7280; font-weight: 500; font-size: 14px;">${stat.label}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderDrawings(content) {
+            const drawings = currentProject.drawings || [];
+            content.innerHTML = `
+                <div class="section-header">
+                    <h3>📐 Drawings</h3>
+                    <button class="btn btn-primary btn-small" onclick="openDrawingModal()">+ Add Drawing</button>
+                </div>
+                ${drawings.length === 0 ? 
+                    '<div class="empty-state"><div class="empty-state-icon">📐</div><p>No drawings yet. Add your first drawing!</p></div>' :
+                    drawings.map(d => `
+                        <div class="item-card">
+                            <div class="item-header">
+                                <div>
+                                    <div class="item-title">${escapeHtml(d.name)}</div>
+                                    <div class="item-meta">Version ${d.version} • ${formatDateTime(d.date)}</div>
+                                    ${d.notes ? `<div style="margin-top: 6px; color: #6b7280; font-size: 13px;">${escapeHtml(d.notes)}</div>` : ''}
+                                </div>
+                                <div class="item-actions">
+                                    <button class="btn btn-secondary btn-small" onclick="editDrawing('${d.id}')">Edit</button>
+                                    <button class="btn btn-danger btn-small" onclick="deleteDrawing('${d.id}')">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')
+                }
+            `;
+        }
+
+        function renderRFIs(content) {
+            const rfis = currentProject.rfis || [];
+            content.innerHTML = `
+                <div class="section-header">
+                    <h3>❓ RFIs (Requests for Information)</h3>
+                    <button class="btn btn-primary btn-small" onclick="openRFIModal()">+ Create RFI</button>
+                </div>
+                ${rfis.length === 0 ? 
+                    '<div class="empty-state"><div class="empty-state-icon">❓</div><p>No RFIs yet. Create your first RFI!</p></div>' :
+                    rfis.map(r => `
+                        <div class="item-card">
+                            <div class="item-header">
+                                <div style="flex: 1;">
+                                    <div class="item-title">RFI-${String(r.number).padStart(3, '0')}: ${escapeHtml(r.title)}</div>
+                                    <div class="item-meta">
+                                        <span class="priority-${r.priority.toLowerCase()}">${r.priority} Priority</span> • 
+                                        ${formatDateTime(r.date)}
+                                    </div>
+                                    <div style="margin-top: 8px; color: #374151; font-size: 13px;">${escapeHtml(r.question)}</div>
+                                    ${r.response ? `<div style="margin-top: 8px; padding: 10px; background: #d1fae5; border-radius: 6px; font-size: 13px;"><strong>Response:</strong> ${escapeHtml(r.response)}</div>` : ''}
+                                </div>
+                                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                                    <span class="status-badge status-${r.status.toLowerCase()}">${r.status}</span>
+                                    <div class="item-actions">
+                                        <button class="btn btn-secondary btn-small" onclick="editRFI('${r.id}')">Edit</button>
+                                        <button class="btn btn-danger btn-small" onclick="deleteRFI('${r.id}')">Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')
+                }
+            `;
+        }
+
+        function renderSubmittals(content) {
+            const submittals = currentProject.submittals || [];
+            content.innerHTML = `
+                <div class="section-header">
+                    <h3>📋 Submittals</h3>
+                    <button class="btn btn-primary btn-small" onclick="openSubmittalModal()">+ Add Submittal</button>
+                </div>
+                ${submittals.length === 0 ? 
+                    '<div class="empty-state"><div class="empty-state-icon">📋</div><p>No submittals yet. Add your first submittal!</p></div>' :
+                    submittals.map(s => `
+                        <div class="item-card">
+                            <div class="item-header">
+                                <div style="flex: 1;">
+                                    <div class="item-title">${escapeHtml(s.name)}</div>
+                                    <div class="item-meta">${s.type} • ${formatDateTime(s.date)}</div>
+                                    ${s.description ? `<div style="margin-top: 6px; color: #6b7280; font-size: 13px;">${escapeHtml(s.description)}</div>` : ''}
+                                    ${s.reviewNotes ? `<div style="margin-top: 8px; padding: 10px; background: #fef3c7; border-radius: 6px; font-size: 13px;"><strong>Review Notes:</strong> ${escapeHtml(s.reviewNotes)}</div>` : ''}
+                                </div>
+                                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                                    <span class="status-badge status-${s.status.toLowerCase()}">${s.status}</span>
+                                    <button class="btn btn-secondary btn-small" onclick="editSubmittal('${s.id}')">Review</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')
+                }
+            `;
+        }
+
+        function renderDailyLogs(content) {
+            const logs = currentProject.daily_logs || [];
+            content.innerHTML = `
+                <div class="section-header">
+                    <h3>📅 Daily Logs</h3>
+                    <button class="btn btn-primary btn-small" onclick="openDailyLogModal()">+ Add Daily Log</button>
+                </div>
+                ${logs.length === 0 ? 
+                    '<div class="empty-state"><div class="empty-state-icon">📅</div><p>No daily logs yet. Start logging your work!</p></div>' :
+                    logs.map(l => `
+                        <div class="item-card">
+                            <div class="item-header">
+                                <div style="flex: 1;">
+                                    <div class="item-title">${formatDate(l.date)}</div>
+                                    <div class="item-meta">Weather: ${l.weather} • Temp: ${l.temperature}°C • Workers: ${l.workers} • Hours: ${l.hours}</div>
+                                    <div style="margin-top: 8px; color: #374151; font-size: 13px; white-space: pre-wrap;">${escapeHtml(l.workReport)}</div>
+                                    ${l.photos ? `<div style="margin-top: 6px; color: #6b7280; font-size: 12px;">📷 Photos: ${escapeHtml(l.photos)}</div>` : ''}
+                                    ${l.drawings ? `<div style="margin-top: 2px; color: #6b7280; font-size: 12px;">📐 Drawings: ${escapeHtml(l.drawings)}</div>` : ''}
+                                </div>
+                                <div class="item-actions">
+                                    <button class="btn btn-secondary btn-small" onclick="editDailyLog('${l.id}')">Edit</button>
+                                    <button class="btn btn-danger btn-small" onclick="deleteDailyLog('${l.id}')">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')
+                }
+            `;
+        }
+
+        function renderPhotos(content) {
+            const photos = currentProject.photos || [];
+            content.innerHTML = `
+                <div class="section-header">
+                    <h3>📷 Photos</h3>
+                    <button class="btn btn-primary btn-small" onclick="openPhotoModal()">+ Add Photo</button>
+                </div>
+                ${photos.length === 0 ? 
+                    '<div class="empty-state"><div class="empty-state-icon">📷</div><p>No photos yet. Add your first photo!</p></div>' :
+                    photos.map(p => `
+                        <div class="item-card">
+                            <div class="item-header">
+                                <div style="flex: 1;">
+                                    <div class="item-title">${escapeHtml(p.title)}</div>
+                                    <div class="item-meta">${p.location ? escapeHtml(p.location) + ' • ' : ''}${formatDateTime(p.date)}</div>
+                                    ${p.notes ? `<div style="margin-top: 6px; color: #6b7280; font-size: 13px;">${escapeHtml(p.notes)}</div>` : ''}
+                                    ${p.url ? `<div style="margin-top: 8px;"><a href="${escapeHtml(p.url)}" target="_blank" style="color: #3b82f6;">View Photo</a></div>` : ''}
+                                </div>
+                                <div class="item-actions">
+                                    <button class="btn btn-secondary btn-small" onclick="editPhoto('${p.id}')">Edit</button>
+                                    <button class="btn btn-danger btn-small" onclick="deletePhoto('${p.id}')">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')
+                }
+            `;
+        }
+
+        function renderSafety(content) {
+            const reports = currentProject.safety || [];
+            content.innerHTML = `
+                <div class="section-header">
+                    <h3>🛡️ Safety Reports</h3>
+                    <button class="btn btn-primary btn-small" onclick="openSafetyModal()">+ Report Incident</button>
+                </div>
+                ${reports.length === 0 ? 
+                    '<div class="empty-state"><div class="empty-state-icon">🛡️</div><p>No safety reports yet. Stay safe!</p></div>' :
+                    reports.map(s => `
+                        <div class="item-card" style="border-left: 4px solid ${s.severity === 'High' ? '#ef4444' : s.severity === 'Medium' ? '#f59e0b' : '#10b981'};">
+                            <div class="item-header">
+                                <div style="flex: 1;">
+                                    <div class="item-title">${escapeHtml(s.type)}</div>
+                                    <div class="item-meta">
+                                        <span style="color: ${s.severity === 'High' ? '#ef4444' : s.severity === 'Medium' ? '#f59e0b' : '#10b981'}; font-weight: 600;">${s.severity} Severity</span> • 
+                                        ${s.location ? escapeHtml(s.location) + ' • ' : ''}${formatDateTime(s.date)}
+                                    </div>
+                                    <div style="margin-top: 8px; color: #374151; font-size: 13px;">${escapeHtml(s.description)}</div>
+                                    ${s.actionTaken ? `<div style="margin-top: 8px; padding: 10px; background: #d1fae5; border-radius: 6px; font-size: 13px;"><strong>Action Taken:</strong> ${escapeHtml(s.actionTaken)}</div>` : ''}
+                                </div>
+                                <div class="item-actions">
+                                    <button class="btn btn-secondary btn-small" onclick="editSafety('${s.id}')">Edit</button>
+                                    <button class="btn btn-danger btn-small" onclick="deleteSafety('${s.id}')">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')
+                }
+            `;
+        }
+
+        function renderMessages(content) {
+            const messages = currentProject.messages || [];
+            content.innerHTML = `
+                <div class="section-header">
+                    <h3>💬 Messages</h3>
+                    <button class="btn btn-primary btn-small" onclick="openMessageModal()">+ Send Message</button>
+                </div>
+                ${messages.length === 0 ? 
+                    '<div class="empty-state"><div class="empty-state-icon">💬</div><p>No messages yet. Start a conversation!</p></div>' :
+                    messages.map(m => `
+                        <div class="message-bubble">
+                            <div class="message-header">
+                                <span class="message-author">${escapeHtml(m.author)} <span style="font-weight: 400; color: #6b7280;">(${m.role})</span></span>
+                                <span class="message-time">${formatDateTime(m.date)}</span>
+                            </div>
+                            <div class="message-text">${escapeHtml(m.text)}</div>
+                        </div>
+                    `).join('')
+                }
+            `;
         }
 
         function openProjectModal() {
             const modalId = 'projectModal_' + Date.now();
             showModal(`
-                <form id="${modalId}" onsubmit="return false;">
+                <form id="${modalId}">
                     <h3>Create New Project</h3>
                     <div class="form-group">
                         <label>Project Avatar (Optional)</label>
-                        <div style="display: flex; gap: 16px; align-items: center;">
-                            <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); display: flex; align-items: center; justify-content: center; font-size: 32px; color: white; font-weight: 700;">?</div>
-                            <div style="flex: 1;">
-                                <input type="text" name="avatar" placeholder="🏗️ or image URL">
-                                <small style="color: #6b7280; display: block; margin-top: 4px;">Emoji or image URL</small>
-                            </div>
-                        </div>
+                        <input type="text" name="avatar" placeholder="🏗️ or image URL">
                     </div>
                     <div class="form-group">
                         <label>Project Name *</label>
@@ -1163,27 +1372,16 @@
 
         async function handleCreateProject(formId) {
             const form = document.getElementById(formId);
-            if (!form) {
-                alert('Form not found');
-                return;
-            }
+            if (!form) return;
 
             const formData = new FormData(form);
             const name = formData.get('name')?.trim();
             const startDate = formData.get('startDate')?.trim();
             const endDate = formData.get('endDate')?.trim();
 
-            if (!name) { 
-                alert('Please enter project name'); 
-                return; 
-            }
-            if (!startDate) { 
-                alert('Please select start date'); 
-                return; 
-            }
-            if (!endDate) { 
-                alert('Please select end date'); 
-                return; 
+            if (!name || !startDate || !endDate) {
+                alert('Please fill in all required fields');
+                return;
             }
 
             const project = {
@@ -1212,23 +1410,13 @@
         }
 
         function openEditProjectModal() {
-            let avatarPreview = currentProject.avatar || currentProject.name.charAt(0).toUpperCase();
-            if (currentProject.avatar?.startsWith('http')) {
-                avatarPreview = `<img src="${currentProject.avatar}" style="width: 100%; height: 100%; object-fit: cover;">`;
-            }
-
             const modalId = 'editModal_' + Date.now();
             showModal(`
-                <form id="${modalId}" onsubmit="return false;">
+                <form id="${modalId}">
                     <h3>Edit Project</h3>
                     <div class="form-group">
                         <label>Project Avatar</label>
-                        <div style="display: flex; gap: 16px; align-items: center;">
-                            <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); display: flex; align-items: center; justify-content: center; font-size: 32px; color: white; font-weight: 700; overflow: hidden;">${avatarPreview}</div>
-                            <div style="flex: 1;">
-                                <input type="text" name="avatar" value="${escapeHtml(currentProject.avatar || '')}" placeholder="🏗️ or URL">
-                            </div>
-                        </div>
+                        <input type="text" name="avatar" value="${escapeHtml(currentProject.avatar || '')}" placeholder="🏗️ or URL">
                     </div>
                     <div class="form-group">
                         <label>Project Name *</label>
@@ -1264,19 +1452,17 @@
 
         async function handleUpdateProject(formId) {
             const form = document.getElementById(formId);
-            if (!form) {
-                alert('Form not found');
-                return;
-            }
+            if (!form) return;
 
             const formData = new FormData(form);
             const name = formData.get('name')?.trim();
             const startDate = formData.get('startDate')?.trim();
             const endDate = formData.get('endDate')?.trim();
 
-            if (!name) { alert('Please enter project name'); return; }
-            if (!startDate) { alert('Please select start date'); return; }
-            if (!endDate) { alert('Please select end date'); return; }
+            if (!name || !startDate || !endDate) {
+                alert('Please fill in all required fields');
+                return;
+            }
 
             showLoading();
             const { error } = await supabase.from('projects').update({
@@ -1319,31 +1505,674 @@
             }
         }
 
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        function openDrawingModal(drawingId = null) {
+            const drawing = drawingId ? (currentProject.drawings || []).find(d => d.id === drawingId) : null;
+            const modalId = 'drawingModal_' + Date.now();
+            showModal(`
+                <form id="${modalId}">
+                    <h3>${drawing ? 'Edit' : 'Add'} Drawing</h3>
+                    <div class="form-group">
+                        <label>Drawing Name *</label>
+                        <input type="text" name="name" value="${drawing ? escapeHtml(drawing.name) : ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Version *</label>
+                        <input type="text" name="version" value="${drawing ? escapeHtml(drawing.version) : ''}" placeholder="1.0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Notes</label>
+                        <textarea name="notes" rows="3">${drawing ? escapeHtml(drawing.notes || '') : ''}</textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="handleSaveDrawing('${modalId}', ${drawingId ? "'" + drawingId + "'" : 'null'})">${drawing ? 'Update' : 'Add'} Drawing</button>
+                    </div>
+                </form>
+            `);
         }
 
-        function showModal(content) {
-            document.getElementById('modalContent').innerHTML = content;
-            document.getElementById('modal').classList.add('show');
+        async function handleSaveDrawing(formId, drawingId) {
+            const form = document.getElementById(formId);
+            if (!form) return;
+
+            const formData = new FormData(form);
+            const name = formData.get('name')?.trim();
+            const version = formData.get('version')?.trim();
+
+            if (!name || !version) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            let drawings = currentProject.drawings || [];
+            
+            if (drawingId) {
+                drawings = drawings.map(d => d.id === drawingId ? 
+                    { ...d, name, version, notes: formData.get('notes') || '' } : d
+                );
+            } else {
+                drawings.push({
+                    id: 'draw_' + Date.now(),
+                    name,
+                    version,
+                    notes: formData.get('notes') || '',
+                    date: new Date().toISOString()
+                });
+            }
+
+            showLoading();
+            const { error } = await supabase.from('projects').update({ drawings }).eq('id', currentProject.id);
+            if (error) {
+                hideLoading();
+                alert('Error: ' + error.message);
+            } else {
+                await loadProjects();
+                currentProject = projects.find(p => p.id === currentProject.id);
+                switchTab('drawings');
+                closeModal();
+                hideLoading();
+            }
         }
 
-        function closeModal() {
-            document.getElementById('modal').classList.remove('show');
+        function editDrawing(id) { openDrawingModal(id); }
+
+        async function deleteDrawing(id) {
+            if (!confirm('Delete this drawing?')) return;
+            
+            showLoading();
+            const drawings = (currentProject.drawings || []).filter(d => d.id !== id);
+            const { error } = await supabase.from('projects').update({ drawings }).eq('id', currentProject.id);
+            if (error) {
+                hideLoading();
+                alert('Error: ' + error.message);
+            } else {
+                await loadProjects();
+                currentProject = projects.find(p => p.id === currentProject.id);
+                switchTab('drawings');
+                hideLoading();
+            }
         }
 
-        document.getElementById('modal').addEventListener('click', (e) => {
-            if (e.target.id === 'modal') closeModal();
-        });
-
-        function formatDate(dateStr) {
-            if (!dateStr) return '-';
-            const date = new Date(dateStr);
-            return `${date.getDate()} ${date.toLocaleDateString('en-GB', { month: 'short' })} ${date.getFullYear()}`;
+        function openRFIModal(rfiId = null) {
+            const rfi = rfiId ? (currentProject.rfis || []).find(r => r.id === rfiId) : null;
+            const modalId = 'rfiModal_' + Date.now();
+            const nextNumber = rfi ? rfi.number : ((currentProject.rfis || []).length + 1);
+            
+            showModal(`
+                <form id="${modalId}">
+                    <h3>${rfi ? 'Edit' : 'Create'} RFI</h3>
+                    <div class="form-group">
+                        <label>RFI Number</label>
+                        <input type="text" value="RFI-${String(nextNumber).padStart(3, '0')}" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>Title *</label>
+                        <input type="text" name="title" value="${rfi ? escapeHtml(rfi.title) : ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Question *</label>
+                        <textarea name="question" rows="3" required>${rfi ? escapeHtml(rfi.question) : ''}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Priority *</label>
+                        <select name="priority" required>
+                            <option value="Low" ${rfi?.priority === 'Low' ? 'selected' : ''}>Low</option>
+                            <option value="Medium" ${rfi?.priority === 'Medium' ? 'selected' : ''}>Medium</option>
+                            <option value="High" ${rfi?.priority === 'High' ? 'selected' : ''}>High</option>
+                            <option value="Critical" ${rfi?.priority === 'Critical' ? 'selected' : ''}>Critical</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status *</label>
+                        <select name="status" required>
+                            <option value="Open" ${!rfi || rfi.status === 'Open' ? 'selected' : ''}>Open</option>
+                            <option value="Answered" ${rfi?.status === 'Answered' ? 'selected' : ''}>Answered</option>
+                            <option value="Closed" ${rfi?.status === 'Closed' ? 'selected' : ''}>Closed</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Response</label>
+                        <textarea name="response" rows="3">${rfi ? escapeHtml(rfi.response || '') : ''}</textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="handleSaveRFI('${modalId}', ${rfiId ? "'" + rfiId + "'" : 'null'}, ${nextNumber})">${rfi ? 'Update' : 'Create'} RFI</button>
+                    </div>
+                </form>
+            `);
         }
-    </script>
-</body>
-</html>
+
+        async function handleSaveRFI(formId, rfiId, number) {
+            const form = document.getElementById(formId);
+            if (!form) return;
+
+            const formData = new FormData(form);
+            const title = formData.get('title')?.trim();
+            const question = formData.get('question')?.trim();
+
+            if (!title || !question) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            let rfis = currentProject.rfis || [];
+            
+            if (rfiId) {
+                rfis = rfis.map(r => r.id === rfiId ? {
+                    ...r,
+                    title,
+                    question,
+                    priority: formData.get('priority'),
+                    status: formData.get('status'),
+                    response: formData.get('response') || ''
+                } : r);
+            } else {
+                rfis.push({
+                    id: 'rfi_' + Date.now(),
+                    number,
+                    title,
+                    question,
+                    priority: formData.get('priority'),
+                    status: formData.get('status'),
+                    response: formData.get('response') || '',
+                    date: new Date().toISOString()
+                });
+            }
+
+            showLoading();
+            const { error } = await supabase.from('projects').update({ rfis }).eq('id', currentProject.id);
+            if (error) {
+                hideLoading();
+                alert('Error: ' + error.message);
+            } else {
+                await loadProjects();
+                currentProject = projects.find(p => p.id === currentProject.id);
+                switchTab('rfis');
+                closeModal();
+                hideLoading();
+            }
+        }
+
+        function editRFI(id) { openRFIModal(id); }
+
+        async function deleteRFI(id) {
+            if (!confirm('Delete this RFI?')) return;
+            
+            showLoading();
+            const rfis = (currentProject.rfis || []).filter(r => r.id !== id);
+            const { error } = await supabase.from('projects').update({ rfis }).eq('id', currentProject.id);
+            if (error) {
+                hideLoading();
+                alert('Error: ' + error.message);
+            } else {
+                await loadProjects();
+                currentProject = projects.find(p => p.id === currentProject.id);
+                switchTab('rfis');
+                hideLoading();
+            }
+        }
+
+        function openSubmittalModal(submittalId = null) {
+            const submittal = submittalId ? (currentProject.submittals || []).find(s => s.id === submittalId) : null;
+            const modalId = 'submittalModal_' + Date.now();
+            
+            showModal(`
+                <form id="${modalId}">
+                    <h3>${submittal ? 'Review' : 'Add'} Submittal</h3>
+                    <div class="form-group">
+                        <label>Submittal Name *</label>
+                        <input type="text" name="name" value="${submittal ? escapeHtml(submittal.name) : ''}" ${submittal ? 'disabled' : 'required'}>
+                    </div>
+                    <div class="form-group">
+                        <label>Type *</label>
+                        <select name="type" ${submittal ? 'disabled' : 'required'}>
+                            <option value="Shop Drawings" ${submittal?.type === 'Shop Drawings' ? 'selected' : ''}>Shop Drawings</option>
+                            <option value="Product Data" ${submittal?.type === 'Product Data' ? 'selected' : ''}>Product Data</option>
+                            <option value="Material Samples" ${submittal?.type === 'Material Samples' ? 'selected' : ''}>Material Samples</option>
+                            <option value="Quality Control" ${submittal?.type === 'Quality Control' ? 'selected' : ''}>Quality Control</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea name="description" rows="3" ${submittal ? 'disabled' : ''}>${submittal ? escapeHtml(submittal.description || '') : ''}</textarea>
+                    </div>
+                    ${submittal ? `
+                        <div class="form-group">
+                            <label>Status *</label>
+                            <select name="status" required>
+                                <option value="Pending" ${submittal.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                <option value="Approved" ${submittal.status === 'Approved' ? 'selected' : ''}>Approved</option>
+                                <option value="Rejected" ${submittal.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Review Notes</label>
+                            <textarea name="reviewNotes" rows="3">${escapeHtml(submittal.reviewNotes || '')}</textarea>
+                        </div>
+                    ` : ''}
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="handleSaveSubmittal('${modalId}', ${submittal ? "'" + submittal.id + "'" : 'null'})">${submittal ? 'Update Review' : 'Add Submittal'}</button>
+                    </div>
+                </form>
+            `);
+        }
+
+        async function handleSaveSubmittal(formId, submittalId) {
+            const form = document.getElementById(formId);
+            if (!form) return;
+
+            const formData = new FormData(form);
+            let submittals = currentProject.submittals || [];
+            
+            if (submittalId) {
+                submittals = submittals.map(s => s.id === submittalId ? {
+                    ...s,
+                    status: formData.get('status'),
+                    reviewNotes: formData.get('reviewNotes') || ''
+                } : s);
+            } else {
+                const name = formData.get('name')?.trim();
+                const type = formData.get('type');
+                if (!name || !type) {
+                    alert('Please fill in all required fields');
+                    return;
+                }
+                
+                submittals.push({
+                    id: 'sub_' + Date.now(),
+                    name,
+                    type,
+                    description: formData.get('description') || '',
+                    status: 'Pending',
+                    reviewNotes: '',
+                    date: new Date().toISOString()
+                });
+            }
+
+            showLoading();
+            const { error } = await supabase.from('projects').update({ submittals }).eq('id', currentProject.id);
+            if (error) {
+                hideLoading();
+                alert('Error: ' + error.message);
+            } else {
+                await loadProjects();
+                currentProject = projects.find(p => p.id === currentProject.id);
+                switchTab('submittals');
+                closeModal();
+                hideLoading();
+            }
+        }
+
+        function editSubmittal(id) { openSubmittalModal(id); }
+
+        function openDailyLogModal(logId = null) {
+            const log = logId ? (currentProject.daily_logs || []).find(l => l.id === logId) : null;
+            const modalId = 'logModal_' + Date.now();
+            const today = new Date().toISOString().split('T')[0];
+            
+            showModal(`
+                <form id="${modalId}">
+                    <h3>${log ? 'Edit' : 'Add'} Daily Log</h3>
+                    <div class="form-group">
+                        <label>Date *</label>
+                        <input type="date" name="date" value="${log ? log.date : today}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Weather *</label>
+                        <select name="weather" required>
+                            <option value="Sunny" ${log?.weather === 'Sunny' ? 'selected' : ''}>☀️ Sunny</option>
+                            <option value="Cloudy" ${log?.weather === 'Cloudy' ? 'selected' : ''}>☁️ Cloudy</option>
+                            <option value="Rainy" ${log?.weather === 'Rainy' ? 'selected' : ''}>🌧️ Rainy</option>
+                            <option value="Stormy" ${log?.weather === 'Stormy' ? 'selected' : ''}>⛈️ Stormy</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Temperature (°C) *</label>
+                        <input type="number" name="temperature" value="${log ? log.temperature : ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Workers on Site *</label>
+                        <input type="number" name="workers" value="${log ? log.workers : ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Hours Worked *</label>
+                        <input type="number" step="0.5" name="hours" value="${log ? log.hours : ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Work Report *</label>
+                        <textarea name="workReport" rows="5" required>${log ? escapeHtml(log.workReport) : ''}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Photos (comma-separated filenames)</label>
+                        <input type="text" name="photos" value="${log ? escapeHtml(log.photos || '') : ''}" placeholder="photo1.jpg, photo2.jpg">
+                    </div>
+                    <div class="form-group">
+                        <label>Drawings Referenced (comma-separated)</label>
+                        <input type="text" name="drawings" value="${log ? escapeHtml(log.drawings || '') : ''}" placeholder="A-101, S-201">
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="handleSaveDailyLog('${modalId}', ${logId ? "'" + logId + "'" : 'null'})">${log ? 'Update' : 'Add'} Log</button>
+                    </div>
+                </form>
+            `);
+        }
+
+        async function handleSaveDailyLog(formId, logId) {
+            const form = document.getElementById(formId);
+            if (!form) return;
+
+            const formData = new FormData(form);
+            const date = formData.get('date')?.trim();
+            const weather = formData.get('weather');
+            const temperature = formData.get('temperature');
+            const workers = formData.get('workers');
+            const hours = formData.get('hours');
+            const workReport = formData.get('workReport')?.trim();
+
+            if (!date || !weather || !temperature || !workers || !hours || !workReport) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            let logs = currentProject.daily_logs || [];
+            
+            if (logId) {
+                logs = logs.map(l => l.id === logId ? {
+                    ...l,
+                    date,
+                    weather,
+                    temperature: parseInt(temperature),
+                    workers: parseInt(workers),
+                    hours: parseFloat(hours),
+                    workReport,
+                    photos: formData.get('photos') || '',
+                    drawings: formData.get('drawings') || ''
+                } : l);
+            } else {
+                logs.push({
+                    id: 'log_' + Date.now(),
+                    date,
+                    weather,
+                    temperature: parseInt(temperature),
+                    workers: parseInt(workers),
+                    hours: parseFloat(hours),
+                    workReport,
+                    photos: formData.get('photos') || '',
+                    drawings: formData.get('drawings') || ''
+                });
+            }
+
+            showLoading();
+            const { error } = await supabase.from('projects').update({ daily_logs: logs }).eq('id', currentProject.id);
+            if (error) {
+                hideLoading();
+                alert('Error: ' + error.message);
+            } else {
+                await loadProjects();
+                currentProject = projects.find(p => p.id === currentProject.id);
+                switchTab('dailyLogs');
+                closeModal();
+                hideLoading();
+            }
+        }
+
+        function editDailyLog(id) { openDailyLogModal(id); }
+
+        async function deleteDailyLog(id) {
+            if (!confirm('Delete this daily log?')) return;
+            
+            showLoading();
+            const logs = (currentProject.daily_logs || []).filter(l => l.id !== id);
+            const { error } = await supabase.from('projects').update({ daily_logs: logs }).eq('id', currentProject.id);
+            if (error) {
+                hideLoading();
+                alert('Error: ' + error.message);
+            } else {
+                await loadProjects();
+                currentProject = projects.find(p => p.id === currentProject.id);
+                switchTab('dailyLogs');
+                hideLoading();
+            }
+        }
+
+        function openPhotoModal(photoId = null) {
+            const photo = photoId ? (currentProject.photos || []).find(p => p.id === photoId) : null;
+            const modalId = 'photoModal_' + Date.now();
+            
+            showModal(`
+                <form id="${modalId}">
+                    <h3>${photo ? 'Edit' : 'Add'} Photo</h3>
+                    <div class="form-group">
+                        <label>Title *</label>
+                        <input type="text" name="title" value="${photo ? escapeHtml(photo.title) : ''}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Photo URL *</label>
+                        <input type="url" name="url" value="${photo ? escapeHtml(photo.url || '') : ''}" placeholder="https://..." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" name="location" value="${photo ? escapeHtml(photo.location || '') : ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>Notes</label>
+                        <textarea name="notes" rows="3">${photo ? escapeHtml(photo.notes || '') : ''}</textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="handleSavePhoto('${modalId}', ${photoId ? "'" + photoId + "'" : 'null'})">${photo ? 'Update' : 'Add'} Photo</button>
+                    </div>
+                </form>
+            `);
+        }
+
+        async function handleSavePhoto(formId, photoId) {
+            const form = document.getElementById(formId);
+            if (!form) return;
+
+            const formData = new FormData(form);
+            const title = formData.get('title')?.trim();
+            const url = formData.get('url')?.trim();
+
+            if (!title || !url) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            let photos = currentProject.photos || [];
+            
+            if (photoId) {
+                photos = photos.map(p => p.id === photoId ? {
+                    ...p,
+                    title,
+                    url,
+                    location: formData.get('location') || '',
+                    notes: formData.get('notes') || ''
+                } : p);
+            } else {
+                photos.push({
+                    id: 'photo_' + Date.now(),
+                    title,
+                    url,
+                    location: formData.get('location') || '',
+                    notes: formData.get('notes') || '',
+                    date: new Date().toISOString()
+                });
+            }
+
+            showLoading();
+            const { error } = await supabase.from('projects').update({ photos }).eq('id', currentProject.id);
+            if (error) {
+                hideLoading();
+                alert('Error: ' + error.message);
+            } else {
+                await loadProjects();
+                currentProject = projects.find(p => p.id === currentProject.id);
+                switchTab('photos');
+                closeModal();
+                hideLoading();
+            }
+        }
+
+        function editPhoto(id) { openPhotoModal(id); }
+
+        async function deletePhoto(id) {
+            if (!confirm('Delete this photo?')) return;
+            
+            showLoading();
+            const photos = (currentProject.photos || []).filter(p => p.id !== id);
+            const { error } = await supabase.from('projects').update({ photos }).eq('id', currentProject.id);
+            if (error) {
+                hideLoading();
+                alert('Error: ' + error.message);
+            } else {
+                await loadProjects();
+                currentProject = projects.find(p => p.id === currentProject.id);
+                switchTab('photos');
+                hideLoading();
+            }
+        }
+
+        function openSafetyModal(safetyId = null) {
+            const safety = safetyId ? (currentProject.safety || []).find(s => s.id === safetyId) : null;
+            const modalId = 'safetyModal_' + Date.now();
+            
+            showModal(`
+                <form id="${modalId}">
+                    <h3>${safety ? 'Edit' : 'Report'} Safety Incident</h3>
+                    <div class="form-group">
+                        <label>Incident Type *</label>
+                        <select name="type" required>
+                            <option value="Near Miss" ${safety?.type === 'Near Miss' ? 'selected' : ''}>Near Miss</option>
+                            <option value="Injury" ${safety?.type === 'Injury' ? 'selected' : ''}>Injury</option>
+                            <option value="Equipment Damage" ${safety?.type === 'Equipment Damage' ? 'selected' : ''}>Equipment Damage</option>
+                            <option value="Safety Violation" ${safety?.type === 'Safety Violation' ? 'selected' : ''}>Safety Violation</option>
+                            <option value="Environmental" ${safety?.type === 'Environmental' ? 'selected' : ''}>Environmental</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Severity *</label>
+                        <select name="severity" required>
+                            <option value="Low" ${safety?.severity === 'Low' ? 'selected' : ''}>Low</option>
+                            <option value="Medium" ${safety?.severity === 'Medium' ? 'selected' : ''}>Medium</option>
+                            <option value="High" ${safety?.severity === 'High' ? 'selected' : ''}>High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" name="location" value="${safety ? escapeHtml(safety.location || '') : ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>Description *</label>
+                        <textarea name="description" rows="3" required>${safety ? escapeHtml(safety.description) : ''}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Action Taken</label>
+                        <textarea name="actionTaken" rows="3">${safety ? escapeHtml(safety.actionTaken || '') : ''}</textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="handleSaveSafety('${modalId}', ${safetyId ? "'" + safetyId + "'" : 'null'})">${safety ? 'Update' : 'Report'} Incident</button>
+                    </div>
+                </form>
+            `);
+        }
+
+        async function handleSaveSafety(formId, safetyId) {
+            const form = document.getElementById(formId);
+            if (!form) return;
+
+            const formData = new FormData(form);
+            const type = formData.get('type');
+            const severity = formData.get('severity');
+            const description = formData.get('description')?.trim();
+
+            if (!type || !severity || !description) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            let safety = currentProject.safety || [];
+            
+            if (safetyId) {
+                safety = safety.map(s => s.id === safetyId ? {
+                    ...s,
+                    type,
+                    severity,
+                    location: formData.get('location') || '',
+                    description,
+                    actionTaken: formData.get('actionTaken') || ''
+                } : s);
+            } else {
+                safety.push({
+                    id: 'safety_' + Date.now(),
+                    type,
+                    severity,
+                    location: formData.get('location') || '',
+                    description,
+                    actionTaken: formData.get('actionTaken') || '',
+                    date: new Date().toISOString()
+                });
+            }
+
+            showLoading();
+            const { error } = await supabase.from('projects').update({ safety }).eq('id', currentProject.id);
+            if (error) {
+                hideLoading();
+                alert('Error: ' + error.message);
+            } else {
+                await loadProjects();
+                currentProject = projects.find(p => p.id === currentProject.id);
+                switchTab('safety');
+                closeModal();
+                hideLoading();
+            }
+        }
+
+        function editSafety(id) { openSafetyModal(id); }
+
+        async function deleteSafety(id) {
+            if (!confirm('Delete this safety report?')) return;
+            
+            showLoading();
+            const safety = (currentProject.safety || []).filter(s => s.id !== id);
+            const { error } = await supabase.from('projects').update({ safety }).eq('id', currentProject.id);
+            if (error) {
+                hideLoading();
+                alert('Error: ' + error.message);
+            } else {
+                await loadProjects();
+                currentProject = projects.find(p => p.id === currentProject.id);
+                switchTab('safety');
+                hideLoading();
+            }
+        }
+
+        function openMessageModal() {
+            const modalId = 'messageModal_' + Date.now();
+            
+            showModal(`
+                <form id="${modalId}">
+                    <h3>Send Message</h3>
+                    <div class="form-group">
+                        <label>Message *</label>
+                        <textarea name="text" rows="5" required placeholder="Type your message here..."></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="handleSendMessage('${modalId}')">Send Message</button>
+                    </div>
+                </form>
+            `);
+        }
+
+        async function handleSendMessage(formId) {
+            const form = document.getElementById(formId);
+            if (!form) return;
+
+            const formData = new FormData(form);
+            const text = formData.get('text')?.trim();
+
+            if

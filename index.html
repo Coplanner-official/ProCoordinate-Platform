@@ -45,7 +45,6 @@
             to { transform: rotate(360deg); }
         }
         
-        /* Auth */
         .auth-container {
             min-height: 100vh;
             display: flex;
@@ -166,6 +165,7 @@
             text-decoration: none;
             font-size: 13px;
             font-weight: 500;
+            cursor: pointer;
         }
         
         .forgot-password a:hover {
@@ -183,6 +183,7 @@
             color: #3b82f6;
             text-decoration: none;
             font-weight: 600;
+            cursor: pointer;
         }
         
         .install-banner {
@@ -230,7 +231,6 @@
             gap: 8px;
         }
         
-        /* App */
         .navbar {
             background: white;
             border-bottom: 1px solid #e5e7eb;
@@ -323,7 +323,6 @@
             margin-bottom: 24px;
         }
         
-        /* Projects Grid */
         .projects-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -446,7 +445,6 @@
             margin-bottom: 10px;
         }
         
-        /* Project Detail */
         .project-detail {
             background: white;
             border-radius: 12px;
@@ -462,6 +460,7 @@
             display: inline-block;
             font-size: 14px;
             font-weight: 500;
+            cursor: pointer;
         }
         
         .back-btn:hover {
@@ -574,7 +573,6 @@
             opacity: 0.3;
         }
         
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -631,12 +629,10 @@
     </style>
 </head>
 <body>
-    <!-- Loading Spinner -->
     <div id="loadingSpinner" class="loading hidden">
         <div class="spinner"></div>
     </div>
 
-    <!-- Auth View -->
     <div id="authView" class="auth-container">
         <div class="auth-box">
             <h1>ProCoordinate</h1>
@@ -653,7 +649,7 @@
             </div>
             
             <div class="forgot-password" id="forgotPasswordLink">
-                <a href="#" id="forgotPasswordBtn">Forgot password?</a>
+                <a id="forgotPasswordBtn">Forgot password?</a>
             </div>
             
             <div class="form-group hidden" id="nameGroup">
@@ -682,12 +678,11 @@
             
             <div class="auth-toggle">
                 <span id="authToggleText">Don't have an account?</span>
-                <a href="#" id="authToggleLink">Sign up</a>
+                <a id="authToggleLink">Sign up</a>
             </div>
         </div>
     </div>
 
-    <!-- App View -->
     <div id="appView" class="hidden">
         <nav class="navbar">
             <div class="nav-container">
@@ -707,7 +702,6 @@
         </nav>
 
         <main class="main-content">
-            <!-- Dashboard -->
             <div id="dashboardView">
                 <div class="page-header">
                     <h2>Your Projects</h2>
@@ -716,10 +710,9 @@
                 <div class="projects-grid" id="projectsGrid"></div>
             </div>
 
-            <!-- Project Detail -->
             <div id="projectView" class="hidden">
                 <div class="project-detail">
-                    <a href="#" class="back-btn" id="backBtn">← Back to Projects</a>
+                    <a class="back-btn" id="backBtn">← Back to Projects</a>
                     <h2 id="projectName"></h2>
                     <p id="projectDescription" style="color: #6b7280; margin-bottom: 16px;"></p>
                     <div class="project-meta" id="projectMeta"></div>
@@ -730,12 +723,10 @@
         </main>
     </div>
 
-    <!-- Modal -->
     <div id="modal" class="modal">
         <div class="modal-content" id="modalContent"></div>
     </div>
 
-    <!-- Install Banner -->
     <div id="installBanner" class="install-banner">
         <div class="install-banner-icon">📱</div>
         <div class="install-banner-content">
@@ -749,7 +740,6 @@
     </div>
 
     <script>
-        // Initialize Supabase
         const SUPABASE_URL = 'https://ilfgmgajivusmqarkaqd.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsZmdtZ2FqaXZ1c21xYXJrYXFkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3MDY0NzYsImV4cCI6MjA3NDI4MjQ3Nn0.ysd2Y8DuxGWe99eM3PxbkIuvw62Vgp-68lZMJjkd7do';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -761,11 +751,9 @@
         let activeTab = 'overview';
         let deferredPrompt = null;
 
-        // PWA Install Prompt Handler
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            
             const dismissed = sessionStorage.getItem('installDismissed');
             if (!dismissed && currentUser) {
                 setTimeout(() => {
@@ -777,7 +765,7 @@
         function installApp() {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
+                deferredPrompt.userChoice.then(() => {
                     deferredPrompt = null;
                     document.getElementById('installBanner').classList.remove('show');
                 });
@@ -789,7 +777,6 @@
             sessionStorage.setItem('installDismissed', 'true');
         }
 
-        // Show/hide loading spinner
         function showLoading() {
             document.getElementById('loadingSpinner').classList.remove('hidden');
         }
@@ -798,13 +785,11 @@
             document.getElementById('loadingSpinner').classList.add('hidden');
         }
 
-        // Check authentication on load
         checkAuth();
 
         async function checkAuth() {
             showLoading();
             const { data: { session } } = await supabase.auth.getSession();
-            
             if (session) {
                 const { data: userData } = await supabase.auth.getUser();
                 currentUser = {
@@ -835,8 +820,7 @@
             document.getElementById('appView').classList.add('hidden');
         }
 
-        document.getElementById('authToggleLink').addEventListener('click', (e) => {
-            e.preventDefault();
+        document.getElementById('authToggleLink').addEventListener('click', () => {
             isSignup = !isSignup;
             document.getElementById('authBtn').textContent = isSignup ? 'Create Account' : 'Sign In';
             document.getElementById('authToggleText').textContent = isSignup ? 'Already have an account?' : "Don't have an account?";
@@ -869,20 +853,13 @@
                     return;
                 }
 
-                const { data, error } = await supabase.auth.signUp({
+                const { error } = await supabase.auth.signUp({
                     email,
                     password,
-                    options: {
-                        data: {
-                            name,
-                            company,
-                            role
-                        }
-                    }
+                    options: { data: { name, company, role } }
                 });
 
                 hideLoading();
-
                 if (error) {
                     alert('Error: ' + error.message);
                 } else {
@@ -897,11 +874,7 @@
                     document.getElementById('forgotPasswordLink').classList.remove('hidden');
                 }
             } else {
-                const { data, error } = await supabase.auth.signInWithPassword({
-                    email,
-                    password
-                });
-
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
                 if (error) {
                     hideLoading();
                     alert('Error: ' + error.message);
@@ -918,8 +891,7 @@
             }
         });
 
-        document.getElementById('forgotPasswordBtn').addEventListener('click', (e) => {
-            e.preventDefault();
+        document.getElementById('forgotPasswordBtn').addEventListener('click', () => {
             showModal(`
                 <h3>Reset Password</h3>
                 <p style="color: #6b7280; margin-bottom: 20px; font-size: 14px;">
@@ -931,26 +903,22 @@
                 </div>
                 <div class="modal-actions">
                     <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button class="btn btn-primary" id="sendResetBtn">Send Reset Link</button>
+                    <button class="btn btn-primary" onclick="handleSendResetEmail()">Send Reset Link</button>
                 </div>
             `);
-            
-            document.getElementById('sendResetBtn').addEventListener('click', sendResetEmail);
         });
 
-        async function sendResetEmail() {
-            const email = document.getElementById('resetEmail').value.trim();
+        async function handleSendResetEmail() {
+            const email = document.getElementById('resetEmail')?.value?.trim();
             if (!email) {
                 alert('Please enter your email address');
                 return;
             }
-
             showLoading();
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
                 redirectTo: window.location.origin
             });
             hideLoading();
-
             if (error) {
                 alert('Error: ' + error.message);
             } else {
@@ -981,12 +949,10 @@
             
             if (error) {
                 console.error('Error loading projects:', error);
-                alert('Error loading projects: ' + error.message);
                 projects = [];
             } else {
                 projects = data || [];
             }
-            
             renderProjects();
             hideLoading();
         }
@@ -1007,9 +973,7 @@
                 
                 return `
                     <div class="project-card" onclick="openProject('${p.id}')">
-                        <div class="project-avatar">
-                            ${avatarContent}
-                        </div>
+                        <div class="project-avatar">${avatarContent}</div>
                         <div class="project-header">
                             <h3>${escapeHtml(p.name)}</h3>
                             <p>${escapeHtml(p.location || 'No location specified')}</p>
@@ -1052,8 +1016,7 @@
             renderProjectDetail();
         }
 
-        document.getElementById('backBtn').addEventListener('click', (e) => {
-            e.preventDefault();
+        document.getElementById('backBtn').addEventListener('click', () => {
             currentProject = null;
             document.getElementById('dashboardView').classList.remove('hidden');
             document.getElementById('projectView').classList.add('hidden');
@@ -1066,24 +1029,21 @@
             
             const projectDetailDiv = document.querySelector('.project-detail');
             const existingHeader = projectDetailDiv.querySelector('.project-detail-header');
-            if (existingHeader) {
-                existingHeader.remove();
-            }
+            if (existingHeader) existingHeader.remove();
             
             const backBtn = projectDetailDiv.querySelector('.back-btn');
-            const headerHTML = `
+            backBtn.insertAdjacentHTML('afterend', `
                 <div class="project-detail-header">
                     <div>
                         <h2>${escapeHtml(currentProject.name)}</h2>
                         <p style="color: #6b7280; margin-bottom: 0;">${escapeHtml(currentProject.description || '')}</p>
                     </div>
                     <div class="project-detail-actions">
-                        <button class="btn btn-secondary btn-small" onclick="openEditProjectModal()">✏️ Edit Project</button>
-                        <button class="btn btn-danger btn-small" onclick="deleteProject()">🗑️ Delete</button>
+                        <button class="btn btn-secondary btn-small" onclick="openEditProjectModal()">✏️ Edit</button>
+                        <button class="btn btn-danger btn-small" onclick="handleDeleteProject()">🗑️ Delete</button>
                     </div>
                 </div>
-            `;
-            backBtn.insertAdjacentHTML('afterend', headerHTML);
+            `);
             
             document.getElementById('projectName').style.display = 'none';
             document.getElementById('projectDescription').style.display = 'none';
@@ -1117,7 +1077,6 @@
                 <button class="tab" onclick="switchTab('safety', event)">Safety</button>
                 <button class="tab" onclick="switchTab('messages', event)">Messages</button>
             `;
-            
             switchTab('overview');
         }
 
@@ -1129,7 +1088,6 @@
             }
             
             const content = document.getElementById('tabContent');
-            
             if (tab === 'overview') {
                 content.innerHTML = `
                     <h3 style="margin-bottom: 20px;">Project Overview</h3>
@@ -1152,23 +1110,20 @@
                     </div>
                 `;
             } else {
-                content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🚧</div><p>Feature coming soon with full functionality</p></div>';
+                content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🚧</div><p>Feature coming soon</p></div>';
             }
         }
 
-        // Modal functions
         function openProjectModal() {
             showModal(`
                 <h3>Create New Project</h3>
                 <div class="form-group">
                     <label>Project Avatar (Optional)</label>
-                    <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px;">
-                        <div id="avatarPreview" style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); display: flex; align-items: center; justify-content: center; font-size: 32px; color: white; font-weight: 700; overflow: hidden;">
-                            ?
-                        </div>
+                    <div style="display: flex; gap: 16px; align-items: center;">
+                        <div id="avatarPreview" style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); display: flex; align-items: center; justify-content: center; font-size: 32px; color: white; font-weight: 700;">?</div>
                         <div style="flex: 1;">
-                            <input type="text" id="projectAvatar" placeholder="Enter emoji 🏗️ or image URL">
-                            <small style="color: #6b7280; display: block; margin-top: 4px;">Add an emoji (🏗️ 🏢 🏠 🏭) or image URL</small>
+                            <input type="text" id="projectAvatar" placeholder="🏗️ or image URL">
+                            <small style="color: #6b7280; display: block; margin-top: 4px;">Emoji or image URL</small>
                         </div>
                     </div>
                 </div>
@@ -1198,90 +1153,38 @@
                 </div>
                 <div class="modal-actions">
                     <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button class="btn btn-primary" id="createProjectBtn">Create Project</button>
+                    <button class="btn btn-primary" onclick="handleCreateProject()">Create Project</button>
                 </div>
             `);
-            
-            // Add event listeners after modal is created
-            setTimeout(() => {
-                const avatarInput = document.getElementById('projectAvatar');
-                const nameInput = document.getElementById('projectName');
-                const createBtn = document.getElementById('createProjectBtn');
-                
-                if (avatarInput) {
-                    avatarInput.addEventListener('input', updateAvatarPreview);
-                }
-                if (nameInput) {
-                    nameInput.addEventListener('input', updateAvatarPreview);
-                }
-                if (createBtn) {
-                    createBtn.addEventListener('click', createProject);
-                }
-            }, 100);
         }
 
-        async function createProject() {
-            const nameInput = document.getElementById('projectName');
-            const startInput = document.getElementById('projectStart');
-            const endInput = document.getElementById('projectEnd');
-            
-            if (!nameInput || !startInput || !endInput) {
-                alert('Form fields not found');
-                return;
-            }
-            
-            const name = nameInput.value.trim();
-            const startDate = startInput.value.trim();
-            const endDate = endInput.value.trim();
+        async function handleCreateProject() {
+            const name = document.getElementById('projectName')?.value?.trim();
+            const startDate = document.getElementById('projectStart')?.value?.trim();
+            const endDate = document.getElementById('projectEnd')?.value?.trim();
 
-            if (!name) {
-                alert('Please enter a project name');
-                return;
-            }
-            
-            if (!startDate) {
-                alert('Please select a start date');
-                return;
-            }
-            
-            if (!endDate) {
-                alert('Please select an end date');
-                return;
-            }
-
-            const avatarInput = document.getElementById('projectAvatar');
-            const descInput = document.getElementById('projectDesc');
-            const locationInput = document.getElementById('projectLocation');
-            const budgetInput = document.getElementById('projectBudget');
+            if (!name) { alert('Please enter project name'); return; }
+            if (!startDate) { alert('Please select start date'); return; }
+            if (!endDate) { alert('Please select end date'); return; }
 
             const project = {
                 id: 'proj_' + Date.now(),
                 user_id: currentUser.id,
-                name: name,
-                description: descInput ? descInput.value : '',
+                name,
+                description: document.getElementById('projectDesc')?.value || '',
                 start_date: startDate,
                 end_date: endDate,
-                location: locationInput ? locationInput.value : '',
-                budget: budgetInput ? (parseInt(budgetInput.value) || 0) : 0,
-                avatar: avatarInput ? (avatarInput.value.trim() || null) : null,
-                drawings: [],
-                rfis: [],
-                submittals: [],
-                daily_logs: [],
-                photos: [],
-                safety: [],
-                messages: []
+                location: document.getElementById('projectLocation')?.value || '',
+                budget: parseInt(document.getElementById('projectBudget')?.value) || 0,
+                avatar: document.getElementById('projectAvatar')?.value?.trim() || null,
+                drawings: [], rfis: [], submittals: [], daily_logs: [], photos: [], safety: [], messages: []
             };
             
             showLoading();
-            const { error } = await supabase
-                .from('projects')
-                .insert([project]);
-            
+            const { error } = await supabase.from('projects').insert([project]);
             if (error) {
                 hideLoading();
-                console.error('Error creating project:', error);
-                alert('Error creating project: ' + error.message);
+                alert('Error: ' + error.message);
             } else {
                 await loadProjects();
                 closeModal();
@@ -1290,37 +1193,25 @@
         }
 
         function openEditProjectModal() {
-            let avatarPreview = '';
-            if (currentProject.avatar) {
-                if (currentProject.avatar.startsWith('http://') || currentProject.avatar.startsWith('https://')) {
-                    avatarPreview = `<img src="${currentProject.avatar}" style="width: 100%; height: 100%; object-fit: cover;">`;
-                } else {
-                    avatarPreview = currentProject.avatar;
-                }
-            } else {
-                avatarPreview = currentProject.name.charAt(0).toUpperCase();
+            let avatarPreview = currentProject.avatar || currentProject.name.charAt(0).toUpperCase();
+            if (currentProject.avatar?.startsWith('http')) {
+                avatarPreview = `<img src="${currentProject.avatar}" style="width: 100%; height: 100%; object-fit: cover;">`;
             }
-            
-            const startDate = currentProject.start_date || '';
-            const endDate = currentProject.end_date || '';
             
             showModal(`
                 <h3>Edit Project</h3>
                 <div class="form-group">
                     <label>Project Avatar</label>
-                    <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px;">
-                        <div id="avatarPreview" style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); display: flex; align-items: center; justify-content: center; font-size: 32px; color: white; font-weight: 700; overflow: hidden;">
-                            ${avatarPreview}
-                        </div>
+                    <div style="display: flex; gap: 16px; align-items: center;">
+                        <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); display: flex; align-items: center; justify-content: center; font-size: 32px; color: white; font-weight: 700; overflow: hidden;">${avatarPreview}</div>
                         <div style="flex: 1;">
-                            <input type="text" id="projectAvatar" placeholder="Paste image URL or emoji" value="${escapeHtml(currentProject.avatar || '')}">
-                            <small style="color: #6b7280; display: block; margin-top: 4px;">Enter an emoji (🏗️ 🏢 🏠) or image URL</small>
+                            <input type="text" id="projectAvatar" value="${escapeHtml(currentProject.avatar || '')}" placeholder="🏗️ or URL">
                         </div>
                     </div>
                 </div>
                 <div class="form-group">
                     <label>Project Name *</label>
-                    <input type="text" id="projectName" value="${escapeHtml(currentProject.name)}" required>
+                    <input type="text" id="projectName" value="${escapeHtml(currentProject.name)}">
                 </div>
                 <div class="form-group">
                     <label>Description</label>
@@ -1328,11 +1219,11 @@
                 </div>
                 <div class="form-group">
                     <label>Start Date *</label>
-                    <input type="date" id="projectStart" value="${startDate}" required>
+                    <input type="date" id="projectStart" value="${currentProject.start_date || ''}">
                 </div>
                 <div class="form-group">
                     <label>End Date *</label>
-                    <input type="date" id="projectEnd" value="${endDate}" required>
+                    <input type="date" id="projectEnd" value="${currentProject.end_date || ''}">
                 </div>
                 <div class="form-group">
                     <label>Location</label>
@@ -1344,80 +1235,34 @@
                 </div>
                 <div class="modal-actions">
                     <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button class="btn btn-primary" id="updateProjectBtn">Save Changes</button>
+                    <button class="btn btn-primary" onclick="handleUpdateProject()">Save Changes</button>
                 </div>
             `);
-            
-            // Add event listeners after modal is created
-            setTimeout(() => {
-                const avatarInput = document.getElementById('projectAvatar');
-                const nameInput = document.getElementById('projectName');
-                const updateBtn = document.getElementById('updateProjectBtn');
-                
-                if (avatarInput) {
-                    avatarInput.addEventListener('input', updateAvatarPreview);
-                }
-                if (nameInput) {
-                    nameInput.addEventListener('input', updateAvatarPreview);
-                }
-                if (updateBtn) {
-                    updateBtn.addEventListener('click', updateProject);
-                }
-            }, 100);
         }
 
-        async function updateProject() {
-            const nameInput = document.getElementById('projectName');
-            const startInput = document.getElementById('projectStart');
-            const endInput = document.getElementById('projectEnd');
-            
-            if (!nameInput || !startInput || !endInput) {
-                alert('Form fields not found');
-                return;
-            }
-            
-            const name = nameInput.value.trim();
-            const startDate = startInput.value.trim();
-            const endDate = endInput.value.trim();
+        async function handleUpdateProject() {
+            const name = document.getElementById('projectName')?.value?.trim();
+            const startDate = document.getElementById('projectStart')?.value?.trim();
+            const endDate = document.getElementById('projectEnd')?.value?.trim();
 
-            if (!name) {
-                alert('Please enter a project name');
-                return;
-            }
-            
-            if (!startDate) {
-                alert('Please select a start date');
-                return;
-            }
-            
-            if (!endDate) {
-                alert('Please select an end date');
-                return;
-            }
-
-            const avatarInput = document.getElementById('projectAvatar');
-            const descInput = document.getElementById('projectDesc');
-            const locationInput = document.getElementById('projectLocation');
-            const budgetInput = document.getElementById('projectBudget');
+            if (!name) { alert('Please enter project name'); return; }
+            if (!startDate) { alert('Please select start date'); return; }
+            if (!endDate) { alert('Please select end date'); return; }
 
             showLoading();
-            const { error } = await supabase
-                .from('projects')
-                .update({
-                    name: name,
-                    description: descInput ? descInput.value : '',
-                    start_date: startDate,
-                    end_date: endDate,
-                    location: locationInput ? locationInput.value : '',
-                    budget: budgetInput ? (parseInt(budgetInput.value) || 0) : 0,
-                    avatar: avatarInput ? (avatarInput.value.trim() || null) : null
-                })
-                .eq('id', currentProject.id);
+            const { error } = await supabase.from('projects').update({
+                name,
+                description: document.getElementById('projectDesc')?.value || '',
+                start_date: startDate,
+                end_date: endDate,
+                location: document.getElementById('projectLocation')?.value || '',
+                budget: parseInt(document.getElementById('projectBudget')?.value) || 0,
+                avatar: document.getElementById('projectAvatar')?.value?.trim() || null
+            }).eq('id', currentProject.id);
 
             if (error) {
                 hideLoading();
-                console.error('Error updating project:', error);
-                alert('Error updating project: ' + error.message);
+                alert('Error: ' + error.message);
             } else {
                 await loadProjects();
                 currentProject = projects.find(p => p.id === currentProject.id);
@@ -1427,17 +1272,13 @@
             }
         }
 
-        async function deleteProject() {
-            if (confirm(`Are you sure you want to delete "${currentProject.name}"? This action cannot be undone and will delete all project data.`)) {
+        async function handleDeleteProject() {
+            if (confirm(`Delete "${currentProject.name}"? This cannot be undone.`)) {
                 showLoading();
-                const { error } = await supabase
-                    .from('projects')
-                    .delete()
-                    .eq('id', currentProject.id);
-
+                const { error } = await supabase.from('projects').delete().eq('id', currentProject.id);
                 if (error) {
                     hideLoading();
-                    alert('Error deleting project: ' + error.message);
+                    alert('Error: ' + error.message);
                 } else {
                     currentProject = null;
                     document.getElementById('dashboardView').classList.remove('hidden');
@@ -1446,27 +1287,6 @@
                     await loadProjects();
                     hideLoading();
                 }
-            }
-        }
-
-        function updateAvatarPreview() {
-            const avatarInput = document.getElementById('projectAvatar');
-            const nameInput = document.getElementById('projectName');
-            const preview = document.getElementById('avatarPreview');
-            
-            if (!preview) return;
-            
-            const avatarValue = avatarInput ? avatarInput.value.trim() : '';
-            
-            if (avatarValue) {
-                if (avatarValue.startsWith('http://') || avatarValue.startsWith('https://')) {
-                    preview.innerHTML = `<img src="${avatarValue}" style="width: 100%; height: 100%; object-fit: cover;">`;
-                } else {
-                    preview.textContent = avatarValue;
-                }
-            } else {
-                const name = nameInput ? nameInput.value.trim() : '';
-                preview.textContent = name ? name.charAt(0).toUpperCase() : '?';
             }
         }
 
@@ -1493,10 +1313,7 @@
         function formatDate(dateStr) {
             if (!dateStr) return '-';
             const date = new Date(dateStr);
-            const day = date.getDate();
-            const month = date.toLocaleDateString('en-GB', { month: 'short' });
-            const year = date.getFullYear();
-            return `${day} ${month} ${year}`;
+            return `${date.getDate()} ${date.toLocaleDateString('en-GB', { month: 'short' })} ${date.getFullYear()}`;
         }
     </script>
 </body>

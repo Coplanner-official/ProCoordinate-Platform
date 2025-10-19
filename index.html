@@ -1,522 +1,383 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#1e40af">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co; img-src 'self' https: data:;">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="ProCoordinate">
-    <title>ProCoordinate - Construction Management</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f9fafb; }
-        .hidden { display: none !important; }
-        .loading { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999; }
-        .spinner { width: 50px; height: 50px; border: 5px solid #f3f4f6; border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .toast { position: fixed; bottom: 20px; right: 20px; background: white; padding: 16px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 10000; display: none; align-items: center; gap: 12px; max-width: 400px; animation: slideIn 0.3s ease; }
-        .toast.show { display: flex; }
-        .toast.success { border-left: 4px solid #10b981; }
-        .toast.error { border-left: 4px solid #ef4444; }
-        .toast.warning { border-left: 4px solid #f59e0b; }
-        @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        .auth-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); }
-        .auth-box { background: white; border-radius: 16px; padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-        .auth-box h1 { color: #1e40af; font-size: 28px; text-align: center; margin-bottom: 8px; }
-        .auth-box p { color: #6b7280; text-align: center; margin-bottom: 32px; font-size: 14px; }
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 14px; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px; transition: border-color 0.2s; font-family: inherit; }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #3b82f6; }
-        .form-group textarea { resize: vertical; min-height: 80px; }
-        .form-help { font-size: 12px; color: #6b7280; margin-top: 4px; }
-        .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-        .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); color: white; width: 100%; }
-        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); }
-        .btn-secondary { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
-        .btn-secondary:hover { background: #e5e7eb; }
-        .btn-danger { background: #ef4444; color: white; }
-        .btn-danger:hover { background: #dc2626; }
-        .btn-small { padding: 6px 12px; font-size: 13px; }
-        .forgot-password { text-align: right; margin-top: -8px; margin-bottom: 16px; }
-        .forgot-password a { color: #3b82f6; text-decoration: none; font-size: 13px; font-weight: 500; cursor: pointer; }
-        .forgot-password a:hover { text-decoration: underline; }
-        .auth-toggle { text-align: center; margin-top: 20px; color: #6b7280; font-size: 14px; }
-        .auth-toggle a { color: #3b82f6; text-decoration: none; font-weight: 600; cursor: pointer; }
-        .navbar { background: white; border-bottom: 1px solid #e5e7eb; padding: 0 20px; position: sticky; top: 0; z-index: 100; }
-        .nav-container { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; height: 64px; }
-        .logo { font-size: 22px; font-weight: 700; color: #1e40af; }
-        .user-info { display: flex; align-items: center; gap: 16px; }
-        .user-details { text-align: right; }
-        .user-name { font-weight: 600; color: #111827; font-size: 14px; }
-        .user-company { font-size: 12px; color: #6b7280; }
-        .role-badge { font-size: 11px; padding: 2px 8px; border-radius: 4px; background: #dbeafe; color: #1e40af; font-weight: 600; }
-        .main-content { max-width: 1400px; margin: 0 auto; padding: 30px 20px; }
-        .page-header h2 { font-size: 28px; color: #111827; margin-bottom: 6px; }
-        .page-header p { color: #6b7280; margin-bottom: 24px; }
-        .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
-        .project-card { background: white; border-radius: 12px; padding: 20px; border: 1px solid #e5e7eb; cursor: pointer; transition: all 0.3s; }
-        .project-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
-        .project-card h3 { font-size: 18px; color: #111827; margin-bottom: 8px; }
-        .project-card p { color: #6b7280; font-size: 14px; margin-bottom: 16px; }
-        .project-meta { display: flex; justify-content: space-between; font-size: 12px; color: #6b7280; padding-top: 12px; border-top: 1px solid #e5e7eb; }
-        .new-project-card { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 2px dashed #60a5fa; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; border-radius: 12px; cursor: pointer; transition: all 0.3s; }
-        .new-project-card:hover { border-color: #3b82f6; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-        .modal.show { display: flex; }
-        .modal-content { background: white; border-radius: 16px; padding: 28px; width: 100%; max-width: 650px; max-height: 85vh; overflow-y: auto; }
-        .modal-content h3 { font-size: 22px; margin-bottom: 20px; color: #111827; }
-        .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
-        .modal-actions .btn { flex: 1; }
-        .project-detail { background: white; border-radius: 12px; padding: 24px; margin-bottom: 20px; border: 1px solid #e5e7eb; }
-        .back-btn { color: #3b82f6; text-decoration: none; margin-bottom: 14px; display: inline-block; font-size: 14px; font-weight: 500; cursor: pointer; }
-        .back-btn:hover { text-decoration: underline; }
-        .project-detail h2 { font-size: 26px; color: #111827; margin-bottom: 6px; }
-        .project-detail-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px; }
-        .project-detail-actions { display: flex; gap: 8px; }
-        .tabs { display: flex; gap: 6px; margin-top: 20px; overflow-x: auto; padding-bottom: 6px; }
-        .tab { padding: 10px 20px; border-radius: 8px; background: #f3f4f6; border: none; cursor: pointer; font-weight: 600; color: #374151; white-space: nowrap; transition: all 0.2s; font-size: 14px; }
-        .tab:hover { background: #e5e7eb; }
-        .tab.active { background: #3b82f6; color: white; }
-        .tab-content { background: white; border-radius: 12px; padding: 24px; border: 1px solid #e5e7eb; }
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .section-header h3 { font-size: 19px; font-weight: 700; }
-        .empty-state { text-align: center; padding: 50px 20px; color: #9ca3af; }
-        .empty-state-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.3; }
-        .item-card { background: #f9fafb; border-radius: 8px; padding: 16px; margin-bottom: 12px; border: 1px solid #e5e7eb; }
-        .item-header { display: flex; justify-content: space-between; align-items: start; }
-        .item-title { font-weight: 600; color: #111827; font-size: 15px; }
-        .item-meta { font-size: 12px; color: #6b7280; margin-top: 4px; }
-        .item-actions { display: flex; gap: 6px; }
-        .status-badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
-        .status-open { background: #dbeafe; color: #1e40af; }
-        .status-answered { background: #d1fae5; color: #065f46; }
-        .status-closed { background: #e5e7eb; color: #374151; }
-        .status-pending { background: #fef3c7; color: #92400e; }
-        .status-approved { background: #d1fae5; color: #065f46; }
-        .status-rejected { background: #fee2e2; color: #991b1b; }
-        .priority-low { color: #10b981; }
-        .priority-medium { color: #f59e0b; }
-        .priority-high { color: #ef4444; }
-        .priority-critical { color: #dc2626; font-weight: 700; }
-        .message-bubble { background: #eff6ff; padding: 12px 16px; border-radius: 12px; margin-bottom: 12px; border-left: 3px solid #3b82f6; }
-        .message-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-        .message-author { font-weight: 600; color: #1e40af; font-size: 14px; }
-        .message-time { font-size: 11px; color: #6b7280; }
-        .message-text { color: #374151; font-size: 14px; line-height: 1.5; }
-        @media (max-width: 768px) { .projects-grid { grid-template-columns: 1fr; } }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ProCoordinate – Auth Fixed</title>
+
+  <!-- CSP (prefer server headers in production) -->
+  <meta http-equiv="Content-Security-Policy"
+        content="
+          default-src 'self';
+          script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+          style-src 'self' 'unsafe-inline';
+          img-src 'self' https: data:;
+          connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.supabase.in wss://*.supabase.in;
+          base-uri 'self'; frame-ancestors 'none'; form-action 'self';
+          upgrade-insecure-requests
+        ">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root { --brand:#1e40af; --muted:#6b7280; --bg:#f9fafb; --ok:#10b981; --warn:#f59e0b; --err:#ef4444; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); }
+    .wrap { min-height:100vh; display:grid; place-items:center; padding:24px; }
+    .card { width:100%; max-width:420px; background:#fff; border:1px solid #e5e7eb; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.08); padding:24px; }
+    h1 { margin:0 0 6px; font-size:24px; color:var(--brand); text-align:center; }
+    p.sub { margin:0 0 18px; color:var(--muted); text-align:center; }
+    .row { margin-bottom:14px; }
+    label { display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px; }
+    input, select { width:100%; padding:10px 12px; border:2px solid #e5e7eb; border-radius:8px; font-size:15px; }
+    input:focus, select:focus { outline:none; border-color:#3b82f6; }
+    .btn { width:100%; padding:10px 14px; border:0; border-radius:10px; font-weight:700; cursor:pointer; }
+    .primary { color:#fff; background:linear-gradient(135deg,#3b82f6 0%, var(--brand) 100%); }
+    .ghost { background:#f3f4f6; }
+    .link { color:#3b82f6; background:none; border:0; padding:0; cursor:pointer; font-weight:600; }
+    .flex { display:flex; gap:10px; }
+    .muted { color:var(--muted); font-size:13px; text-align:center; }
+    .center { text-align:center; }
+    .hidden { display:none !important; }
+    .toast { position:fixed; right:20px; bottom:20px; background:#fff; border-left:4px solid var(--brand);
+             padding:12px 14px; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,.15); display:none; }
+    .toast.show { display:block; }
+    .toast.ok { border-left-color:var(--ok); }
+    .toast.err { border-left-color:var(--err); }
+    .toast.warn { border-left-color:var(--warn); }
+    .spinner { display:inline-block; width:18px; height:18px; border:3px solid #e5e7eb; border-top-color:#3b82f6; border-radius:50%; animation:spin 1s linear infinite; vertical-align:-3px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .topbar { position:sticky; top:0; background:#fff; border-bottom:1px solid #e5e7eb; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; }
+    .badge { background:#dbeafe; color:var(--brand); padding:2px 8px; border-radius:999px; font-size:12px; font-weight:700; }
+    .area { padding:16px; }
+    .hint { font-size:12px; color:var(--muted); margin-top:4px; }
+  </style>
 </head>
 <body>
-    <div id="loadingSpinner" class="loading hidden"><div class="spinner"></div></div>
-    <div id="toast" class="toast"><span id="toastMessage"></span></div>
 
-    <div id="authView" class="auth-container">
-        <div class="auth-box">
-            <h1>ProCoordinate</h1>
-            <p>Professional Construction Management Platform</p>
-            <form id="authForm">
-                <div class="form-group">
-                    <label for="authEmail">Email</label>
-                    <input type="email" id="authEmail" required>
-                </div>
-                <div class="form-group">
-                    <label for="authPassword">Password</label>
-                    <input type="password" id="authPassword" minlength="10" required>
-                    <div class="form-help">Minimum 10 characters</div>
-                </div>
-                <div class="forgot-password" id="forgotPasswordLink">
-                    <a id="forgotPasswordBtn" href="#">Forgot password?</a>
-                </div>
-                <div class="form-group hidden" id="nameGroup">
-                    <label for="authName">Full Name</label>
-                    <input type="text" id="authName">
-                </div>
-                <div class="form-group hidden" id="companyGroup">
-                    <label for="authCompany">Company Name</label>
-                    <input type="text" id="authCompany">
-                </div>
-                <div class="form-group hidden" id="roleGroup">
-                    <label for="authRole">Role</label>
-                    <select id="authRole">
-                        <option value="Main Contractor">Main Contractor</option>
-                        <option value="Subcontractor">Subcontractor</option>
-                        <option value="Architect">Architect</option>
-                        <option value="Engineer">Engineer</option>
-                        <option value="Client">Client</option>
-                        <option value="Project Manager">Project Manager</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary" id="authBtn">Sign In</button>
-            </form>
-            <div class="auth-toggle">
-                <span id="authToggleText">Don't have an account?</span>
-                <a id="authToggleLink" href="#">Sign up</a>
-            </div>
+<!-- ---------- AUTH VIEWS ---------- -->
+<div id="authView" class="wrap">
+  <div class="card">
+    <h1>ProCoordinate</h1>
+    <p class="sub">Sign in or create an account</p>
+
+    <form id="authForm">
+      <div class="row">
+        <label for="email">Email</label>
+        <input id="email" type="email" required />
+      </div>
+
+      <div class="row">
+        <label for="password">Password</label>
+        <input id="password" type="password" minlength="10" required />
+        <div class="hint">Minimum 10 characters</div>
+      </div>
+
+      <div id="signupOnly" class="hidden">
+        <div class="row">
+          <label for="name">Full name</label>
+          <input id="name" type="text" />
         </div>
+        <div class="row">
+          <label for="company">Company</label>
+          <input id="company" type="text" />
+        </div>
+        <div class="row">
+          <label for="role">Role</label>
+          <select id="role">
+            <option>Main Contractor</option>
+            <option>Subcontractor</option>
+            <option>Architect</option>
+            <option>Engineer</option>
+            <option>Client</option>
+            <option selected>Project Manager</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <button id="authBtn" class="btn primary" type="submit">
+          <span id="authBtnText">Sign In</span>
+        </button>
+      </div>
+    </form>
+
+    <div class="row flex">
+      <button id="forgotBtn" class="btn ghost">Forgot password</button>
+      <button id="magicBtn" class="btn ghost">Send magic link</button>
     </div>
 
-    <div id="appView" class="hidden">
-        <nav class="navbar">
-            <div class="nav-container">
-                <div class="logo">ProCoordinate</div>
-                <div class="user-info">
-                    <div class="user-details">
-                        <div class="user-name" id="userName"></div>
-                        <div class="user-company" id="userCompany"></div>
-                    </div>
-                    <span class="role-badge" id="userRole"></span>
-                    <button class="btn btn-secondary btn-small" id="logoutBtn">Logout</button>
-                </div>
-            </div>
-        </nav>
+    <p class="muted" id="toggleText">
+      Don’t have an account? <button id="toggleMode" class="link">Sign up</button>
+    </p>
+  </div>
+</div>
 
-        <main class="main-content">
-            <div id="dashboardView">
-                <div class="page-header">
-                    <h2>Your Projects</h2>
-                    <p>Manage all your construction projects in one place</p>
-                </div>
-                <div class="projects-grid" id="projectsGrid"></div>
-            </div>
+<!-- ---------- PASSWORD RECOVERY VIEW ---------- -->
+<div id="resetView" class="wrap hidden">
+  <div class="card">
+    <h1>Reset password</h1>
+    <p class="sub">Enter a new password for your account</p>
 
-            <div id="projectView" class="hidden">
-                <div class="project-detail">
-                    <a class="back-btn" id="backBtn">← Back to Projects</a>
-                    <div id="projectHeader"></div>
-                </div>
-                <div class="tabs" id="tabs"></div>
-                <div class="tab-content" id="tabContent"></div>
-            </div>
-        </main>
+    <div class="row">
+      <label for="newPass">New password</label>
+      <input id="newPass" type="password" minlength="10" required />
     </div>
-
-    <div id="modal" class="modal">
-        <div class="modal-content" id="modalContent"></div>
+    <div class="row">
+      <label for="newPass2">Confirm password</label>
+      <input id="newPass2" type="password" minlength="10" required />
     </div>
+    <div class="row">
+      <button id="updatePassBtn" class="btn primary">Update password</button>
+    </div>
+    <p class="muted center"><button id="backToAuth" class="link">← Back to sign in</button></p>
+  </div>
+</div>
 
-    <script>
-        const SUPABASE_URL = 'https://ilfgmgajivusmqarkaqd.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsZmdtZ2FqaXZ1c21xYXJrYXFkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3MDY0NzYsImV4cCI6MjA3NDI4MjQ3Nn0.ysd2Y8DuxGWe99eM3PxbkIuvw62Vgp-68lZMJjkd7do';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+<!-- ---------- APP VIEW (AFTER LOGIN) ---------- -->
+<div id="appView" class="hidden">
+  <div class="topbar">
+    <strong>ProCoordinate</strong>
+    <div>
+      <span id="who" class="badge"></span>
+      <button id="logoutBtn" class="btn ghost" style="margin-left:10px;width:auto">Logout</button>
+    </div>
+  </div>
+  <div class="area">
+    <h2>Welcome!</h2>
+    <p>You’re logged in. This stub proves auth is working. Plug this flow back into your full app once you’ve verified sign up / login / reset.</p>
+  </div>
+</div>
 
-        const MIN_PASSWORD_LENGTH = 10;
-        let currentUser = null;
-        let currentProject = null;
-        let projects = [];
-        let isSignup = false;
-        let activeTab = 'overview';
+<!-- ---------- TOAST ---------- -->
+<div id="toast" class="toast"></div>
 
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toastMessage');
-            toast.className = `toast ${type} show`;
-            toastMessage.textContent = message;
-            setTimeout(() => toast.classList.remove('show'), 4000);
+<script>
+/* ====== CONFIG ====== */
+const SUPABASE_URL = 'https://ilfgmgajivusmqarkaqd.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlsZmdtZ2FqaXZ1c21xYXJrYXFkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3MDY0NzYsImV4cCI6MjA3NDI4MjQ3Nn0.ysd2Y8DuxGWe99eM3PxbkIuvw62Vgp-68lZMJjkd7do';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const MINLEN = 10;
+
+/* ====== UTIL ====== */
+const $ = (id) => document.getElementById(id);
+function toast(msg, type='ok') {
+  const el = $('toast');
+  el.textContent = msg;
+  el.className = `toast show ${type}`;
+  setTimeout(()=> el.className = 'toast', 4000);
+}
+function setView(view) {
+  ['authView','resetView','appView'].forEach(v => $(v).classList.add('hidden'));
+  $(view).classList.remove('hidden');
+}
+function parseUrlParams() {
+  // Supabase can deliver tokens via hash (#) OR query (?)
+  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  const query = new URLSearchParams(window.location.search);
+  const params = new URLSearchParams();
+  for (const [k,v] of hash) params.set(k,v);
+  for (const [k,v] of query) params.set(k,v);
+  return params;
+}
+function buttonBusy(btn, busy) {
+  if (!btn) return;
+  btn.disabled = !!busy;
+  btn.dataset.originalText ??= btn.textContent;
+  btn.innerHTML = busy ? `<span class="spinner"></span>` : btn.dataset.originalText;
+}
+
+/* ====== STATE ====== */
+let isSignup = false;
+let currentUser = null;
+
+/* ====== AUTH FLOW ====== */
+init();
+
+async function init() {
+  // 1) detect recovery token
+  const params = parseUrlParams();
+  const type = params.get('type');
+  const access_token = params.get('access_token');
+  if (type === 'recovery' && access_token) {
+    // Supabase sets the session automatically on load for recovery links
+    setView('resetView');
+    return;
+  }
+
+  // 2) restore session
+  const { data: { session }, error } = await supabase.auth.getSession();
+  if (error) console.error(error);
+  if (session?.user) {
+    currentUser = session.user;
+    onSignedIn(session.user);
+  } else {
+    setView('authView');
+  }
+}
+
+/* Sign up / Sign in toggle */
+$('toggleMode').addEventListener('click', () => {
+  isSignup = !isSignup;
+  $('signupOnly').classList.toggle('hidden', !isSignup);
+  $('authBtnText').textContent = isSignup ? 'Create Account' : 'Sign In';
+  $('toggleText').innerHTML = isSignup
+    ? `Already have an account? <button id="toggleMode" class="link">Sign in</button>`
+    : `Don’t have an account? <button id="toggleMode" class="link">Sign up</button>`;
+});
+
+/* Sign up / Sign in submit */
+$('authForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = $('email').value.trim();
+  const password = $('password').value;
+
+  if (password.length < MINLEN) {
+    toast(`Password must be at least ${MINLEN} characters`, 'warn');
+    return;
+  }
+
+  const btn = $('authBtn'); buttonBusy(btn, true);
+
+  try {
+    if (isSignup) {
+      const name = $('name').value.trim();
+      const company = $('company').value.trim();
+      const role = $('role').value;
+      if (!name || !company) {
+        toast('Please fill name and company', 'warn');
+        return;
+      }
+      const { error } = await supabase.auth.signUp({
+        email, password,
+        options: {
+          data: { name, company, role },
+          emailRedirectTo: window.location.origin
         }
-
-        function showLoading() { document.getElementById('loadingSpinner').classList.remove('hidden'); }
-        function hideLoading() { document.getElementById('loadingSpinner').classList.add('hidden'); }
-        function setText(element, text) { if (element) element.textContent = text || ''; }
-        function escapeHtml(text) { if (!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
-        function formatDate(dateStr) { if (!dateStr) return '-'; const d = new Date(dateStr); return `${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'short' })} ${d.getFullYear()}`; }
-        function formatDateTime(dateStr) { if (!dateStr) return '-'; const d = new Date(dateStr); return `${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'short' })} ${d.getFullYear()}, ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`; }
-
-        checkAuth();
-
-        async function checkAuth() {
-            showLoading();
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                const { data: userData } = await supabase.auth.getUser();
-                currentUser = {
-                    id: userData.user.id,
-                    email: userData.user.email,
-                    name: userData.user.user_metadata.name || userData.user.email,
-                    company: userData.user.user_metadata.company || 'My Company',
-                    role: userData.user.user_metadata.role || 'Project Manager'
-                };
-                await showApp();
-            } else {
-                hideLoading();
-            }
+      });
+      if (error) throw error;
+      toast('Account created! Check your email to verify your address.', 'ok');
+    } else {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        // Common gotcha: email not confirmed
+        if (/email/i.test(error.message) && /confirm/i.test(error.message)) {
+          toast('Please confirm your email first. Check your inbox (and spam).', 'warn');
+        } else {
+          toast(error.message, 'err');
         }
+        return;
+      }
+      currentUser = data.user;
+      onSignedIn(data.user);
+    }
+  } catch (err) {
+    console.error(err);
+    toast(err.message || 'Authentication error', 'err');
+  } finally {
+    buttonBusy(btn, false);
+  }
+});
 
-        async function showApp() {
-            document.getElementById('authView').classList.add('hidden');
-            document.getElementById('appView').classList.remove('hidden');
-            setText(document.getElementById('userName'), currentUser.name);
-            setText(document.getElementById('userCompany'), currentUser.company);
-            setText(document.getElementById('userRole'), currentUser.role);
-            await loadProjects();
-            hideLoading();
-        }
+/* Forgot password → sends reset email */
+$('forgotBtn').addEventListener('click', async () => {
+  const email = $('email').value.trim();
+  if (!email) return toast('Enter your email above first.', 'warn');
+  buttonBusy($('forgotBtn'), true);
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin   // opens this page with type=recovery
+    });
+    if (error) throw error;
+    toast('Password reset email sent. Check your inbox.', 'ok');
+  } catch (e) {
+    toast(e.message, 'err');
+  } finally {
+    buttonBusy($('forgotBtn'), false);
+  }
+});
 
-        document.getElementById('authToggleLink').addEventListener('click', (e) => {
-            e.preventDefault();
-            isSignup = !isSignup;
-            setText(document.getElementById('authBtn'), isSignup ? 'Create Account' : 'Sign In');
-            setText(document.getElementById('authToggleText'), isSignup ? 'Already have an account?' : "Don't have an account?");
-            setText(document.getElementById('authToggleLink'), isSignup ? 'Sign in' : 'Sign up');
-            document.getElementById('nameGroup').classList.toggle('hidden');
-            document.getElementById('companyGroup').classList.toggle('hidden');
-            document.getElementById('roleGroup').classList.toggle('hidden');
-            document.getElementById('forgotPasswordLink').classList.toggle('hidden');
-        });
+/* Magic link sign-in (optional) */
+$('magicBtn').addEventListener('click', async () => {
+  const email = $('email').value.trim();
+  if (!email) return toast('Enter your email above first.', 'warn');
+  buttonBusy($('magicBtn'), true);
+  try {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: window.location.origin }
+    });
+    if (error) throw error;
+    toast('Magic link sent. Check your email.', 'ok');
+  } catch (e) {
+    toast(e.message, 'err');
+  } finally {
+    buttonBusy($('magicBtn'), false);
+  }
+});
 
-        document.getElementById('authForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('authEmail').value.trim();
-            const password = document.getElementById('authPassword').value;
-            if (password.length < MIN_PASSWORD_LENGTH) { showToast(`Password must be at least ${MIN_PASSWORD_LENGTH} characters`, 'error'); return; }
-            showLoading();
+/* Recovery view: update password */
+$('updatePassBtn').addEventListener('click', async () => {
+  const p1 = $('newPass').value;
+  const p2 = $('newPass2').value;
+  if (p1.length < MINLEN) return toast(`Password must be at least ${MINLEN} characters`, 'warn');
+  if (p1 !== p2) return toast('Passwords do not match', 'warn');
 
-            if (isSignup) {
-                const name = document.getElementById('authName').value.trim();
-                const company = document.getElementById('authCompany').value.trim();
-                const role = document.getElementById('authRole').value;
-                if (!name || !company) { hideLoading(); showToast('Please fill in all fields', 'error'); return; }
-                const { error } = await supabase.auth.signUp({ email, password, options: { data: { name, company, role }, emailRedirectTo: window.location.origin } });
-                hideLoading();
-                if (error) showToast('Error: ' + error.message, 'error');
-                else showToast('Account created! Please check your email.', 'success');
-            } else {
-                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                if (error) { hideLoading(); showToast('Error: ' + error.message, 'error'); }
-                else {
-                    currentUser = { id: data.user.id, email: data.user.email, name: data.user.user_metadata.name || data.user.email, company: data.user.user_metadata.company || 'My Company', role: data.user.user_metadata.role || 'Project Manager' };
-                    await showApp();
-                }
-            }
-        });
+  buttonBusy($('updatePassBtn'), true);
+  try {
+    const { error } = await supabase.auth.updateUser({ password: p1 });
+    if (error) throw error;
 
-        document.getElementById('forgotPasswordBtn').addEventListener('click', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('authEmail').value.trim();
-            if (!email) { showToast('Please enter your email first', 'warning'); return; }
-            showLoading();
-            const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
-            hideLoading();
-            if (error) showToast('Error: ' + error.message, 'error');
-            else showToast('Password reset email sent!', 'success');
-        });
+    // Clean the URL of recovery params
+    history.replaceState({}, '', window.location.origin + window.location.pathname);
 
-        document.getElementById('logoutBtn').addEventListener('click', async () => {
-            if (confirm('Are you sure you want to logout?')) {
-                showLoading();
-                await supabase.auth.signOut();
-                currentUser = null; projects = []; currentProject = null;
-                document.getElementById('authView').classList.remove('hidden');
-                document.getElementById('appView').classList.add('hidden');
-                hideLoading();
-            }
-        });
+    toast('Password updated. You can sign in now.', 'ok');
+    setView('authView');
+  } catch (e) {
+    toast(e.message, 'err');
+  } finally {
+    buttonBusy($('updatePassBtn'), false);
+  }
+});
 
-        document.getElementById('backBtn').addEventListener('click', () => {
-            currentProject = null;
-            document.getElementById('dashboardView').classList.remove('hidden');
-            document.getElementById('projectView').classList.add('hidden');
-        });
+/* Back link from recovery */
+$('backToAuth').addEventListener('click', () => {
+  // Clean params and go back
+  history.replaceState({}, '', window.location.origin + window.location.pathname);
+  setView('authView');
+});
 
-        async function loadProjects() {
-            showLoading();
-            const { data, error } = await supabase.from('projects').select('*').or(`user_id.eq.${currentUser.id}`).order('created_at', { ascending: false });
-            if (error) { console.error(error); showToast('Error loading projects', 'error'); projects = []; }
-            else projects = data || [];
-            renderProjects();
-            hideLoading();
-        }
+/* Logout */
+$('logoutBtn').addEventListener('click', async () => {
+  const btn = $('logoutBtn'); buttonBusy(btn, true);
+  try {
+    await supabase.auth.signOut();
+    currentUser = null;
+    setView('authView');
+    toast('Signed out.', 'ok');
+  } catch (e) {
+    toast(e.message, 'err');
+  } finally {
+    buttonBusy(btn, false);
+  }
+});
 
-        function renderProjects() {
-            const grid = document.getElementById('projectsGrid');
-            grid.innerHTML = '';
-            projects.forEach(p => {
-                const card = document.createElement('div');
-                card.className = 'project-card';
-                const title = document.createElement('h3');
-                title.textContent = p.name;
-                const location = document.createElement('p');
-                location.textContent = p.location || 'No location';
-                const meta = document.createElement('div');
-                meta.className = 'project-meta';
-                const start = document.createElement('span');
-                start.textContent = `Start: ${formatDate(p.start_date)}`;
-                const end = document.createElement('span');
-                end.textContent = `End: ${formatDate(p.end_date)}`;
-                meta.appendChild(start);
-                meta.appendChild(end);
-                card.appendChild(title);
-                card.appendChild(location);
-                card.appendChild(meta);
-                card.addEventListener('click', () => openProject(p.id));
-                grid.appendChild(card);
-            });
-            const newCard = document.createElement('div');
-            newCard.className = 'new-project-card';
-            newCard.innerHTML = '<div style="font-size:42px;color:#60a5fa;margin-bottom:10px">+</div><span style="color:#1e40af;font-weight:600">Create New Project</span>';
-            newCard.addEventListener('click', openProjectModal);
-            grid.appendChild(newCard);
-        }
+/* On successful sign-in */
+function onSignedIn(user) {
+  $('who').textContent = user.user_metadata?.name || user.email;
+  setView('appView');
+  toast('Signed in!', 'ok');
+}
 
-        function openProject(id) {
-            currentProject = projects.find(p => p.id === id);
-            document.getElementById('dashboardView').classList.add('hidden');
-            document.getElementById('projectView').classList.remove('hidden');
-            renderProjectDetail();
-        }
-
-        function renderProjectDetail() {
-            document.getElementById('projectHeader').innerHTML = `
-                <div class="project-detail-header">
-                    <div>
-                        <h2>${escapeHtml(currentProject.name)}</h2>
-                        <p style="color:#6b7280;margin-bottom:0">${escapeHtml(currentProject.description || '')}</p>
-                    </div>
-                    <div class="project-detail-actions">
-                        <button class="btn btn-secondary btn-small" onclick="editProject()">✏️ Edit</button>
-                        <button class="btn btn-danger btn-small" onclick="deleteProject()">🗑️ Delete</button>
-                    </div>
-                </div>
-                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0">
-                    <div style="background:#f9fafb;padding:14px;border-radius:8px">
-                        <div style="font-size:11px;color:#6b7280;margin-bottom:4px;text-transform:uppercase">Start Date</div>
-                        <div style="font-weight:600;color:#111827;font-size:15px">${formatDate(currentProject.start_date)}</div>
-                    </div>
-                    <div style="background:#f9fafb;padding:14px;border-radius:8px">
-                        <div style="font-size:11px;color:#6b7280;margin-bottom:4px;text-transform:uppercase">End Date</div>
-                        <div style="font-weight:600;color:#111827;font-size:15px">${formatDate(currentProject.end_date)}</div>
-                    </div>
-                    <div style="background:#f9fafb;padding:14px;border-radius:8px">
-                        <div style="font-size:11px;color:#6b7280;margin-bottom:4px;text-transform:uppercase">Location</div>
-                        <div style="font-weight:600;color:#111827;font-size:15px">${escapeHtml(currentProject.location || 'N/A')}</div>
-                    </div>
-                    <div style="background:#f9fafb;padding:14px;border-radius:8px">
-                        <div style="font-size:11px;color:#6b7280;margin-bottom:4px;text-transform:uppercase">Budget</div>
-                        <div style="font-weight:600;color:#111827;font-size:15px">£${(currentProject.budget || 0).toLocaleString()}</div>
-                    </div>
-                </div>
-            `;
-            document.getElementById('tabs').innerHTML = `
-                <button class="tab active" onclick="switchTab('overview')">Overview</button>
-                <button class="tab" onclick="switchTab('drawings')">Drawings</button>
-                <button class="tab" onclick="switchTab('rfis')">RFIs</button>
-                <button class="tab" onclick="switchTab('submittals')">Submittals</button>
-                <button class="tab" onclick="switchTab('dailyLogs')">Daily Logs</button>
-                <button class="tab" onclick="switchTab('photos')">Photos</button>
-                <button class="tab" onclick="switchTab('safety')">Safety</button>
-                <button class="tab" onclick="switchTab('messages')">Messages</button>
-            `;
-            switchTab('overview');
-        }
-
-        async function switchTab(tab) {
-            activeTab = tab;
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target?.classList.add('active') || document.querySelector(`.tab:nth-child(1)`).classList.add('active');
-            const content = document.getElementById('tabContent');
-            
-            if (tab === 'overview') {
-                showLoading();
-                const [drawings, rfis, submittals, logs, photos, safety, messages] = await Promise.all([
-                    supabase.from('drawings').select('id').eq('project_id', currentProject.id),
-                    supabase.from('rfis').select('id').eq('project_id', currentProject.id),
-                    supabase.from('submittals').select('id').eq('project_id', currentProject.id),
-                    supabase.from('daily_logs').select('id').eq('project_id', currentProject.id),
-                    supabase.from('photos').select('id').eq('project_id', currentProject.id),
-                    supabase.from('safety_reports').select('id').eq('project_id', currentProject.id),
-                    supabase.from('messages').select('id').eq('project_id', currentProject.id)
-                ]);
-                hideLoading();
-                content.innerHTML = `
-                    <h3 style="margin-bottom:20px">Project Overview</h3>
-                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
-                        ${[
-                            { label: 'Drawings', value: drawings.data?.length || 0, color: '#3b82f6' },
-                            { label: 'RFIs', value: rfis.data?.length || 0, color: '#ef4444' },
-                            { label: 'Submittals', value: submittals.data?.length || 0, color: '#f59e0b' },
-                            { label: 'Daily Logs', value: logs.data?.length || 0, color: '#8b5cf6' },
-                            { label: 'Photos', value: photos.data?.length || 0, color: '#ec4899' },
-                            { label: 'Safety Reports', value: safety.data?.length || 0, color: '#f97316' },
-                            { label: 'Messages', value: messages.data?.length || 0, color: '#06b6d4' },
-                            { label: 'Team Members', value: '1', color: '#10b981' }
-                        ].map(s => `<div style="background:linear-gradient(135deg,#f9fafb 0%,#f3f4f6 100%);padding:20px;border-radius:10px"><div style="font-size:32px;font-weight:700;color:${s.color};margin-bottom:6px">${s.value}</div><div style="color:#6b7280;font-weight:500;font-size:14px">${s.label}</div></div>`).join('')}
-                    </div>
-                `;
-            } else {
-                content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🚧</div><p>Loading...</p></div>';
-                setTimeout(() => showToast(`${tab} tab coming soon!`, 'warning'), 100);
-            }
-        }
-
-        function openProjectModal() {
-            showModal(`
-                <form id="projectForm">
-                    <h3>Create New Project</h3>
-                    <div class="form-group"><label>Project Name *</label><input type="text" name="name" required></div>
-                    <div class="form-group"><label>Description</label><textarea name="description" rows="3"></textarea></div>
-                    <div class="form-group"><label>Start Date *</label><input type="date" name="startDate" required></div>
-                    <div class="form-group"><label>End Date *</label><input type="date" name="endDate" required></div>
-                    <div class="form-group"><label>Location</label><input type="text" name="location"></div>
-                    <div class="form-group"><label>Budget (£)</label><input type="number" name="budget"></div>
-                    <div class="modal-actions">
-                        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Create Project</button>
-                    </div>
-                </form>
-            `);
-            document.getElementById('projectForm').addEventListener('submit', handleCreateProject);
-        }
-
-        async function handleCreateProject(e) {
-            e.preventDefault();
-            const fd = new FormData(e.target);
-            const name = fd.get('name')?.trim();
-            const startDate = fd.get('startDate');
-            const endDate = fd.get('endDate');
-            if (!name || !startDate || !endDate) { showToast('Please fill required fields', 'error'); return; }
-            showLoading();
-            const { data: proj, error: projErr } = await supabase.from('projects').insert([{
-                user_id: currentUser.id,
-                name, description: fd.get('description') || '', start_date: startDate, end_date: endDate,
-                location: fd.get('location') || '', budget: parseInt(fd.get('budget')) || 0
-            }]).select().single();
-            if (projErr) { hideLoading(); showToast('Error: ' + projErr.message, 'error'); return; }
-            await supabase.from('project_members').insert([{ project_id: proj.id, user_id: currentUser.id, role: 'Project Manager' }]);
-            await loadProjects();
-            closeModal();
-            hideLoading();
-            showToast('Project created!', 'success');
-        }
-
-        function editProject() { showToast('Edit coming soon!', 'warning'); }
-        function deleteProject() {
-            if (confirm(`Delete "${currentProject.name}"?`)) {
-                showLoading();
-                supabase.from('projects').delete().eq('id', currentProject.id).then(async () => {
-                    await loadProjects();
-                    document.getElementById('dashboardView').classList.remove('hidden');
-                    document.getElementById('projectView').classList.add('hidden');
-                    hideLoading();
-                    showToast('Project deleted', 'success');
-                });
-            }
-        }
-
-        function showModal(content) {
-            document.getElementById('modalContent').innerHTML = content;
-            document.getElementById('modal').classList.add('show');
-        }
-
-        function closeModal() {
-            document.getElementById('modal').classList.remove('show');
-        }
-
-        document.getElementById('modal').addEventListener('click', (e) => {
-            if (e.target.id === 'modal') closeModal();
-        });
-    </script>
+/* Keep the UI in sync if session changes in another tab */
+supabase.auth.onAuthStateChange((_event, session) => {
+  if (session?.user && !currentUser) {
+    currentUser = session.user;
+    onSignedIn(session.user);
+  } else if (!session && currentUser) {
+    currentUser = null;
+    setView('authView');
+  }
+});
+</script>
 </body>
 </html>

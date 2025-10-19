@@ -8,457 +8,153 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ProCoordinate">
-    <title>ProCoordinate - Professional Construction Management</title>
+    <title>ProCoordinate - Construction Management</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f9fafb;
-        }
-        
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f9fafb; }
         .hidden { display: none !important; }
-        
-        .loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-        
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f4f6;
-            border-top-color: #3b82f6;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: white;
-            padding: 16px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 10000;
-            display: none;
-            align-items: center;
-            gap: 12px;
-            max-width: 400px;
-            animation: slideIn 0.3s ease;
-        }
-        
+        .loading { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        .spinner { width: 50px; height: 50px; border: 5px solid #f3f4f6; border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: white; padding: 16px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 10000; display: none; align-items: center; gap: 12px; max-width: 400px; animation: slideIn 0.3s ease; }
         .toast.show { display: flex; }
-        
         .toast.success { border-left: 4px solid #10b981; }
         .toast.error { border-left: 4px solid #ef4444; }
         .toast.warning { border-left: 4px solid #f59e0b; }
-        
-        @keyframes slideIn {
-            from { transform: translateX(400px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        .auth-container {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-        }
-        
-        .auth-box {
-            background: white;
-            border-radius: 16px;
-            padding: 40px;
-            width: 100%;
-            max-width: 420px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        
-        .auth-box h1 {
-            color: #1e40af;
-            font-size: 28px;
-            text-align: center;
-            margin-bottom: 8px;
-        }
-        
-        .auth-box p {
-            color: #6b7280;
-            text-align: center;
-            margin-bottom: 32px;
-            font-size: 14px;
-        }
-        
-        .form-group {
-            margin-bottom: 16px;
-        }
-        
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 6px;
-            font-size: 14px;
-        }
-        
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 10px 14px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 15px;
-            transition: border-color 0.2s;
-            font-family: inherit;
-        }
-        
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            outline: none;
-            border-color: #3b82f6;
-        }
-        
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-        
-        .form-help {
-            font-size: 12px;
-            color: #6b7280;
-            margin-top: 4px;
-        }
-        
-        .form-error {
-            font-size: 12px;
-            color: #ef4444;
-            margin-top: 4px;
-        }
-        
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
-            color: white;
-            width: 100%;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-        }
-        
-        .btn-secondary {
-            background: #f3f4f6;
-            color: #374151;
-            border: 1px solid #e5e7eb;
-        }
-        
-        .btn-secondary:hover {
-            background: #e5e7eb;
-        }
-        
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-        
-        .btn-small {
-            padding: 6px 12px;
-            font-size: 13px;
-        }
-        
-        .forgot-password {
-            text-align: right;
-            margin-top: -8px;
-            margin-bottom: 16px;
-        }
-        
-        .forgot-password a {
-            color: #3b82f6;
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-        }
-        
-        .forgot-password a:hover {
-            text-decoration: underline;
-        }
-        
-        .auth-toggle {
-            text-align: center;
-            margin-top: 20px;
-            color: #6b7280;
-            font-size: 14px;
-        }
-        
-        .auth-toggle a {
-            color: #3b82f6;
-            text-decoration: none;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        
-        .navbar {
-            background: white;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 0 20px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        
-        .nav-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 64px;
-        }
-        
-        .logo {
-            font-size: 22px;
-            font-weight: 700;
-            color: #1e40af;
-        }
-        
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-        
-        .user-details {
-            text-align: right;
-        }
-        
-        .user-name {
-            font-weight: 600;
-            color: #111827;
-            font-size: 14px;
-        }
-        
-        .user-company {
-            font-size: 12px;
-            color: #6b7280;
-        }
-        
-        .role-badge {
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 4px;
-            background: #dbeafe;
-            color: #1e40af;
-            font-weight: 600;
-        }
-        
-        .main-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 30px 20px;
-        }
-        
-        .page-header h2 {
-            font-size: 28px;
-            color: #111827;
-            margin-bottom: 6px;
-        }
-        
-        .page-header p {
-            color: #6b7280;
-            margin-bottom: 24px;
-        }
-        
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 20px;
-        }
-        
-        .project-card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid #e5e7eb;
-            cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-        }
-        
-        .project-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-        }
-        
-        .new-project-card {
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-            border: 2px dashed #60a5fa;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 240px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .new-project-card:hover {
-            border-color: #3b82f6;
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 20px;
-        }
-        
-        .modal.show {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: 16px;
-            padding: 28px;
-            width: 100%;
-            max-width: 650px;
-            max-height: 85vh;
-            overflow-y: auto;
-        }
-        
-        .modal-content h3 {
-            font-size: 22px;
-            margin-bottom: 20px;
-            color: #111827;
-        }
-        
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .modal-actions .btn {
-            flex: 1;
-        }
+        @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .auth-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); }
+        .auth-box { background: white; border-radius: 16px; padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .auth-box h1 { color: #1e40af; font-size: 28px; text-align: center; margin-bottom: 8px; }
+        .auth-box p { color: #6b7280; text-align: center; margin-bottom: 32px; font-size: 14px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-weight: 600; color: #374151; margin-bottom: 6px; font-size: 14px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px; transition: border-color 0.2s; font-family: inherit; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #3b82f6; }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .form-help { font-size: 12px; color: #6b7280; margin-top: 4px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); color: white; width: 100%; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); }
+        .btn-secondary { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
+        .btn-secondary:hover { background: #e5e7eb; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-small { padding: 6px 12px; font-size: 13px; }
+        .forgot-password { text-align: right; margin-top: -8px; margin-bottom: 16px; }
+        .forgot-password a { color: #3b82f6; text-decoration: none; font-size: 13px; font-weight: 500; cursor: pointer; }
+        .forgot-password a:hover { text-decoration: underline; }
+        .auth-toggle { text-align: center; margin-top: 20px; color: #6b7280; font-size: 14px; }
+        .auth-toggle a { color: #3b82f6; text-decoration: none; font-weight: 600; cursor: pointer; }
+        .navbar { background: white; border-bottom: 1px solid #e5e7eb; padding: 0 20px; position: sticky; top: 0; z-index: 100; }
+        .nav-container { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; height: 64px; }
+        .logo { font-size: 22px; font-weight: 700; color: #1e40af; }
+        .user-info { display: flex; align-items: center; gap: 16px; }
+        .user-details { text-align: right; }
+        .user-name { font-weight: 600; color: #111827; font-size: 14px; }
+        .user-company { font-size: 12px; color: #6b7280; }
+        .role-badge { font-size: 11px; padding: 2px 8px; border-radius: 4px; background: #dbeafe; color: #1e40af; font-weight: 600; }
+        .main-content { max-width: 1400px; margin: 0 auto; padding: 30px 20px; }
+        .page-header h2 { font-size: 28px; color: #111827; margin-bottom: 6px; }
+        .page-header p { color: #6b7280; margin-bottom: 24px; }
+        .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+        .project-card { background: white; border-radius: 12px; padding: 20px; border: 1px solid #e5e7eb; cursor: pointer; transition: all 0.3s; }
+        .project-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+        .project-card h3 { font-size: 18px; color: #111827; margin-bottom: 8px; }
+        .project-card p { color: #6b7280; font-size: 14px; margin-bottom: 16px; }
+        .project-meta { display: flex; justify-content: space-between; font-size: 12px; color: #6b7280; padding-top: 12px; border-top: 1px solid #e5e7eb; }
+        .new-project-card { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 2px dashed #60a5fa; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; border-radius: 12px; cursor: pointer; transition: all 0.3s; }
+        .new-project-card:hover { border-color: #3b82f6; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .modal.show { display: flex; }
+        .modal-content { background: white; border-radius: 16px; padding: 28px; width: 100%; max-width: 650px; max-height: 85vh; overflow-y: auto; }
+        .modal-content h3 { font-size: 22px; margin-bottom: 20px; color: #111827; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-actions .btn { flex: 1; }
+        .project-detail { background: white; border-radius: 12px; padding: 24px; margin-bottom: 20px; border: 1px solid #e5e7eb; }
+        .back-btn { color: #3b82f6; text-decoration: none; margin-bottom: 14px; display: inline-block; font-size: 14px; font-weight: 500; cursor: pointer; }
+        .back-btn:hover { text-decoration: underline; }
+        .project-detail h2 { font-size: 26px; color: #111827; margin-bottom: 6px; }
+        .project-detail-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px; }
+        .project-detail-actions { display: flex; gap: 8px; }
+        .tabs { display: flex; gap: 6px; margin-top: 20px; overflow-x: auto; padding-bottom: 6px; }
+        .tab { padding: 10px 20px; border-radius: 8px; background: #f3f4f6; border: none; cursor: pointer; font-weight: 600; color: #374151; white-space: nowrap; transition: all 0.2s; font-size: 14px; }
+        .tab:hover { background: #e5e7eb; }
+        .tab.active { background: #3b82f6; color: white; }
+        .tab-content { background: white; border-radius: 12px; padding: 24px; border: 1px solid #e5e7eb; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .section-header h3 { font-size: 19px; font-weight: 700; }
+        .empty-state { text-align: center; padding: 50px 20px; color: #9ca3af; }
+        .empty-state-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.3; }
+        .item-card { background: #f9fafb; border-radius: 8px; padding: 16px; margin-bottom: 12px; border: 1px solid #e5e7eb; }
+        .item-header { display: flex; justify-content: space-between; align-items: start; }
+        .item-title { font-weight: 600; color: #111827; font-size: 15px; }
+        .item-meta { font-size: 12px; color: #6b7280; margin-top: 4px; }
+        .item-actions { display: flex; gap: 6px; }
+        .status-badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+        .status-open { background: #dbeafe; color: #1e40af; }
+        .status-answered { background: #d1fae5; color: #065f46; }
+        .status-closed { background: #e5e7eb; color: #374151; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-approved { background: #d1fae5; color: #065f46; }
+        .status-rejected { background: #fee2e2; color: #991b1b; }
+        .priority-low { color: #10b981; }
+        .priority-medium { color: #f59e0b; }
+        .priority-high { color: #ef4444; }
+        .priority-critical { color: #dc2626; font-weight: 700; }
+        .message-bubble { background: #eff6ff; padding: 12px 16px; border-radius: 12px; margin-bottom: 12px; border-left: 3px solid #3b82f6; }
+        .message-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .message-author { font-weight: 600; color: #1e40af; font-size: 14px; }
+        .message-time { font-size: 11px; color: #6b7280; }
+        .message-text { color: #374151; font-size: 14px; line-height: 1.5; }
+        @media (max-width: 768px) { .projects-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <div id="loadingSpinner" class="loading hidden">
-        <div class="spinner"></div>
-    </div>
-
-    <div id="toast" class="toast">
-        <span id="toastMessage"></span>
-    </div>
+    <div id="loadingSpinner" class="loading hidden"><div class="spinner"></div></div>
+    <div id="toast" class="toast"><span id="toastMessage"></span></div>
 
     <div id="authView" class="auth-container">
         <div class="auth-box">
             <h1>ProCoordinate</h1>
             <p>Professional Construction Management Platform</p>
-            
-            <div id="resetPasswordView" class="hidden">
-                <form id="resetPasswordForm">
-                    <div class="form-group">
-                        <label for="newPassword">New Password</label>
-                        <input type="password" id="newPassword" name="newPassword" minlength="10" required>
-                        <div class="form-help">Minimum 10 characters</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="confirmPassword">Confirm Password</label>
-                        <input type="password" id="confirmPassword" name="confirmPassword" minlength="10" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Update Password</button>
-                </form>
-                <div class="auth-toggle">
-                    <a id="backToLoginFromReset" href="#">← Back to Login</a>
+            <form id="authForm">
+                <div class="form-group">
+                    <label for="authEmail">Email</label>
+                    <input type="email" id="authEmail" required>
                 </div>
-            </div>
-            
-            <div id="loginSignupView">
-                <form id="authForm">
-                    <div class="form-group">
-                        <label for="authEmail">Email</label>
-                        <input type="email" id="authEmail" name="authEmail" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="authPassword">Password</label>
-                        <input type="password" id="authPassword" name="authPassword" minlength="10" required>
-                        <div class="form-help" id="passwordHelp">Minimum 10 characters</div>
-                    </div>
-                    
-                    <div class="forgot-password" id="forgotPasswordLink">
-                        <a id="forgotPasswordBtn" href="#">Forgot password?</a>
-                    </div>
-                    
-                    <div class="form-group hidden" id="nameGroup">
-                        <label for="authName">Full Name</label>
-                        <input type="text" id="authName" name="authName">
-                    </div>
-                    
-                    <div class="form-group hidden" id="companyGroup">
-                        <label for="authCompany">Company Name</label>
-                        <input type="text" id="authCompany" name="authCompany">
-                    </div>
-                    
-                    <div class="form-group hidden" id="roleGroup">
-                        <label for="authRole">Role</label>
-                        <select id="authRole" name="authRole">
-                            <option value="Main Contractor">Main Contractor</option>
-                            <option value="Subcontractor">Subcontractor</option>
-                            <option value="Architect">Architect</option>
-                            <option value="Engineer">Engineer</option>
-                            <option value="Client">Client</option>
-                            <option value="Project Manager">Project Manager</option>
-                        </select>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary" id="authBtn">Sign In</button>
-                </form>
-                
-                <div class="auth-toggle">
-                    <span id="authToggleText">Don't have an account?</span>
-                    <a id="authToggleLink" href="#">Sign up</a>
+                <div class="form-group">
+                    <label for="authPassword">Password</label>
+                    <input type="password" id="authPassword" minlength="10" required>
+                    <div class="form-help">Minimum 10 characters</div>
                 </div>
+                <div class="forgot-password" id="forgotPasswordLink">
+                    <a id="forgotPasswordBtn" href="#">Forgot password?</a>
+                </div>
+                <div class="form-group hidden" id="nameGroup">
+                    <label for="authName">Full Name</label>
+                    <input type="text" id="authName">
+                </div>
+                <div class="form-group hidden" id="companyGroup">
+                    <label for="authCompany">Company Name</label>
+                    <input type="text" id="authCompany">
+                </div>
+                <div class="form-group hidden" id="roleGroup">
+                    <label for="authRole">Role</label>
+                    <select id="authRole">
+                        <option value="Main Contractor">Main Contractor</option>
+                        <option value="Subcontractor">Subcontractor</option>
+                        <option value="Architect">Architect</option>
+                        <option value="Engineer">Engineer</option>
+                        <option value="Client">Client</option>
+                        <option value="Project Manager">Project Manager</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" id="authBtn">Sign In</button>
+            </form>
+            <div class="auth-toggle">
+                <span id="authToggleText">Don't have an account?</span>
+                <a id="authToggleLink" href="#">Sign up</a>
             </div>
         </div>
     </div>
@@ -486,6 +182,15 @@
                 </div>
                 <div class="projects-grid" id="projectsGrid"></div>
             </div>
+
+            <div id="projectView" class="hidden">
+                <div class="project-detail">
+                    <a class="back-btn" id="backBtn">← Back to Projects</a>
+                    <div id="projectHeader"></div>
+                </div>
+                <div class="tabs" id="tabs"></div>
+                <div class="tab-content" id="tabContent"></div>
+            </div>
         </main>
     </div>
 
@@ -500,105 +205,30 @@
 
         const MIN_PASSWORD_LENGTH = 10;
         let currentUser = null;
+        let currentProject = null;
         let projects = [];
         let isSignup = false;
+        let activeTab = 'overview';
 
-        // ============================================
-        // SECURITY: Toast notifications (replaces alert())
-        // ============================================
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             const toastMessage = document.getElementById('toastMessage');
-            
             toast.className = `toast ${type} show`;
             toastMessage.textContent = message;
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 4000);
+            setTimeout(() => toast.classList.remove('show'), 4000);
         }
 
-        // ============================================
-        // SECURITY: URL Sanitization
-        // ============================================
-        function sanitizeUrl(url) {
-            if (!url) return '';
-            const trimmed = url.trim();
-            if (!trimmed.startsWith('https://')) {
-                return ''; // Reject non-HTTPS URLs
-            }
-            try {
-                const parsed = new URL(trimmed);
-                return parsed.protocol === 'https:' ? trimmed : '';
-            } catch {
-                return '';
-            }
-        }
+        function showLoading() { document.getElementById('loadingSpinner').classList.remove('hidden'); }
+        function hideLoading() { document.getElementById('loadingSpinner').classList.add('hidden'); }
+        function setText(element, text) { if (element) element.textContent = text || ''; }
+        function escapeHtml(text) { if (!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
+        function formatDate(dateStr) { if (!dateStr) return '-'; const d = new Date(dateStr); return `${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'short' })} ${d.getFullYear()}`; }
+        function formatDateTime(dateStr) { if (!dateStr) return '-'; const d = new Date(dateStr); return `${d.getDate()} ${d.toLocaleDateString('en-GB', { month: 'short' })} ${d.getFullYear()}, ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`; }
 
-        // ============================================
-        // SECURITY: Safe Text Content (no innerHTML)
-        // ============================================
-        function setText(element, text) {
-            if (element) element.textContent = text || '';
-        }
-
-        function createEl(tag, props = {}) {
-            const el = document.createElement(tag);
-            Object.entries(props).forEach(([key, value]) => {
-                if (key === 'text') {
-                    el.textContent = value;
-                } else if (key === 'class') {
-                    el.className = value;
-                } else if (key === 'click') {
-                    el.addEventListener('click', value);
-                } else {
-                    el.setAttribute(key, value);
-                }
-            });
-            return el;
-        }
-
-        // ============================================
-        // SECURITY: Password Validation
-        // ============================================
-        function validatePassword(password) {
-            if (!password || password.length < MIN_PASSWORD_LENGTH) {
-                return `Password must be at least ${MIN_PASSWORD_LENGTH} characters`;
-            }
-            return null;
-        }
-
-        // ============================================
-        // Loading State
-        // ============================================
-        function showLoading() {
-            document.getElementById('loadingSpinner').classList.remove('hidden');
-        }
-
-        function hideLoading() {
-            document.getElementById('loadingSpinner').classList.add('hidden');
-        }
-
-        // ============================================
-        // Initialize
-        // ============================================
         checkAuth();
 
         async function checkAuth() {
             showLoading();
-            
-            // Check for password recovery
-            const urlParams = new URLSearchParams(window.location.search);
-            const accessToken = urlParams.get('access_token');
-            const type = urlParams.get('type');
-            
-            if (type === 'recovery' && accessToken) {
-                document.getElementById('loginSignupView').classList.add('hidden');
-                document.getElementById('resetPasswordView').classList.remove('hidden');
-                hideLoading();
-                return;
-            }
-            
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
                 const { data: userData } = await supabase.auth.getUser();
@@ -618,30 +248,19 @@
         async function showApp() {
             document.getElementById('authView').classList.add('hidden');
             document.getElementById('appView').classList.remove('hidden');
-            
             setText(document.getElementById('userName'), currentUser.name);
             setText(document.getElementById('userCompany'), currentUser.company);
             setText(document.getElementById('userRole'), currentUser.role);
-            
             await loadProjects();
             hideLoading();
         }
 
-        // ============================================
-        // Auth Form Handlers
-        // ============================================
         document.getElementById('authToggleLink').addEventListener('click', (e) => {
             e.preventDefault();
             isSignup = !isSignup;
-            
-            const authBtn = document.getElementById('authBtn');
-            const authToggleText = document.getElementById('authToggleText');
-            const authToggleLink = document.getElementById('authToggleLink');
-            
-            setText(authBtn, isSignup ? 'Create Account' : 'Sign In');
-            setText(authToggleText, isSignup ? 'Already have an account?' : "Don't have an account?");
-            setText(authToggleLink, isSignup ? 'Sign in' : 'Sign up');
-            
+            setText(document.getElementById('authBtn'), isSignup ? 'Create Account' : 'Sign In');
+            setText(document.getElementById('authToggleText'), isSignup ? 'Already have an account?' : "Don't have an account?");
+            setText(document.getElementById('authToggleLink'), isSignup ? 'Sign in' : 'Sign up');
             document.getElementById('nameGroup').classList.toggle('hidden');
             document.getElementById('companyGroup').classList.toggle('hidden');
             document.getElementById('roleGroup').classList.toggle('hidden');
@@ -650,58 +269,25 @@
 
         document.getElementById('authForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const email = document.getElementById('authEmail').value.trim();
             const password = document.getElementById('authPassword').value;
-
-            // Validate password
-            const passwordError = validatePassword(password);
-            if (passwordError) {
-                showToast(passwordError, 'error');
-                return;
-            }
-
+            if (password.length < MIN_PASSWORD_LENGTH) { showToast(`Password must be at least ${MIN_PASSWORD_LENGTH} characters`, 'error'); return; }
             showLoading();
 
             if (isSignup) {
                 const name = document.getElementById('authName').value.trim();
                 const company = document.getElementById('authCompany').value.trim();
                 const role = document.getElementById('authRole').value;
-
-                if (!name || !company) {
-                    hideLoading();
-                    showToast('Please fill in all fields', 'error');
-                    return;
-                }
-
-                const { error } = await supabase.auth.signUp({
-                    email,
-                    password,
-                    options: { 
-                        data: { name, company, role },
-                        emailRedirectTo: window.location.origin
-                    }
-                });
-
+                if (!name || !company) { hideLoading(); showToast('Please fill in all fields', 'error'); return; }
+                const { error } = await supabase.auth.signUp({ email, password, options: { data: { name, company, role }, emailRedirectTo: window.location.origin } });
                 hideLoading();
-                if (error) {
-                    showToast('Error: ' + error.message, 'error');
-                } else {
-                    showToast('Account created! Please check your email to verify.', 'success');
-                }
+                if (error) showToast('Error: ' + error.message, 'error');
+                else showToast('Account created! Please check your email.', 'success');
             } else {
                 const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                if (error) {
-                    hideLoading();
-                    showToast('Error: ' + error.message, 'error');
-                } else {
-                    currentUser = {
-                        id: data.user.id,
-                        email: data.user.email,
-                        name: data.user.user_metadata.name || data.user.email,
-                        company: data.user.user_metadata.company || 'My Company',
-                        role: data.user.user_metadata.role || 'Project Manager'
-                    };
+                if (error) { hideLoading(); showToast('Error: ' + error.message, 'error'); }
+                else {
+                    currentUser = { id: data.user.id, email: data.user.email, name: data.user.user_metadata.name || data.user.email, company: data.user.user_metadata.company || 'My Company', role: data.user.user_metadata.role || 'Project Manager' };
                     await showApp();
                 }
             }
@@ -710,93 +296,36 @@
         document.getElementById('forgotPasswordBtn').addEventListener('click', async (e) => {
             e.preventDefault();
             const email = document.getElementById('authEmail').value.trim();
-            
-            if (!email) {
-                showToast('Please enter your email address first', 'warning');
-                return;
-            }
-            
+            if (!email) { showToast('Please enter your email first', 'warning'); return; }
             showLoading();
-            const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: window.location.origin
-            });
+            const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
             hideLoading();
-            
-            if (error) {
-                showToast('Error: ' + error.message, 'error');
-            } else {
-                showToast('Password reset email sent! Check your inbox.', 'success');
-            }
-        });
-
-        document.getElementById('resetPasswordForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            
-            const passwordError = validatePassword(newPassword);
-            if (passwordError) {
-                showToast(passwordError, 'error');
-                return;
-            }
-            
-            if (newPassword !== confirmPassword) {
-                showToast('Passwords do not match', 'error');
-                return;
-            }
-            
-            showLoading();
-            const { error } = await supabase.auth.updateUser({ password: newPassword });
-            hideLoading();
-            
-            if (error) {
-                showToast('Error updating password: ' + error.message, 'error');
-            } else {
-                showToast('Password updated successfully!', 'success');
-                window.history.replaceState({}, document.title, window.location.pathname);
-                document.getElementById('resetPasswordView').classList.add('hidden');
-                document.getElementById('loginSignupView').classList.remove('hidden');
-            }
-        });
-
-        document.getElementById('backToLoginFromReset').addEventListener('click', (e) => {
-            e.preventDefault();
-            window.history.replaceState({}, document.title, window.location.pathname);
-            document.getElementById('resetPasswordView').classList.add('hidden');
-            document.getElementById('loginSignupView').classList.remove('hidden');
+            if (error) showToast('Error: ' + error.message, 'error');
+            else showToast('Password reset email sent!', 'success');
         });
 
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             if (confirm('Are you sure you want to logout?')) {
                 showLoading();
                 await supabase.auth.signOut();
-                currentUser = null;
-                projects = [];
+                currentUser = null; projects = []; currentProject = null;
                 document.getElementById('authView').classList.remove('hidden');
                 document.getElementById('appView').classList.add('hidden');
                 hideLoading();
             }
         });
 
-        // ============================================
-        // Project Management
-        // ============================================
+        document.getElementById('backBtn').addEventListener('click', () => {
+            currentProject = null;
+            document.getElementById('dashboardView').classList.remove('hidden');
+            document.getElementById('projectView').classList.add('hidden');
+        });
+
         async function loadProjects() {
             showLoading();
-            const { data, error } = await supabase
-                .from('projects')
-                .select('*')
-                .eq('user_id', currentUser.id)
-                .order('created_at', { ascending: false });
-            
-            if (error) {
-                console.error('Error loading projects:', error);
-                showToast('Error loading projects', 'error');
-                projects = [];
-            } else {
-                projects = data || [];
-            }
+            const { data, error } = await supabase.from('projects').select('*').or(`user_id.eq.${currentUser.id}`).order('created_at', { ascending: false });
+            if (error) { console.error(error); showToast('Error loading projects', 'error'); projects = []; }
+            else projects = data || [];
             renderProjects();
             hideLoading();
         }
@@ -804,73 +333,189 @@
         function renderProjects() {
             const grid = document.getElementById('projectsGrid');
             grid.innerHTML = '';
-            
-            // Render existing projects
-            projects.forEach(project => {
-                const card = createProjectCard(project);
+            projects.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'project-card';
+                const title = document.createElement('h3');
+                title.textContent = p.name;
+                const location = document.createElement('p');
+                location.textContent = p.location || 'No location';
+                const meta = document.createElement('div');
+                meta.className = 'project-meta';
+                const start = document.createElement('span');
+                start.textContent = `Start: ${formatDate(p.start_date)}`;
+                const end = document.createElement('span');
+                end.textContent = `End: ${formatDate(p.end_date)}`;
+                meta.appendChild(start);
+                meta.appendChild(end);
+                card.appendChild(title);
+                card.appendChild(location);
+                card.appendChild(meta);
+                card.addEventListener('click', () => openProject(p.id));
                 grid.appendChild(card);
             });
-            
-            // Add "Create New" card
-            const newCard = createEl('div', { class: 'new-project-card' });
-            const plus = createEl('div', { text: '+', style: 'font-size: 42px; color: #60a5fa; margin-bottom: 10px;' });
-            const label = createEl('span', { text: 'Create New Project', style: 'color: #1e40af; font-weight: 600;' });
-            newCard.appendChild(plus);
-            newCard.appendChild(label);
+            const newCard = document.createElement('div');
+            newCard.className = 'new-project-card';
+            newCard.innerHTML = '<div style="font-size:42px;color:#60a5fa;margin-bottom:10px">+</div><span style="color:#1e40af;font-weight:600">Create New Project</span>';
             newCard.addEventListener('click', openProjectModal);
             grid.appendChild(newCard);
         }
 
-        function createProjectCard(project) {
-            const card = createEl('div', { class: 'project-card' });
-            
-            // Build card content safely
-            const header = createEl('div', { 
-                class: 'project-header',
-                style: 'background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); padding: 18px;'
-            });
-            const title = createEl('h3', { text: project.name, style: 'color: white; font-size: 17px; margin-bottom: 4px;' });
-            const location = createEl('p', { text: project.location || 'No location specified', style: 'color: rgba(255,255,255,0.8); font-size: 13px;' });
-            header.appendChild(title);
-            header.appendChild(location);
-            
-            const body = createEl('div', { style: 'padding: 18px;' });
-            const dates = createEl('div', { style: 'display: flex; justify-content: space-between; font-size: 12px; color: #6b7280; padding-top: 14px; border-top: 1px solid #e5e7eb;' });
-            const startDate = createEl('span', { text: `Start: ${formatDate(project.start_date)}` });
-            const endDate = createEl('span', { text: `End: ${formatDate(project.end_date)}` });
-            dates.appendChild(startDate);
-            dates.appendChild(endDate);
-            body.appendChild(dates);
-            
-            card.appendChild(header);
-            card.appendChild(body);
-            card.addEventListener('click', () => openProject(project.id));
-            
-            return card;
+        function openProject(id) {
+            currentProject = projects.find(p => p.id === id);
+            document.getElementById('dashboardView').classList.add('hidden');
+            document.getElementById('projectView').classList.remove('hidden');
+            renderProjectDetail();
         }
 
-        function openProject(projectId) {
-            showToast('Project details coming in Phase 2', 'warning');
+        function renderProjectDetail() {
+            document.getElementById('projectHeader').innerHTML = `
+                <div class="project-detail-header">
+                    <div>
+                        <h2>${escapeHtml(currentProject.name)}</h2>
+                        <p style="color:#6b7280;margin-bottom:0">${escapeHtml(currentProject.description || '')}</p>
+                    </div>
+                    <div class="project-detail-actions">
+                        <button class="btn btn-secondary btn-small" onclick="editProject()">✏️ Edit</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteProject()">🗑️ Delete</button>
+                    </div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0">
+                    <div style="background:#f9fafb;padding:14px;border-radius:8px">
+                        <div style="font-size:11px;color:#6b7280;margin-bottom:4px;text-transform:uppercase">Start Date</div>
+                        <div style="font-weight:600;color:#111827;font-size:15px">${formatDate(currentProject.start_date)}</div>
+                    </div>
+                    <div style="background:#f9fafb;padding:14px;border-radius:8px">
+                        <div style="font-size:11px;color:#6b7280;margin-bottom:4px;text-transform:uppercase">End Date</div>
+                        <div style="font-weight:600;color:#111827;font-size:15px">${formatDate(currentProject.end_date)}</div>
+                    </div>
+                    <div style="background:#f9fafb;padding:14px;border-radius:8px">
+                        <div style="font-size:11px;color:#6b7280;margin-bottom:4px;text-transform:uppercase">Location</div>
+                        <div style="font-weight:600;color:#111827;font-size:15px">${escapeHtml(currentProject.location || 'N/A')}</div>
+                    </div>
+                    <div style="background:#f9fafb;padding:14px;border-radius:8px">
+                        <div style="font-size:11px;color:#6b7280;margin-bottom:4px;text-transform:uppercase">Budget</div>
+                        <div style="font-weight:600;color:#111827;font-size:15px">£${(currentProject.budget || 0).toLocaleString()}</div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('tabs').innerHTML = `
+                <button class="tab active" onclick="switchTab('overview')">Overview</button>
+                <button class="tab" onclick="switchTab('drawings')">Drawings</button>
+                <button class="tab" onclick="switchTab('rfis')">RFIs</button>
+                <button class="tab" onclick="switchTab('submittals')">Submittals</button>
+                <button class="tab" onclick="switchTab('dailyLogs')">Daily Logs</button>
+                <button class="tab" onclick="switchTab('photos')">Photos</button>
+                <button class="tab" onclick="switchTab('safety')">Safety</button>
+                <button class="tab" onclick="switchTab('messages')">Messages</button>
+            `;
+            switchTab('overview');
+        }
+
+        async function switchTab(tab) {
+            activeTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target?.classList.add('active') || document.querySelector(`.tab:nth-child(1)`).classList.add('active');
+            const content = document.getElementById('tabContent');
+            
+            if (tab === 'overview') {
+                showLoading();
+                const [drawings, rfis, submittals, logs, photos, safety, messages] = await Promise.all([
+                    supabase.from('drawings').select('id').eq('project_id', currentProject.id),
+                    supabase.from('rfis').select('id').eq('project_id', currentProject.id),
+                    supabase.from('submittals').select('id').eq('project_id', currentProject.id),
+                    supabase.from('daily_logs').select('id').eq('project_id', currentProject.id),
+                    supabase.from('photos').select('id').eq('project_id', currentProject.id),
+                    supabase.from('safety_reports').select('id').eq('project_id', currentProject.id),
+                    supabase.from('messages').select('id').eq('project_id', currentProject.id)
+                ]);
+                hideLoading();
+                content.innerHTML = `
+                    <h3 style="margin-bottom:20px">Project Overview</h3>
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+                        ${[
+                            { label: 'Drawings', value: drawings.data?.length || 0, color: '#3b82f6' },
+                            { label: 'RFIs', value: rfis.data?.length || 0, color: '#ef4444' },
+                            { label: 'Submittals', value: submittals.data?.length || 0, color: '#f59e0b' },
+                            { label: 'Daily Logs', value: logs.data?.length || 0, color: '#8b5cf6' },
+                            { label: 'Photos', value: photos.data?.length || 0, color: '#ec4899' },
+                            { label: 'Safety Reports', value: safety.data?.length || 0, color: '#f97316' },
+                            { label: 'Messages', value: messages.data?.length || 0, color: '#06b6d4' },
+                            { label: 'Team Members', value: '1', color: '#10b981' }
+                        ].map(s => `<div style="background:linear-gradient(135deg,#f9fafb 0%,#f3f4f6 100%);padding:20px;border-radius:10px"><div style="font-size:32px;font-weight:700;color:${s.color};margin-bottom:6px">${s.value}</div><div style="color:#6b7280;font-weight:500;font-size:14px">${s.label}</div></div>`).join('')}
+                    </div>
+                `;
+            } else {
+                content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🚧</div><p>Loading...</p></div>';
+                setTimeout(() => showToast(`${tab} tab coming soon!`, 'warning'), 100);
+            }
         }
 
         function openProjectModal() {
-            showToast('Create project form coming soon', 'warning');
+            showModal(`
+                <form id="projectForm">
+                    <h3>Create New Project</h3>
+                    <div class="form-group"><label>Project Name *</label><input type="text" name="name" required></div>
+                    <div class="form-group"><label>Description</label><textarea name="description" rows="3"></textarea></div>
+                    <div class="form-group"><label>Start Date *</label><input type="date" name="startDate" required></div>
+                    <div class="form-group"><label>End Date *</label><input type="date" name="endDate" required></div>
+                    <div class="form-group"><label>Location</label><input type="text" name="location"></div>
+                    <div class="form-group"><label>Budget (£)</label><input type="number" name="budget"></div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create Project</button>
+                    </div>
+                </form>
+            `);
+            document.getElementById('projectForm').addEventListener('submit', handleCreateProject);
         }
 
-        // ============================================
-        // Utilities
-        // ============================================
-        function formatDate(dateStr) {
-            if (!dateStr) return '-';
-            const date = new Date(dateStr);
-            return `${date.getDate()} ${date.toLocaleDateString('en-GB', { month: 'short' })} ${date.getFullYear()}`;
+        async function handleCreateProject(e) {
+            e.preventDefault();
+            const fd = new FormData(e.target);
+            const name = fd.get('name')?.trim();
+            const startDate = fd.get('startDate');
+            const endDate = fd.get('endDate');
+            if (!name || !startDate || !endDate) { showToast('Please fill required fields', 'error'); return; }
+            showLoading();
+            const { data: proj, error: projErr } = await supabase.from('projects').insert([{
+                user_id: currentUser.id,
+                name, description: fd.get('description') || '', start_date: startDate, end_date: endDate,
+                location: fd.get('location') || '', budget: parseInt(fd.get('budget')) || 0
+            }]).select().single();
+            if (projErr) { hideLoading(); showToast('Error: ' + projErr.message, 'error'); return; }
+            await supabase.from('project_members').insert([{ project_id: proj.id, user_id: currentUser.id, role: 'Project Manager' }]);
+            await loadProjects();
+            closeModal();
+            hideLoading();
+            showToast('Project created!', 'success');
         }
 
-        // Close modal on outside click
-        document.getElementById('modal').addEventListener('click', (e) => {
-            if (e.target.id === 'modal') {
-                document.getElementById('modal').classList.remove('show');
+        function editProject() { showToast('Edit coming soon!', 'warning'); }
+        function deleteProject() {
+            if (confirm(`Delete "${currentProject.name}"?`)) {
+                showLoading();
+                supabase.from('projects').delete().eq('id', currentProject.id).then(async () => {
+                    await loadProjects();
+                    document.getElementById('dashboardView').classList.remove('hidden');
+                    document.getElementById('projectView').classList.add('hidden');
+                    hideLoading();
+                    showToast('Project deleted', 'success');
+                });
             }
+        }
+
+        function showModal(content) {
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('modal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('show');
+        }
+
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') closeModal();
         });
     </script>
 </body>

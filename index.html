@@ -186,6 +186,16 @@
             cursor: pointer;
         }
         
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            text-align: center;
+        }
+        
         .navbar {
             background: white;
             border-bottom: 1px solid #e5e7eb;
@@ -678,47 +688,67 @@
             <h1>ProCoordinate</h1>
             <p>Professional Construction Management Platform</p>
             
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="authEmail" placeholder="your@email.com">
+            <div id="resetPasswordView" class="hidden">
+                <div class="success-message" id="resetSuccessMessage" style="display: none;">
+                    Password reset link sent! Check your email.
+                </div>
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" id="newPassword" placeholder="Enter new password" minlength="6">
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <input type="password" id="confirmPassword" placeholder="Confirm new password" minlength="6">
+                </div>
+                <button class="btn btn-primary" id="updatePasswordBtn">Update Password</button>
+                <div class="auth-toggle">
+                    <a id="backToLoginFromReset">← Back to Login</a>
+                </div>
             </div>
             
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="authPassword" placeholder="Your password">
-            </div>
-            
-            <div class="forgot-password" id="forgotPasswordLink">
-                <a id="forgotPasswordBtn">Forgot password?</a>
-            </div>
-            
-            <div class="form-group hidden" id="nameGroup">
-                <label>Full Name</label>
-                <input type="text" id="authName" placeholder="John Smith">
-            </div>
-            
-            <div class="form-group hidden" id="companyGroup">
-                <label>Company Name</label>
-                <input type="text" id="authCompany" placeholder="Your Company Ltd">
-            </div>
-            
-            <div class="form-group hidden" id="roleGroup">
-                <label>Role</label>
-                <select id="authRole">
-                    <option value="Main Contractor">Main Contractor</option>
-                    <option value="Subcontractor">Subcontractor</option>
-                    <option value="Architect">Architect</option>
-                    <option value="Engineer">Engineer</option>
-                    <option value="Client">Client</option>
-                    <option value="Project Manager">Project Manager</option>
-                </select>
-            </div>
-            
-            <button class="btn btn-primary" id="authBtn">Sign In</button>
-            
-            <div class="auth-toggle">
-                <span id="authToggleText">Don't have an account?</span>
-                <a id="authToggleLink">Sign up</a>
+            <div id="loginSignupView">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="authEmail" placeholder="your@email.com">
+                </div>
+                
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="authPassword" placeholder="Your password">
+                </div>
+                
+                <div class="forgot-password" id="forgotPasswordLink">
+                    <a id="forgotPasswordBtn">Forgot password?</a>
+                </div>
+                
+                <div class="form-group hidden" id="nameGroup">
+                    <label>Full Name</label>
+                    <input type="text" id="authName" placeholder="John Smith">
+                </div>
+                
+                <div class="form-group hidden" id="companyGroup">
+                    <label>Company Name</label>
+                    <input type="text" id="authCompany" placeholder="Your Company Ltd">
+                </div>
+                
+                <div class="form-group hidden" id="roleGroup">
+                    <label>Role</label>
+                    <select id="authRole">
+                        <option value="Main Contractor">Main Contractor</option>
+                        <option value="Subcontractor">Subcontractor</option>
+                        <option value="Architect">Architect</option>
+                        <option value="Engineer">Engineer</option>
+                        <option value="Client">Client</option>
+                        <option value="Project Manager">Project Manager</option>
+                    </select>
+                </div>
+                
+                <button class="btn btn-primary" id="authBtn">Sign In</button>
+                
+                <div class="auth-toggle">
+                    <span id="authToggleText">Don't have an account?</span>
+                    <a id="authToggleLink">Sign up</a>
+                </div>
             </div>
         </div>
     </div>
@@ -790,6 +820,20 @@
 
         async function checkAuth() {
             showLoading();
+            
+            // Check if this is a password recovery callback
+            const urlParams = new URLSearchParams(window.location.search);
+            const accessToken = urlParams.get('access_token');
+            const type = urlParams.get('type');
+            
+            if (type === 'recovery' && accessToken) {
+                // Show password reset form
+                document.getElementById('loginSignupView').classList.add('hidden');
+                document.getElementById('resetPasswordView').classList.remove('hidden');
+                hideLoading();
+                return;
+            }
+            
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
                 const { data: userData } = await supabase.auth.getUser();
@@ -841,6 +885,11 @@
                 return;
             }
 
+            if (password.length < 6) {
+                alert('Password must be at least 6 characters');
+                return;
+            }
+
             showLoading();
 
             if (isSignup) {
@@ -857,7 +906,10 @@
                 const { error } = await supabase.auth.signUp({
                     email,
                     password,
-                    options: { data: { name, company, role } }
+                    options: { 
+                        data: { name, company, role },
+                        emailRedirectTo: window.location.origin
+                    }
                 });
 
                 hideLoading();
@@ -884,41 +936,68 @@
             }
         });
 
-        document.getElementById('forgotPasswordBtn').addEventListener('click', () => {
-            showModal(`
-                <h3>Reset Password</h3>
-                <p style="color: #6b7280; margin-bottom: 20px; font-size: 14px;">
-                    Enter your email address to receive a password reset link.
-                </p>
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" id="resetEmail" placeholder="your@email.com">
-                </div>
-                <div class="modal-actions">
-                    <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-                    <button class="btn btn-primary" onclick="handleSendResetEmail()">Send Reset Link</button>
-                </div>
-            `);
-        });
-
-        async function handleSendResetEmail() {
-            const email = document.querySelector('#resetEmail')?.value?.trim();
+        document.getElementById('forgotPasswordBtn').addEventListener('click', async () => {
+            const email = document.getElementById('authEmail').value.trim();
+            
             if (!email) {
-                alert('Please enter your email address');
+                alert('Please enter your email address first');
                 return;
             }
+            
             showLoading();
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
                 redirectTo: window.location.origin
             });
             hideLoading();
+            
             if (error) {
                 alert('Error: ' + error.message);
             } else {
-                closeModal();
-                alert('Password reset email sent! Check your inbox.');
+                alert('Password reset email sent! Check your inbox and click the link to reset your password.');
             }
-        }
+        });
+
+        document.getElementById('updatePasswordBtn').addEventListener('click', async () => {
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (!newPassword || !confirmPassword) {
+                alert('Please fill in both password fields');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                alert('Password must be at least 6 characters');
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+            
+            showLoading();
+            const { error } = await supabase.auth.updateUser({
+                password: newPassword
+            });
+            hideLoading();
+            
+            if (error) {
+                alert('Error updating password: ' + error.message);
+            } else {
+                alert('Password updated successfully! You can now sign in with your new password.');
+                // Clear URL parameters and redirect to login
+                window.history.replaceState({}, document.title, window.location.pathname);
+                document.getElementById('resetPasswordView').classList.add('hidden');
+                document.getElementById('loginSignupView').classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('backToLoginFromReset').addEventListener('click', () => {
+            window.history.replaceState({}, document.title, window.location.pathname);
+            document.getElementById('resetPasswordView').classList.add('hidden');
+            document.getElementById('loginSignupView').classList.remove('hidden');
+        });
 
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             if (confirm('Are you sure you want to logout?')) {
@@ -2175,4 +2254,65 @@
             const formData = new FormData(form);
             const text = formData.get('text')?.trim();
 
-            if
+            if (!text) {
+                alert('Please enter a message');
+                return;
+            }
+
+            let messages = currentProject.messages || [];
+            messages.push({
+                id: 'msg_' + Date.now(),
+                text,
+                author: currentUser.name,
+                role: currentUser.role,
+                date: new Date().toISOString()
+            });
+
+            showLoading();
+            const { error } = await supabase.from('projects').update({ messages }).eq('id', currentProject.id);
+            if (error) {
+                hideLoading();
+                alert('Error: ' + error.message);
+            } else {
+                await loadProjects();
+                currentProject = projects.find(p => p.id === currentProject.id);
+                switchTab('messages');
+                closeModal();
+                hideLoading();
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showModal(content) {
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('modal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('show');
+        }
+
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') closeModal();
+        });
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return `${date.getDate()} ${date.toLocaleDateString('en-GB', { month: 'short' })} ${date.getFullYear()}`;
+        }
+
+        function formatDateTime(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return `${date.getDate()} ${date.toLocaleDateString('en-GB', { month: 'short' })} ${date.getFullYear()}, ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+        }
+    </script>
+</body>
+</html>

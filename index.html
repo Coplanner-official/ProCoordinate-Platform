@@ -170,6 +170,16 @@
             color: white;
         }
 
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
         .btn-block {
             width: 100%;
         }
@@ -182,20 +192,6 @@
         }
 
         .error-message.show {
-            display: block;
-        }
-
-        .success-message {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-            padding: 10px;
-            border-radius: 6px;
-            font-size: 14px;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .success-message.show {
             display: block;
         }
 
@@ -352,107 +348,315 @@
             margin-top: 5px;
         }
 
-        /* Cards */
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        .page-actions {
+            display: flex;
+            gap: 10px;
         }
 
-        .card-header {
+        /* File Manager */
+        .file-manager {
+            background: white;
+            border-radius: 12px;
+            min-height: 600px;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .file-sidebar {
+            width: 200px;
+            border-right: 1px solid var(--border);
+            padding: 20px;
+        }
+
+        .folder-tree {
+            list-style: none;
+        }
+
+        .folder-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+            transition: all 0.3s;
+        }
+
+        .folder-item:hover {
+            background: var(--light);
+        }
+
+        .folder-item.active {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+        }
+
+        .folder-children {
+            margin-left: 20px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .folder-item.expanded .folder-children {
+            display: block;
+        }
+
+        .folder-arrow {
+            width: 12px;
+            transition: transform 0.3s;
+        }
+
+        .folder-item.expanded .folder-arrow {
+            transform: rotate(90deg);
+        }
+
+        .file-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .file-toolbar {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            gap: 15px;
         }
 
-        .card-title {
-            font-size: 18px;
-            font-weight: 600;
-        }
-
-        /* Dashboard Grid */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .stat-value {
-            font-size: 32px;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-
-        .stat-label {
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             color: var(--gray);
             font-size: 14px;
         }
 
-        /* Table */
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
+        .breadcrumb-item {
+            cursor: pointer;
         }
 
-        .data-table th {
-            background: var(--light);
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 13px;
-            color: var(--gray);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .data-table td {
-            padding: 12px;
-            border-top: 1px solid var(--border);
-            font-size: 14px;
-        }
-
-        .data-table tr:hover {
-            background: var(--light);
-        }
-
-        /* Badge */
-        .badge {
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 500;
-            display: inline-block;
-        }
-
-        .badge-success {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-        }
-
-        .badge-warning {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning);
-        }
-
-        .badge-danger {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--danger);
-        }
-
-        .badge-info {
-            background: rgba(99, 102, 241, 0.1);
+        .breadcrumb-item:hover {
             color: var(--primary);
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-box {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            width: 200px;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 5px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 2px;
+        }
+
+        .view-btn {
+            padding: 6px 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .view-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .file-grid {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .file-list-view {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            position: relative;
+        }
+
+        .file-item:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .file-item.selected {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: var(--primary);
+        }
+
+        .file-checkbox {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: none;
+        }
+
+        .file-item.show-checkbox .file-checkbox {
+            display: block;
+        }
+
+        .file-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .file-name {
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .file-info {
+            font-size: 11px;
+            color: var(--gray);
+        }
+
+        .file-list-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-list-item:hover {
+            background: var(--light);
+        }
+
+        .file-list-item.selected {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: var(--primary);
+        }
+
+        .file-list-icon {
+            font-size: 24px;
+            margin-right: 15px;
+        }
+
+        .file-list-details {
+            flex: 1;
+        }
+
+        .file-list-name {
+            font-weight: 500;
+            margin-bottom: 3px;
+        }
+
+        .file-list-meta {
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        .file-list-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        /* Upload Area */
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 60px 20px;
+            text-align: center;
+            transition: all 0.3s;
+            margin: 20px;
+        }
+
+        .upload-area.dragover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 64px;
+            color: var(--gray);
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .upload-subtext {
+            color: var(--gray);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Context Menu */
+        .context-menu {
+            position: fixed;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 8px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .context-menu.show {
+            display: block;
+        }
+
+        .context-menu-item {
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .context-menu-item:hover {
+            background: var(--light);
+        }
+
+        .context-menu-separator {
+            height: 1px;
+            background: var(--border);
+            margin: 8px 0;
         }
 
         /* Modal */
@@ -502,118 +706,196 @@
             gap: 10px;
         }
 
-        /* Upload Area */
-        .upload-area {
-            border: 2px dashed var(--border);
-            border-radius: 12px;
+        /* Upload Progress */
+        .upload-progress {
+            margin-top: 20px;
+        }
+
+        .upload-file-item {
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .upload-file-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .upload-file-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .upload-file-size {
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        .upload-file-status {
+            font-size: 12px;
+        }
+
+        .upload-file-status.success {
+            color: var(--success);
+        }
+
+        .upload-file-status.error {
+            color: var(--danger);
+        }
+
+        .upload-file-status.uploading {
+            color: var(--primary);
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s;
+        }
+
+        /* File Preview */
+        .file-preview {
+            background: var(--light);
+            border-radius: 8px;
             padding: 40px;
             text-align: center;
-            transition: all 0.3s;
-            cursor: pointer;
-            margin: 20px 0;
-        }
-
-        .upload-area:hover {
-            border-color: var(--primary);
-            background: rgba(99, 102, 241, 0.05);
-        }
-
-        /* Tabs */
-        .tabs {
+            min-height: 400px;
             display: flex;
-            gap: 5px;
-            border-bottom: 1px solid var(--border);
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .file-preview img {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 8px;
+        }
+
+        .file-preview-icon {
+            font-size: 120px;
+            color: var(--gray);
             margin-bottom: 20px;
         }
 
-        .tab {
-            padding: 12px 20px;
-            background: none;
-            border: none;
-            border-bottom: 2px solid transparent;
-            cursor: pointer;
-            font-size: 14px;
+        .file-preview-name {
+            font-size: 20px;
             font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .file-preview-info {
             color: var(--gray);
-            transition: all 0.3s;
+            font-size: 14px;
         }
 
-        .tab:hover {
-            color: var(--dark);
+        /* Properties Panel */
+        .properties-panel {
+            width: 300px;
+            border-left: 1px solid var(--border);
+            padding: 20px;
+            background: white;
+            display: none;
         }
 
-        .tab.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
+        .properties-panel.show {
+            display: block;
         }
 
-        /* Activity Feed */
-        .activity-item {
-            display: flex;
-            gap: 15px;
-            padding: 15px 0;
-            border-bottom: 1px solid var(--border);
+        .properties-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
         }
 
-        .activity-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
+        .property-item {
+            margin-bottom: 15px;
+        }
+
+        .property-label {
+            font-size: 12px;
+            color: var(--gray);
+            margin-bottom: 5px;
+        }
+
+        .property-value {
+            font-size: 14px;
+        }
+
+        /* Badge */
+        .badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .badge-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .badge-info {
             background: rgba(99, 102, 241, 0.1);
             color: var(--primary);
         }
 
-        .activity-content {
-            flex: 1;
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--dark);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+            z-index: 2000;
         }
 
-        .activity-title {
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 5px;
+        .toast.show {
+            display: block;
+            animation: slideUp 0.3s ease;
         }
 
-        .activity-description {
-            font-size: 13px;
-            color: var(--gray);
-        }
-
-        .activity-time {
-            font-size: 12px;
-            color: var(--gray);
-            margin-top: 5px;
-        }
-
-        /* Grid Layout */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .sidebar {
-                display: none;
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
             }
-            
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            
-            .dashboard-grid {
-                grid-template-columns: 1fr;
+            to {
+                transform: translateY(0);
+                opacity: 1;
             }
         }
 
         /* Utility Classes */
+        .hidden { display: none !important; }
         .text-center { text-align: center; }
         .mb-20 { margin-bottom: 20px; }
-        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -630,25 +912,23 @@
                 <button class="auth-tab" onclick="app.switchAuthTab('register')">Sign Up</button>
             </div>
             
-            <div id="successMessage" class="success-message"></div>
-            
             <!-- Login Form -->
             <form id="loginForm">
                 <div class="form-group">
                     <label class="form-label">Email Address</label>
-                    <input type="email" class="form-input" id="loginEmail" required>
-                    <div class="error-message" id="loginEmailError"></div>
+                    <input type="email" class="form-input" id="loginEmail" value="demo@procoordinate.com" required>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Password</label>
-                    <input type="password" class="form-input" id="loginPassword" required>
-                    <div class="error-message" id="loginPasswordError"></div>
+                    <input type="password" class="form-input" id="loginPassword" value="demo123" required>
                 </div>
                 
-                <button type="submit" class="btn btn-primary btn-block">
-                    Sign In
-                </button>
+                <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                
+                <p style="margin-top: 20px; text-align: center; font-size: 13px; color: var(--gray);">
+                    Demo credentials are pre-filled. Just click Sign In!
+                </p>
             </form>
             
             <!-- Register Form -->
@@ -668,23 +948,15 @@
                 <div class="form-group">
                     <label class="form-label">Email Address *</label>
                     <input type="email" class="form-input" id="regEmail" required>
-                    <div class="error-message" id="regEmailError"></div>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Password *</label>
                     <input type="password" class="form-input" id="regPassword" required>
-                    <div class="error-message" id="regPasswordError"></div>
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">Confirm Password *</label>
-                    <input type="password" class="form-input" id="regConfirmPassword" required>
-                    <div class="error-message" id="regConfirmPasswordError"></div>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Company Name *</label>
+                    <label class="form-label">Company *</label>
                     <input type="text" class="form-input" id="regCompany" required>
                 </div>
                 
@@ -693,28 +965,14 @@
                     <select class="form-select" id="regRole" required>
                         <option value="">Select your role</option>
                         <option value="architect">Architect</option>
-                        <option value="engineer">Structural Engineer</option>
-                        <option value="mep_engineer">MEP Engineer</option>
-                        <option value="contractor">Main Contractor</option>
-                        <option value="subcontractor">Subcontractor</option>
+                        <option value="engineer">Engineer</option>
+                        <option value="contractor">Contractor</option>
                         <option value="client">Client</option>
                         <option value="pm">Project Manager</option>
-                        <option value="qs">Quantity Surveyor</option>
-                        <option value="inspector">Building Inspector</option>
-                        <option value="consultant">Consultant</option>
                     </select>
                 </div>
                 
-                <div class="form-group">
-                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                        <input type="checkbox" id="regTerms" required>
-                        <span style="font-size: 14px;">I agree to the Terms of Service and Privacy Policy</span>
-                    </label>
-                </div>
-                
-                <button type="submit" class="btn btn-primary btn-block">
-                    Create Account
-                </button>
+                <button type="submit" class="btn btn-primary btn-block">Create Account</button>
             </form>
         </div>
     </div>
@@ -725,17 +983,17 @@
             <div class="header-left">
                 <div class="logo">ProCoordinate</div>
                 <select class="form-select" style="width: 200px;" id="projectSelector">
-                    <option value="">Select Project</option>
+                    <option value="demo">Demo Project</option>
                 </select>
             </div>
             
             <div class="header-right">
                 <button class="btn btn-primary" onclick="app.createProject()">+ New Project</button>
-                <div class="user-menu" onclick="app.showUserMenu()">
-                    <div class="user-avatar" id="userAvatar">--</div>
+                <div class="user-menu" onclick="app.logout()">
+                    <div class="user-avatar" id="userAvatar">KL</div>
                     <div>
-                        <div style="font-size: 14px; font-weight: 500;" id="userName">User</div>
-                        <div style="font-size: 12px; color: var(--gray);" id="userRole">Role</div>
+                        <div style="font-size: 14px; font-weight: 500;" id="userName">Kristian Lieshi</div>
+                        <div style="font-size: 12px; color: var(--gray);" id="userRole">Main Contractor</div>
                     </div>
                 </div>
             </div>
@@ -745,7 +1003,7 @@
             <nav class="sidebar">
                 <div class="nav-section">
                     <div class="nav-section-title">Overview</div>
-                    <div class="nav-item active" onclick="app.navigate('dashboard')">
+                    <div class="nav-item" onclick="app.navigate('dashboard')">
                         📊 Dashboard
                     </div>
                     <div class="nav-item" onclick="app.navigate('projects')">
@@ -755,7 +1013,7 @@
                 
                 <div class="nav-section">
                     <div class="nav-section-title">Documents</div>
-                    <div class="nav-item" onclick="app.navigate('drawings')">
+                    <div class="nav-item active" onclick="app.navigate('drawings')">
                         📐 Drawings
                     </div>
                     <div class="nav-item" onclick="app.navigate('documents')">
@@ -809,93 +1067,742 @@
         </div>
     </div>
 
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+        <div class="context-menu-item" onclick="fileManager.openFile()">
+            📂 Open
+        </div>
+        <div class="context-menu-item" onclick="fileManager.downloadFile()">
+            ⬇️ Download
+        </div>
+        <div class="context-menu-item" onclick="fileManager.shareFile()">
+            🔗 Share
+        </div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" onclick="fileManager.renameFile()">
+            ✏️ Rename
+        </div>
+        <div class="context-menu-item" onclick="fileManager.moveFile()">
+            📁 Move to
+        </div>
+        <div class="context-menu-item" onclick="fileManager.copyFile()">
+            📋 Copy
+        </div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" onclick="fileManager.deleteFile()" style="color: var(--danger);">
+            🗑️ Delete
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
     <script>
+        // File Manager
+        const fileManager = {
+            currentFolder: 'root',
+            selectedFiles: [],
+            viewMode: 'grid',
+            files: [],
+            folders: [
+                { id: 'root', name: 'All Drawings', parent: null },
+                { id: 'arch', name: 'Architectural', parent: 'root' },
+                { id: 'struct', name: 'Structural', parent: 'root' },
+                { id: 'mep', name: 'MEP', parent: 'root' },
+                { id: 'landscape', name: 'Landscape', parent: 'root' },
+                { id: 'floor-plans', name: 'Floor Plans', parent: 'arch' },
+                { id: 'elevations', name: 'Elevations', parent: 'arch' },
+                { id: 'sections', name: 'Sections', parent: 'arch' },
+                { id: 'foundation', name: 'Foundation', parent: 'struct' },
+                { id: 'framing', name: 'Framing', parent: 'struct' }
+            ],
+            
+            init() {
+                this.loadFiles();
+                this.setupEventListeners();
+            },
+            
+            loadFiles() {
+                const saved = localStorage.getItem('procoordinate_files');
+                if (saved) {
+                    this.files = JSON.parse(saved);
+                }
+            },
+            
+            saveFiles() {
+                localStorage.setItem('procoordinate_files', JSON.stringify(this.files));
+            },
+            
+            setupEventListeners() {
+                // Handle file selection outside context menu
+                document.addEventListener('click', (e) => {
+                    const contextMenu = document.getElementById('contextMenu');
+                    if (!contextMenu.contains(e.target)) {
+                        contextMenu.classList.remove('show');
+                    }
+                });
+            },
+            
+            handleFileUpload(files) {
+                const uploadModal = document.getElementById('modal');
+                const modalContent = document.getElementById('modalContent');
+                
+                let uploadHTML = `
+                    <div class="modal-header">
+                        <h2>Uploading ${files.length} file(s)</h2>
+                        <button onclick="app.closeModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="upload-progress">
+                `;
+                
+                const newFiles = [];
+                
+                Array.from(files).forEach((file, index) => {
+                    const fileId = Date.now() + index;
+                    const fileObj = {
+                        id: fileId,
+                        name: file.name,
+                        size: file.size,
+                        type: file.type || this.getFileType(file.name),
+                        folder: this.currentFolder,
+                        uploadedBy: 'Kristian Lieshi',
+                        uploadedAt: new Date().toISOString(),
+                        revision: 'A',
+                        status: 'draft',
+                        url: URL.createObjectURL(file),
+                        fileData: file
+                    };
+                    
+                    newFiles.push(fileObj);
+                    
+                    uploadHTML += `
+                        <div class="upload-file-item" id="upload-${fileId}">
+                            <div class="upload-file-header">
+                                <div>
+                                    <div class="upload-file-name">${file.name}</div>
+                                    <div class="upload-file-size">${this.formatFileSize(file.size)}</div>
+                                </div>
+                                <div class="upload-file-status uploading" id="status-${fileId}">Uploading...</div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-${fileId}" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                uploadHTML += `
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <h3 style="margin-bottom: 15px;">Set Properties</h3>
+                            <div class="form-group">
+                                <label class="form-label">Folder</label>
+                                <select class="form-select" id="uploadFolder">
+                                    ${this.getFolderOptions()}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Status</label>
+                                <select class="form-select" id="uploadStatus">
+                                    <option value="draft">Draft</option>
+                                    <option value="for-review">For Review</option>
+                                    <option value="approved">Approved</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Revision</label>
+                                <input type="text" class="form-input" id="uploadRevision" value="A">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="app.closeModal()">Cancel</button>
+                        <button class="btn btn-primary" onclick="fileManager.confirmUpload()" id="confirmUploadBtn" disabled>Upload</button>
+                    </div>
+                `;
+                
+                modalContent.innerHTML = uploadHTML;
+                uploadModal.classList.add('active');
+                
+                // Simulate upload progress
+                newFiles.forEach((file, index) => {
+                    setTimeout(() => {
+                        this.simulateUpload(file.id);
+                    }, index * 200);
+                });
+                
+                // Store temporary files
+                this.tempFiles = newFiles;
+                
+                // Enable confirm button after "upload"
+                setTimeout(() => {
+                    document.getElementById('confirmUploadBtn').disabled = false;
+                }, 1000);
+            },
+            
+            simulateUpload(fileId) {
+                const progressBar = document.getElementById(`progress-${fileId}`);
+                const statusEl = document.getElementById(`status-${fileId}`);
+                
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += Math.random() * 30;
+                    if (progress >= 100) {
+                        progress = 100;
+                        clearInterval(interval);
+                        statusEl.textContent = 'Uploaded';
+                        statusEl.className = 'upload-file-status success';
+                    }
+                    progressBar.style.width = `${progress}%`;
+                }, 200);
+            },
+            
+            confirmUpload() {
+                const folder = document.getElementById('uploadFolder').value;
+                const status = document.getElementById('uploadStatus').value;
+                const revision = document.getElementById('uploadRevision').value;
+                
+                // Update temp files with settings
+                this.tempFiles.forEach(file => {
+                    file.folder = folder;
+                    file.status = status;
+                    file.revision = revision;
+                    this.files.push(file);
+                });
+                
+                this.saveFiles();
+                app.closeModal();
+                app.showToast(`${this.tempFiles.length} file(s) uploaded successfully`);
+                this.renderFiles();
+            },
+            
+            getFolderOptions(parentId = 'root', level = 0) {
+                let options = '';
+                const folders = this.folders.filter(f => f.parent === parentId);
+                
+                folders.forEach(folder => {
+                    const indent = '&nbsp;'.repeat(level * 4);
+                    options += `<option value="${folder.id}" ${folder.id === this.currentFolder ? 'selected' : ''}>
+                        ${indent}${folder.name}
+                    </option>`;
+                    options += this.getFolderOptions(folder.id, level + 1);
+                });
+                
+                return options;
+            },
+            
+            renderFolders() {
+                const folderTree = document.getElementById('folderTree');
+                if (!folderTree) return;
+                
+                folderTree.innerHTML = this.renderFolderTree('root');
+            },
+            
+            renderFolderTree(parentId, level = 0) {
+                let html = '';
+                const folders = this.folders.filter(f => f.parent === parentId);
+                
+                folders.forEach(folder => {
+                    const hasChildren = this.folders.some(f => f.parent === folder.id);
+                    const fileCount = this.files.filter(f => f.folder === folder.id).length;
+                    
+                    html += `
+                        <li>
+                            <div class="folder-item ${folder.id === this.currentFolder ? 'active' : ''}" 
+                                 onclick="fileManager.openFolder('${folder.id}')"
+                                 oncontextmenu="fileManager.showFolderMenu(event, '${folder.id}')">
+                                ${hasChildren ? '<span class="folder-arrow">▶</span>' : '<span style="width: 12px; display: inline-block;"></span>'}
+                                📁 ${folder.name} 
+                                ${fileCount > 0 ? `<span style="color: var(--gray); font-size: 12px; margin-left: 5px;">(${fileCount})</span>` : ''}
+                            </div>
+                            ${hasChildren ? `<ul class="folder-children">${this.renderFolderTree(folder.id, level + 1)}</ul>` : ''}
+                        </li>
+                    `;
+                });
+                
+                return html;
+            },
+            
+            openFolder(folderId) {
+                this.currentFolder = folderId;
+                this.selectedFiles = [];
+                this.renderFolders();
+                this.renderFiles();
+                this.updateBreadcrumb();
+            },
+            
+            updateBreadcrumb() {
+                const breadcrumb = document.getElementById('breadcrumb');
+                if (!breadcrumb) return;
+                
+                const path = this.getFolderPath(this.currentFolder);
+                breadcrumb.innerHTML = path.map((folder, index) => {
+                    if (index < path.length - 1) {
+                        return `<span class="breadcrumb-item" onclick="fileManager.openFolder('${folder.id}')">${folder.name}</span> /`;
+                    }
+                    return `<span>${folder.name}</span>`;
+                }).join(' ');
+            },
+            
+            getFolderPath(folderId) {
+                const path = [];
+                let current = this.folders.find(f => f.id === folderId);
+                
+                while (current) {
+                    path.unshift(current);
+                    current = this.folders.find(f => f.id === current.parent);
+                }
+                
+                return path;
+            },
+            
+            renderFiles() {
+                const filesContainer = document.getElementById('filesContainer');
+                if (!filesContainer) return;
+                
+                const folderFiles = this.files.filter(f => f.folder === this.currentFolder);
+                const childFolders = this.folders.filter(f => f.parent === this.currentFolder);
+                
+                if (folderFiles.length === 0 && childFolders.length === 0) {
+                    filesContainer.innerHTML = `
+                        <div class="upload-area" ondrop="fileManager.handleDrop(event)" 
+                             ondragover="fileManager.handleDragOver(event)"
+                             ondragleave="fileManager.handleDragLeave(event)">
+                            <div class="upload-icon">📁</div>
+                            <div class="upload-text">Drop files here or click to upload</div>
+                            <div class="upload-subtext">Support for PDF, DWG, DXF, PNG, JPG • Maximum 100 files</div>
+                            <input type="file" class="file-input" id="fileInput" multiple 
+                                   accept=".pdf,.dwg,.dxf,.png,.jpg,.jpeg" 
+                                   onchange="fileManager.handleFileSelect(event)">
+                            <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                                Select Files
+                            </button>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                if (this.viewMode === 'grid') {
+                    filesContainer.innerHTML = '<div class="file-grid">';
+                    
+                    // Render folders first
+                    childFolders.forEach(folder => {
+                        const fileCount = this.files.filter(f => f.folder === folder.id).length;
+                        filesContainer.innerHTML += `
+                            <div class="file-item" ondblclick="fileManager.openFolder('${folder.id}')"
+                                 oncontextmenu="fileManager.showFolderMenu(event, '${folder.id}')">
+                                <div class="file-icon">📁</div>
+                                <div class="file-name">${folder.name}</div>
+                                <div class="file-info">${fileCount} files</div>
+                            </div>
+                        `;
+                    });
+                    
+                    // Render files
+                    folderFiles.forEach(file => {
+                        filesContainer.innerHTML += `
+                            <div class="file-item ${this.selectedFiles.includes(file.id) ? 'selected' : ''}" 
+                                 onclick="fileManager.selectFile(event, ${file.id})"
+                                 ondblclick="fileManager.openFile(${file.id})"
+                                 oncontextmenu="fileManager.showContextMenu(event, ${file.id})">
+                                <input type="checkbox" class="file-checkbox" 
+                                       ${this.selectedFiles.includes(file.id) ? 'checked' : ''}>
+                                <div class="file-icon">${this.getFileIcon(file.type)}</div>
+                                <div class="file-name">${file.name}</div>
+                                <div class="file-info">${this.formatFileSize(file.size)}</div>
+                                <div class="file-info">
+                                    <span class="badge badge-${this.getStatusClass(file.status)}">${file.status}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    filesContainer.innerHTML += '</div>';
+                } else {
+                    filesContainer.innerHTML = '<div class="file-list-view">';
+                    
+                    // List view
+                    folderFiles.forEach(file => {
+                        filesContainer.innerHTML += `
+                            <div class="file-list-item ${this.selectedFiles.includes(file.id) ? 'selected' : ''}"
+                                 onclick="fileManager.selectFile(event, ${file.id})"
+                                 ondblclick="fileManager.openFile(${file.id})"
+                                 oncontextmenu="fileManager.showContextMenu(event, ${file.id})">
+                                <input type="checkbox" ${this.selectedFiles.includes(file.id) ? 'checked' : ''}>
+                                <div class="file-list-icon">${this.getFileIcon(file.type)}</div>
+                                <div class="file-list-details">
+                                    <div class="file-list-name">${file.name}</div>
+                                    <div class="file-list-meta">
+                                        ${this.formatFileSize(file.size)} • Rev ${file.revision} • ${file.uploadedBy} • ${new Date(file.uploadedAt).toLocaleDateString()}
+                                    </div>
+                                </div>
+                                <div class="file-list-actions">
+                                    <span class="badge badge-${this.getStatusClass(file.status)}">${file.status}</span>
+                                    <button class="btn btn-sm" onclick="fileManager.downloadFile(${file.id}); event.stopPropagation();">⬇️</button>
+                                    <button class="btn btn-sm btn-danger" onclick="fileManager.deleteFile(${file.id}); event.stopPropagation();">🗑️</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    filesContainer.innerHTML += '</div>';
+                }
+            },
+            
+            selectFile(event, fileId) {
+                if (!event.ctrlKey && !event.metaKey && !event.shiftKey) {
+                    this.selectedFiles = [];
+                }
+                
+                const index = this.selectedFiles.indexOf(fileId);
+                if (index > -1) {
+                    this.selectedFiles.splice(index, 1);
+                } else {
+                    this.selectedFiles.push(fileId);
+                }
+                
+                this.renderFiles();
+            },
+            
+            openFile(fileId) {
+                const file = this.files.find(f => f.id === fileId);
+                if (!file) return;
+                
+                const modal = document.getElementById('modal');
+                const modalContent = document.getElementById('modalContent');
+                
+                let previewContent = '';
+                
+                if (file.type && file.type.startsWith('image/')) {
+                    previewContent = `<img src="${file.url}" alt="${file.name}">`;
+                } else {
+                    previewContent = `
+                        <div class="file-preview-icon">${this.getFileIcon(file.type)}</div>
+                        <div class="file-preview-name">${file.name}</div>
+                        <div class="file-preview-info">
+                            Size: ${this.formatFileSize(file.size)}<br>
+                            Type: ${file.type || 'Unknown'}<br>
+                            Revision: ${file.revision}<br>
+                            Status: <span class="badge badge-${this.getStatusClass(file.status)}">${file.status}</span><br>
+                            Uploaded by: ${file.uploadedBy}<br>
+                            Date: ${new Date(file.uploadedAt).toLocaleString()}
+                        </div>
+                    `;
+                }
+                
+                modalContent.innerHTML = `
+                    <div class="modal-header">
+                        <h2>${file.name}</h2>
+                        <button onclick="app.closeModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="file-preview">
+                            ${previewContent}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="fileManager.downloadFile(${fileId})">⬇️ Download</button>
+                        <button class="btn btn-primary" onclick="app.closeModal()">Close</button>
+                    </div>
+                `;
+                
+                modal.classList.add('active');
+            },
+            
+            downloadFile(fileId) {
+                const file = fileId ? this.files.find(f => f.id === fileId) : 
+                                     this.files.find(f => this.selectedFiles.includes(f.id));
+                
+                if (!file) return;
+                
+                const link = document.createElement('a');
+                link.href = file.url;
+                link.download = file.name;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                app.showToast(`Downloading ${file.name}`);
+            },
+            
+            deleteFile(fileId) {
+                const filesToDelete = fileId ? [fileId] : this.selectedFiles;
+                
+                if (filesToDelete.length === 0) return;
+                
+                if (confirm(`Are you sure you want to delete ${filesToDelete.length} file(s)?`)) {
+                    filesToDelete.forEach(id => {
+                        const index = this.files.findIndex(f => f.id === id);
+                        if (index > -1) {
+                            // Revoke URL to free memory
+                            const file = this.files[index];
+                            if (file.url && file.url.startsWith('blob:')) {
+                                URL.revokeObjectURL(file.url);
+                            }
+                            this.files.splice(index, 1);
+                        }
+                    });
+                    
+                    this.selectedFiles = [];
+                    this.saveFiles();
+                    this.renderFiles();
+                    app.showToast(`${filesToDelete.length} file(s) deleted`);
+                }
+            },
+            
+            createFolder() {
+                const modal = document.getElementById('modal');
+                const modalContent = document.getElementById('modalContent');
+                
+                modalContent.innerHTML = `
+                    <div class="modal-header">
+                        <h2>New Folder</h2>
+                        <button onclick="app.closeModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="form-label">Folder Name</label>
+                            <input type="text" class="form-input" id="newFolderName" placeholder="Enter folder name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Parent Folder</label>
+                            <select class="form-select" id="parentFolder">
+                                <option value="root">Root</option>
+                                ${this.getFolderOptions()}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="app.closeModal()">Cancel</button>
+                        <button class="btn btn-primary" onclick="fileManager.saveNewFolder()">Create Folder</button>
+                    </div>
+                `;
+                
+                modal.classList.add('active');
+                document.getElementById('newFolderName').focus();
+            },
+            
+            saveNewFolder() {
+                const name = document.getElementById('newFolderName').value.trim();
+                const parent = document.getElementById('parentFolder').value;
+                
+                if (!name) {
+                    alert('Please enter a folder name');
+                    return;
+                }
+                
+                const newFolder = {
+                    id: 'folder-' + Date.now(),
+                    name: name,
+                    parent: parent || this.currentFolder
+                };
+                
+                this.folders.push(newFolder);
+                localStorage.setItem('procoordinate_folders', JSON.stringify(this.folders));
+                
+                app.closeModal();
+                this.renderFolders();
+                app.showToast(`Folder "${name}" created`);
+            },
+            
+            showContextMenu(event, fileId) {
+                event.preventDefault();
+                
+                if (!this.selectedFiles.includes(fileId)) {
+                    this.selectedFiles = [fileId];
+                    this.renderFiles();
+                }
+                
+                const contextMenu = document.getElementById('contextMenu');
+                contextMenu.style.left = event.pageX + 'px';
+                contextMenu.style.top = event.pageY + 'px';
+                contextMenu.classList.add('show');
+            },
+            
+            handleDrop(event) {
+                event.preventDefault();
+                event.currentTarget.classList.remove('dragover');
+                
+                const files = event.dataTransfer.files;
+                if (files.length > 0) {
+                    this.handleFileUpload(files);
+                }
+            },
+            
+            handleDragOver(event) {
+                event.preventDefault();
+                event.currentTarget.classList.add('dragover');
+            },
+            
+            handleDragLeave(event) {
+                event.currentTarget.classList.remove('dragover');
+            },
+            
+            handleFileSelect(event) {
+                const files = event.target.files;
+                if (files.length > 0) {
+                    this.handleFileUpload(files);
+                }
+            },
+            
+            getFileIcon(type) {
+                if (!type) return '📄';
+                if (type.startsWith('image/')) return '🖼️';
+                if (type.includes('pdf')) return '📕';
+                if (type.includes('dwg') || type.includes('dxf')) return '📐';
+                if (type.includes('sheet')) return '📊';
+                if (type.includes('document')) return '📝';
+                return '📄';
+            },
+            
+            getFileType(filename) {
+                const ext = filename.split('.').pop().toLowerCase();
+                const types = {
+                    pdf: 'application/pdf',
+                    dwg: 'application/dwg',
+                    dxf: 'application/dxf',
+                    jpg: 'image/jpeg',
+                    jpeg: 'image/jpeg',
+                    png: 'image/png',
+                    doc: 'application/document',
+                    docx: 'application/document',
+                    xls: 'application/sheet',
+                    xlsx: 'application/sheet'
+                };
+                return types[ext] || 'application/octet-stream';
+            },
+            
+            getStatusClass(status) {
+                const classes = {
+                    'draft': 'info',
+                    'for-review': 'warning',
+                    'approved': 'success',
+                    'rejected': 'danger'
+                };
+                return classes[status] || 'info';
+            },
+            
+            formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+            },
+            
+            renameFile() {
+                const fileId = this.selectedFiles[0];
+                if (!fileId) return;
+                
+                const file = this.files.find(f => f.id === fileId);
+                if (!file) return;
+                
+                const newName = prompt('Enter new name:', file.name);
+                if (newName && newName !== file.name) {
+                    file.name = newName;
+                    this.saveFiles();
+                    this.renderFiles();
+                    app.showToast('File renamed successfully');
+                }
+            },
+            
+            moveFile() {
+                const modal = document.getElementById('modal');
+                const modalContent = document.getElementById('modalContent');
+                
+                modalContent.innerHTML = `
+                    <div class="modal-header">
+                        <h2>Move ${this.selectedFiles.length} file(s)</h2>
+                        <button onclick="app.closeModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="form-label">Select Destination Folder</label>
+                            <select class="form-select" id="moveDestination" size="10" style="height: 300px;">
+                                <option value="root">📁 All Drawings</option>
+                                ${this.getFolderOptions()}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="app.closeModal()">Cancel</button>
+                        <button class="btn btn-primary" onclick="fileManager.confirmMove()">Move</button>
+                    </div>
+                `;
+                
+                modal.classList.add('active');
+            },
+            
+            confirmMove() {
+                const destination = document.getElementById('moveDestination').value;
+                
+                this.selectedFiles.forEach(fileId => {
+                    const file = this.files.find(f => f.id === fileId);
+                    if (file) {
+                        file.folder = destination;
+                    }
+                });
+                
+                this.saveFiles();
+                this.selectedFiles = [];
+                this.renderFiles();
+                app.closeModal();
+                app.showToast('Files moved successfully');
+            },
+            
+            copyFile() {
+                this.selectedFiles.forEach(fileId => {
+                    const file = this.files.find(f => f.id === fileId);
+                    if (file) {
+                        const copy = {
+                            ...file,
+                            id: Date.now() + Math.random(),
+                            name: `Copy of ${file.name}`,
+                            uploadedAt: new Date().toISOString()
+                        };
+                        this.files.push(copy);
+                    }
+                });
+                
+                this.saveFiles();
+                this.renderFiles();
+                app.showToast(`${this.selectedFiles.length} file(s) copied`);
+            },
+            
+            shareFile() {
+                const file = this.files.find(f => f.id === this.selectedFiles[0]);
+                if (!file) return;
+                
+                const shareLink = `${window.location.origin}/share/${file.id}`;
+                
+                navigator.clipboard.writeText(shareLink).then(() => {
+                    app.showToast('Share link copied to clipboard');
+                });
+            }
+        };
+
         // Main Application
         const app = {
             currentUser: null,
-            currentProject: null,
-            users: [],
-            projects: [],
-            drawings: [],
-            documents: [],
-            rfis: [],
-            submittals: [],
-            messages: [],
-            dailyLogs: [],
-            photos: [],
-            safety: [],
             
             init() {
-                this.loadData();
+                // Set up demo user
+                this.currentUser = {
+                    id: 1,
+                    name: 'Kristian Lieshi',
+                    email: 'demo@procoordinate.com',
+                    role: 'Main Contractor',
+                    company: 'BuildCo UK'
+                };
+                
+                // Initialize saved users if not exists
+                let users = localStorage.getItem('procoordinate_users');
+                if (!users) {
+                    localStorage.setItem('procoordinate_users', JSON.stringify([this.currentUser]));
+                }
+                
                 this.attachEventListeners();
-            },
-            
-            loadData() {
-                // Load users
-                const savedUsers = localStorage.getItem('procoordinate_users');
-                if (savedUsers) {
-                    this.users = JSON.parse(savedUsers);
-                }
-                
-                // Load projects
-                const savedProjects = localStorage.getItem('procoordinate_projects');
-                if (savedProjects) {
-                    this.projects = JSON.parse(savedProjects);
-                }
-                
-                // Load other data
-                const savedDrawings = localStorage.getItem('procoordinate_drawings');
-                if (savedDrawings) {
-                    this.drawings = JSON.parse(savedDrawings);
-                }
-                
-                const savedDocuments = localStorage.getItem('procoordinate_documents');
-                if (savedDocuments) {
-                    this.documents = JSON.parse(savedDocuments);
-                }
-                
-                const savedRFIs = localStorage.getItem('procoordinate_rfis');
-                if (savedRFIs) {
-                    this.rfis = JSON.parse(savedRFIs);
-                }
-                
-                const savedSubmittals = localStorage.getItem('procoordinate_submittals');
-                if (savedSubmittals) {
-                    this.submittals = JSON.parse(savedSubmittals);
-                }
-                
-                const savedMessages = localStorage.getItem('procoordinate_messages');
-                if (savedMessages) {
-                    this.messages = JSON.parse(savedMessages);
-                }
-                
-                const savedDailyLogs = localStorage.getItem('procoordinate_dailylogs');
-                if (savedDailyLogs) {
-                    this.dailyLogs = JSON.parse(savedDailyLogs);
-                }
-                
-                const savedPhotos = localStorage.getItem('procoordinate_photos');
-                if (savedPhotos) {
-                    this.photos = JSON.parse(savedPhotos);
-                }
-                
-                const savedSafety = localStorage.getItem('procoordinate_safety');
-                if (savedSafety) {
-                    this.safety = JSON.parse(savedSafety);
-                }
-            },
-            
-            saveData() {
-                localStorage.setItem('procoordinate_users', JSON.stringify(this.users));
-                localStorage.setItem('procoordinate_projects', JSON.stringify(this.projects));
-                localStorage.setItem('procoordinate_drawings', JSON.stringify(this.drawings));
-                localStorage.setItem('procoordinate_documents', JSON.stringify(this.documents));
-                localStorage.setItem('procoordinate_rfis', JSON.stringify(this.rfis));
-                localStorage.setItem('procoordinate_submittals', JSON.stringify(this.submittals));
-                localStorage.setItem('procoordinate_messages', JSON.stringify(this.messages));
-                localStorage.setItem('procoordinate_dailylogs', JSON.stringify(this.dailyLogs));
-                localStorage.setItem('procoordinate_photos', JSON.stringify(this.photos));
-                localStorage.setItem('procoordinate_safety', JSON.stringify(this.safety));
             },
             
             attachEventListeners() {
@@ -910,194 +1817,66 @@
                     e.preventDefault();
                     this.handleRegister();
                 });
-                
-                // Project selector
-                document.getElementById('projectSelector').addEventListener('change', (e) => {
-                    this.currentProject = e.target.value;
-                    this.navigate('dashboard');
-                });
             },
             
             switchAuthTab(tab) {
+                const tabs = document.querySelectorAll('.auth-tab');
                 const loginForm = document.getElementById('loginForm');
                 const registerForm = document.getElementById('registerForm');
-                const tabs = document.querySelectorAll('.auth-tab');
                 
                 tabs.forEach(t => t.classList.remove('active'));
                 
                 if (tab === 'login') {
+                    tabs[0].classList.add('active');
                     loginForm.classList.remove('hidden');
                     registerForm.classList.add('hidden');
-                    tabs[0].classList.add('active');
                 } else {
+                    tabs[1].classList.add('active');
                     loginForm.classList.add('hidden');
                     registerForm.classList.remove('hidden');
-                    tabs[1].classList.add('active');
                 }
-                
-                // Clear messages
-                document.getElementById('successMessage').classList.remove('show');
-                document.querySelectorAll('.error-message').forEach(msg => {
-                    msg.classList.remove('show');
-                    msg.textContent = '';
-                });
             },
             
             handleLogin() {
-                const email = document.getElementById('loginEmail').value;
-                const password = document.getElementById('loginPassword').value;
-                
-                // Clear errors
-                document.querySelectorAll('.error-message').forEach(msg => {
-                    msg.classList.remove('show');
-                    msg.textContent = '';
-                });
-                
-                // Find user
-                const user = this.users.find(u => u.email === email);
-                
-                if (!user) {
-                    const errorMsg = document.getElementById('loginEmailError');
-                    errorMsg.textContent = 'No account found with this email';
-                    errorMsg.classList.add('show');
-                    return;
-                }
-                
-                if (user.password !== password) {
-                    const errorMsg = document.getElementById('loginPasswordError');
-                    errorMsg.textContent = 'Incorrect password';
-                    errorMsg.classList.add('show');
-                    return;
-                }
-                
-                // Login successful
-                this.currentUser = user;
-                this.showApp();
+                // For demo, accept any credentials
+                document.getElementById('authContainer').style.display = 'none';
+                document.getElementById('appContainer').classList.add('active');
+                this.navigate('drawings');
             },
             
             handleRegister() {
                 const firstName = document.getElementById('regFirstName').value;
                 const lastName = document.getElementById('regLastName').value;
                 const email = document.getElementById('regEmail').value;
-                const password = document.getElementById('regPassword').value;
-                const confirmPassword = document.getElementById('regConfirmPassword').value;
                 const company = document.getElementById('regCompany').value;
                 const role = document.getElementById('regRole').value;
-                const terms = document.getElementById('regTerms').checked;
                 
-                // Clear errors
-                document.querySelectorAll('.error-message').forEach(msg => {
-                    msg.classList.remove('show');
-                    msg.textContent = '';
-                });
-                
-                // Validate
-                if (this.users.find(u => u.email === email)) {
-                    const errorMsg = document.getElementById('regEmailError');
-                    errorMsg.textContent = 'An account already exists with this email';
-                    errorMsg.classList.add('show');
-                    return;
-                }
-                
-                if (password.length < 8) {
-                    const errorMsg = document.getElementById('regPasswordError');
-                    errorMsg.textContent = 'Password must be at least 8 characters';
-                    errorMsg.classList.add('show');
-                    return;
-                }
-                
-                if (password !== confirmPassword) {
-                    const errorMsg = document.getElementById('regConfirmPasswordError');
-                    errorMsg.textContent = 'Passwords do not match';
-                    errorMsg.classList.add('show');
-                    return;
-                }
-                
-                // Create user
                 const newUser = {
                     id: Date.now(),
-                    firstName,
-                    lastName,
-                    fullName: `${firstName} ${lastName}`,
-                    email,
-                    password,
-                    company,
-                    role,
-                    createdAt: new Date().toISOString()
+                    name: `${firstName} ${lastName}`,
+                    email: email,
+                    role: role,
+                    company: company
                 };
                 
-                this.users.push(newUser);
-                this.saveData();
+                // Save user
+                let users = JSON.parse(localStorage.getItem('procoordinate_users') || '[]');
+                users.push(newUser);
+                localStorage.setItem('procoordinate_users', JSON.stringify(users));
                 
-                // Show success message
-                const successMsg = document.getElementById('successMessage');
-                successMsg.textContent = 'Account created successfully! Please sign in.';
-                successMsg.classList.add('show');
+                // Auto login
+                this.currentUser = newUser;
+                document.getElementById('userName').textContent = newUser.name;
+                document.getElementById('userRole').textContent = newUser.role;
+                document.getElementById('userAvatar').textContent = newUser.name.split(' ').map(n => n[0]).join('').toUpperCase();
                 
-                // Switch to login tab
-                this.switchAuthTab('login');
-                
-                // Pre-fill email
-                document.getElementById('loginEmail').value = email;
-            },
-            
-            showApp() {
-                // Hide auth, show app
                 document.getElementById('authContainer').style.display = 'none';
                 document.getElementById('appContainer').classList.add('active');
-                
-                // Update user info
-                const initials = this.currentUser.fullName.split(' ').map(n => n[0]).join('').toUpperCase();
-                document.getElementById('userAvatar').textContent = initials;
-                document.getElementById('userName').textContent = this.currentUser.fullName;
-                document.getElementById('userRole').textContent = this.getRoleTitle(this.currentUser.role);
-                
-                // Load projects
-                this.loadProjects();
-                
-                // Navigate to dashboard
-                this.navigate('dashboard');
-            },
-            
-            getRoleTitle(role) {
-                const roles = {
-                    'architect': 'Architect',
-                    'engineer': 'Structural Engineer',
-                    'mep_engineer': 'MEP Engineer',
-                    'contractor': 'Main Contractor',
-                    'subcontractor': 'Subcontractor',
-                    'client': 'Client',
-                    'pm': 'Project Manager',
-                    'qs': 'Quantity Surveyor',
-                    'inspector': 'Building Inspector',
-                    'consultant': 'Consultant'
-                };
-                return roles[role] || 'Team Member';
-            },
-            
-            loadProjects() {
-                const selector = document.getElementById('projectSelector');
-                selector.innerHTML = '<option value="">Select Project</option>';
-                
-                const userProjects = this.projects.filter(p => 
-                    p.team.includes(this.currentUser.id) || p.owner === this.currentUser.id
-                );
-                
-                userProjects.forEach(project => {
-                    const option = document.createElement('option');
-                    option.value = project.id;
-                    option.textContent = project.name;
-                    selector.appendChild(option);
-                });
-                
-                if (userProjects.length > 0) {
-                    selector.value = userProjects[0].id;
-                    this.currentProject = userProjects[0].id;
-                }
+                this.navigate('drawings');
             },
             
             navigate(section) {
-                // Update active nav
+                // Update nav
                 document.querySelectorAll('.nav-item').forEach(item => {
                     item.classList.remove('active');
                 });
@@ -1106,566 +1885,82 @@
                 // Load content
                 const content = document.getElementById('mainContent');
                 
-                switch(section) {
-                    case 'dashboard':
-                        this.loadDashboard();
-                        break;
-                    case 'projects':
-                        this.loadProjectsList();
-                        break;
-                    case 'drawings':
-                        this.loadDrawings();
-                        break;
-                    case 'documents':
-                        this.loadDocuments();
-                        break;
-                    case 'rfis':
-                        this.loadRFIs();
-                        break;
-                    case 'submittals':
-                        this.loadSubmittals();
-                        break;
-                    case 'messages':
-                        this.loadMessages();
-                        break;
-                    case 'team':
-                        this.loadTeam();
-                        break;
-                    case 'dailylogs':
-                        this.loadDailyLogs();
-                        break;
-                    case 'photos':
-                        this.loadPhotos();
-                        break;
-                    case 'safety':
-                        this.loadSafety();
-                        break;
-                    default:
-                        this.loadDashboard();
-                }
-            },
-            
-            loadDashboard() {
-                const project = this.projects.find(p => p.id == this.currentProject);
-                
-                if (!project) {
-                    document.getElementById('mainContent').innerHTML = `
-                        <div class="card text-center">
-                            <h2>Welcome to ProCoordinate!</h2>
-                            <p style="color: var(--gray); margin: 20px 0;">Create or join a project to get started</p>
-                            <button class="btn btn-primary" onclick="app.createProject()">Create Your First Project</button>
+                if (section === 'drawings') {
+                    this.loadDrawings();
+                } else {
+                    content.innerHTML = `
+                        <div class="page-header">
+                            <div>
+                                <h1 class="page-title">${section.charAt(0).toUpperCase() + section.slice(1)}</h1>
+                            </div>
+                        </div>
+                        <div style="padding: 40px; text-align: center; background: white; border-radius: 12px;">
+                            <p>This section is coming soon</p>
                         </div>
                     `;
-                    return;
                 }
-                
-                const projectDrawings = this.drawings.filter(d => d.projectId == this.currentProject);
-                const projectRFIs = this.rfis.filter(r => r.projectId == this.currentProject);
-                const projectSubmittals = this.submittals.filter(s => s.projectId == this.currentProject);
-                const projectMessages = this.messages.filter(m => m.projectId == this.currentProject);
-                
-                document.getElementById('mainContent').innerHTML = `
-                    <div class="page-header">
-                        <div>
-                            <h1 class="page-title">${project.name}</h1>
-                            <p class="page-subtitle">${project.client} • ${project.location}</p>
-                        </div>
-                        <div>
-                            <button class="btn btn-secondary" onclick="app.editProject(${project.id})">Edit Project</button>
-                        </div>
-                    </div>
-                    
-                    <div class="dashboard-grid">
-                        <div class="stat-card">
-                            <div class="stat-label">Project Value</div>
-                            <div class="stat-value">${project.value || '£0'}</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Team Members</div>
-                            <div class="stat-value">${project.team ? project.team.length : 0}</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Drawings</div>
-                            <div class="stat-value">${projectDrawings.length}</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-label">Open RFIs</div>
-                            <div class="stat-value">${projectRFIs.filter(r => r.status === 'open').length}</div>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Recent Activity</h3>
-                        </div>
-                        <div id="activityFeed">
-                            ${this.getRecentActivity()}
-                        </div>
-                    </div>
-                `;
-            },
-            
-            getRecentActivity() {
-                const activities = [];
-                
-                // Get recent items for current project
-                this.drawings.filter(d => d.projectId == this.currentProject).slice(-3).forEach(item => {
-                    activities.push({
-                        type: 'drawing',
-                        title: `Drawing ${item.number} uploaded`,
-                        description: item.title,
-                        time: item.createdAt || 'Recently'
-                    });
-                });
-                
-                this.rfis.filter(r => r.projectId == this.currentProject).slice(-3).forEach(item => {
-                    activities.push({
-                        type: 'rfi',
-                        title: `RFI #${item.number} created`,
-                        description: item.subject,
-                        time: item.createdAt || 'Recently'
-                    });
-                });
-                
-                if (activities.length === 0) {
-                    return '<p style="text-align: center; color: var(--gray); padding: 20px;">No recent activity</p>';
-                }
-                
-                return activities.slice(-5).reverse().map(activity => `
-                    <div class="activity-item">
-                        <div class="activity-icon">
-                            ${activity.type === 'drawing' ? '📐' : '❓'}
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-title">${activity.title}</div>
-                            <div class="activity-description">${activity.description}</div>
-                            <div class="activity-time">${activity.time}</div>
-                        </div>
-                    </div>
-                `).join('');
-            },
-            
-            loadProjectsList() {
-                const userProjects = this.projects.filter(p => 
-                    p.team.includes(this.currentUser.id) || p.owner === this.currentUser.id
-                );
-                
-                document.getElementById('mainContent').innerHTML = `
-                    <div class="page-header">
-                        <div>
-                            <h1 class="page-title">My Projects</h1>
-                            <p class="page-subtitle">Manage all your construction projects</p>
-                        </div>
-                        <div>
-                            <button class="btn btn-primary" onclick="app.createProject()">+ New Project</button>
-                        </div>
-                    </div>
-                    
-                    <div class="grid">
-                        ${userProjects.map(project => `
-                            <div class="card" style="cursor: pointer;" onclick="app.selectProject(${project.id})">
-                                <h3>${project.name}</h3>
-                                <p style="color: var(--gray); margin: 10px 0;">${project.client}</p>
-                                <p style="font-size: 14px; color: var(--gray);">${project.location}</p>
-                                <div style="margin-top: 15px;">
-                                    <span class="badge badge-info">${project.status || 'Active'}</span>
-                                </div>
-                            </div>
-                        `).join('')}
-                        
-                        ${userProjects.length === 0 ? `
-                            <div class="card text-center" style="grid-column: 1 / -1;">
-                                <h3>No projects yet</h3>
-                                <p style="color: var(--gray); margin: 20px 0;">Create your first project to get started</p>
-                                <button class="btn btn-primary" onclick="app.createProject()">Create Project</button>
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
-            },
-            
-            selectProject(projectId) {
-                document.getElementById('projectSelector').value = projectId;
-                this.currentProject = projectId;
-                this.navigate('dashboard');
             },
             
             loadDrawings() {
-                const projectDrawings = this.drawings.filter(d => d.projectId == this.currentProject);
+                const content = document.getElementById('mainContent');
                 
-                document.getElementById('mainContent').innerHTML = `
+                content.innerHTML = `
                     <div class="page-header">
                         <div>
                             <h1 class="page-title">Drawings</h1>
                             <p class="page-subtitle">Manage project drawings and plans</p>
                         </div>
-                        <div>
-                            <button class="btn btn-primary" onclick="app.uploadDrawings()">+ Upload Drawings</button>
+                        <div class="page-actions">
+                            <button class="btn btn-secondary" onclick="fileManager.createFolder()">📁 New Folder</button>
+                            <button class="btn btn-primary" onclick="document.getElementById('uploadInput').click()">
+                                + Upload Drawings
+                            </button>
+                            <input type="file" id="uploadInput" class="hidden" multiple 
+                                   accept=".pdf,.dwg,.dxf,.png,.jpg,.jpeg"
+                                   onchange="fileManager.handleFileSelect(event)">
                         </div>
                     </div>
                     
-                    <div class="card">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Number</th>
-                                    <th>Title</th>
-                                    <th>Revision</th>
-                                    <th>Status</th>
-                                    <th>Uploaded By</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${projectDrawings.map(drawing => `
-                                    <tr>
-                                        <td><strong>${drawing.number}</strong></td>
-                                        <td>${drawing.title}</td>
-                                        <td>${drawing.revision}</td>
-                                        <td><span class="badge badge-${drawing.status === 'approved' ? 'success' : 'warning'}">${drawing.status}</span></td>
-                                        <td>${drawing.uploadedBy || 'System'}</td>
-                                        <td>
-                                            <button class="btn" style="padding: 5px 10px;" onclick="app.viewDrawing(${drawing.id})">View</button>
-                                        </td>
-                                    </tr>
-                                `).join('')}
+                    <div class="file-manager">
+                        <div class="file-sidebar">
+                            <h3 style="font-size: 14px; margin-bottom: 15px;">Folders</h3>
+                            <ul class="folder-tree" id="folderTree">
+                                <!-- Folders will be rendered here -->
+                            </ul>
+                        </div>
+                        
+                        <div class="file-content">
+                            <div class="file-toolbar">
+                                <div class="breadcrumb" id="breadcrumb">
+                                    All Drawings
+                                </div>
                                 
-                                ${projectDrawings.length === 0 ? `
-                                    <tr>
-                                        <td colspan="6" style="text-align: center; padding: 40px; color: var(--gray);">
-                                            No drawings uploaded yet
-                                        </td>
-                                    </tr>
-                                ` : ''}
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            },
-            
-            loadRFIs() {
-                const projectRFIs = this.rfis.filter(r => r.projectId == this.currentProject);
-                
-                document.getElementById('mainContent').innerHTML = `
-                    <div class="page-header">
-                        <div>
-                            <h1 class="page-title">RFIs</h1>
-                            <p class="page-subtitle">Request for Information</p>
-                        </div>
-                        <div>
-                            <button class="btn btn-primary" onclick="app.createRFI()">+ Create RFI</button>
-                        </div>
-                    </div>
-                    
-                    <div class="tabs">
-                        <button class="tab active">All RFIs</button>
-                        <button class="tab">Open</button>
-                        <button class="tab">Answered</button>
-                        <button class="tab">Closed</button>
-                    </div>
-                    
-                    <div class="card">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>RFI #</th>
-                                    <th>Subject</th>
-                                    <th>Status</th>
-                                    <th>Priority</th>
-                                    <th>Created By</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${projectRFIs.map(rfi => `
-                                    <tr>
-                                        <td><strong>${rfi.number}</strong></td>
-                                        <td>${rfi.subject}</td>
-                                        <td><span class="badge badge-${rfi.status === 'open' ? 'warning' : 'success'}">${rfi.status}</span></td>
-                                        <td><span class="badge badge-${rfi.priority === 'high' ? 'danger' : 'info'}">${rfi.priority}</span></td>
-                                        <td>${rfi.createdBy || 'System'}</td>
-                                        <td>
-                                            <button class="btn" style="padding: 5px 10px;" onclick="app.viewRFI(${rfi.id})">View</button>
-                                        </td>
-                                    </tr>
-                                `).join('')}
-                                
-                                ${projectRFIs.length === 0 ? `
-                                    <tr>
-                                        <td colspan="6" style="text-align: center; padding: 40px; color: var(--gray);">
-                                            No RFIs created yet
-                                        </td>
-                                    </tr>
-                                ` : ''}
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-            },
-            
-            loadMessages() {
-                const projectMessages = this.messages.filter(m => m.projectId == this.currentProject);
-                
-                document.getElementById('mainContent').innerHTML = `
-                    <div class="page-header">
-                        <div>
-                            <h1 class="page-title">Project Messages</h1>
-                            <p class="page-subtitle">Team communication</p>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <div style="max-height: 400px; overflow-y: auto; padding: 20px; background: var(--light); border-radius: 8px;">
-                            ${projectMessages.map(msg => `
-                                <div style="margin-bottom: 15px;">
-                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                        <strong>${msg.author}</strong>
-                                        <span style="font-size: 12px; color: var(--gray);">${msg.time || 'Just now'}</span>
-                                    </div>
-                                    <div style="padding: 10px; background: white; border-radius: 6px;">
-                                        ${msg.content}
+                                <div class="file-actions">
+                                    <input type="text" class="search-box" placeholder="Search files...">
+                                    <div class="view-toggle">
+                                        <button class="view-btn ${fileManager.viewMode === 'grid' ? 'active' : ''}" 
+                                                onclick="fileManager.viewMode='grid'; fileManager.renderFiles()">⚏</button>
+                                        <button class="view-btn ${fileManager.viewMode === 'list' ? 'active' : ''}" 
+                                                onclick="fileManager.viewMode='list'; fileManager.renderFiles()">☰</button>
                                     </div>
                                 </div>
-                            `).join('')}
+                            </div>
                             
-                            ${projectMessages.length === 0 ? `
-                                <p style="text-align: center; color: var(--gray);">No messages yet. Start the conversation!</p>
-                            ` : ''}
-                        </div>
-                        
-                        <div style="margin-top: 20px; display: flex; gap: 10px;">
-                            <input type="text" class="form-input" id="messageInput" placeholder="Type your message...">
-                            <button class="btn btn-primary" onclick="app.sendMessage()">Send</button>
+                            <div id="filesContainer">
+                                <!-- Files will be rendered here -->
+                            </div>
                         </div>
                     </div>
                 `;
+                
+                fileManager.init();
+                fileManager.renderFolders();
+                fileManager.renderFiles();
             },
             
-            sendMessage() {
-                const input = document.getElementById('messageInput');
-                const content = input.value.trim();
-                
-                if (content) {
-                    this.messages.push({
-                        id: Date.now(),
-                        projectId: this.currentProject,
-                        author: this.currentUser.fullName,
-                        content: content,
-                        time: new Date().toLocaleString()
-                    });
-                    this.saveData();
-                    input.value = '';
-                    this.loadMessages();
-                }
-            },
-            
-            createProject() {
-                const modal = document.getElementById('modal');
-                const modalContent = document.getElementById('modalContent');
-                
-                modalContent.innerHTML = `
-                    <div class="modal-header">
-                        <h2>Create New Project</h2>
-                        <button onclick="app.closeModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="projectForm">
-                            <div class="form-group">
-                                <label class="form-label">Project Name *</label>
-                                <input type="text" class="form-input" id="projectName" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Client Name *</label>
-                                <input type="text" class="form-input" id="projectClient" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Location *</label>
-                                <input type="text" class="form-input" id="projectLocation" placeholder="e.g., London, UK" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Project Value</label>
-                                <input type="text" class="form-input" id="projectValue" placeholder="e.g., £5M">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Start Date</label>
-                                <input type="date" class="form-input" id="projectStart">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">End Date</label>
-                                <input type="date" class="form-input" id="projectEnd">
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" onclick="app.closeModal()">Cancel</button>
-                        <button class="btn btn-primary" onclick="app.saveProject()">Create Project</button>
-                    </div>
-                `;
-                
-                modal.classList.add('active');
-            },
-            
-            saveProject() {
-                const project = {
-                    id: Date.now(),
-                    name: document.getElementById('projectName').value,
-                    client: document.getElementById('projectClient').value,
-                    location: document.getElementById('projectLocation').value,
-                    value: document.getElementById('projectValue').value,
-                    startDate: document.getElementById('projectStart').value,
-                    endDate: document.getElementById('projectEnd').value,
-                    owner: this.currentUser.id,
-                    team: [this.currentUser.id],
-                    status: 'Active',
-                    createdAt: new Date().toISOString()
-                };
-                
-                this.projects.push(project);
-                this.saveData();
-                this.loadProjects();
-                this.currentProject = project.id;
-                document.getElementById('projectSelector').value = project.id;
-                this.closeModal();
-                this.navigate('dashboard');
-            },
-            
-            uploadDrawings() {
-                const modal = document.getElementById('modal');
-                const modalContent = document.getElementById('modalContent');
-                
-                modalContent.innerHTML = `
-                    <div class="modal-header">
-                        <h2>Upload Drawings</h2>
-                        <button onclick="app.closeModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="upload-area">
-                            <div style="font-size: 48px;">📁</div>
-                            <div style="font-weight: 500; margin: 10px 0;">Click to upload or drag and drop</div>
-                            <div style="color: var(--gray); font-size: 14px;">Support for 100+ files • PDF, DWG, DXF</div>
-                        </div>
-                        
-                        <form id="drawingForm">
-                            <div class="form-group">
-                                <label class="form-label">Drawing Number *</label>
-                                <input type="text" class="form-input" id="drawingNumber" placeholder="e.g., A-001" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Title *</label>
-                                <input type="text" class="form-input" id="drawingTitle" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Revision</label>
-                                <input type="text" class="form-input" id="drawingRevision" placeholder="e.g., A">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Status</label>
-                                <select class="form-select" id="drawingStatus">
-                                    <option value="draft">Draft</option>
-                                    <option value="for-review">For Review</option>
-                                    <option value="approved">Approved</option>
-                                </select>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" onclick="app.closeModal()">Cancel</button>
-                        <button class="btn btn-primary" onclick="app.saveDrawing()">Upload Drawing</button>
-                    </div>
-                `;
-                
-                modal.classList.add('active');
-            },
-            
-            saveDrawing() {
-                const drawing = {
-                    id: Date.now(),
-                    projectId: this.currentProject,
-                    number: document.getElementById('drawingNumber').value,
-                    title: document.getElementById('drawingTitle').value,
-                    revision: document.getElementById('drawingRevision').value || 'A',
-                    status: document.getElementById('drawingStatus').value,
-                    uploadedBy: this.currentUser.fullName,
-                    createdAt: new Date().toISOString()
-                };
-                
-                this.drawings.push(drawing);
-                this.saveData();
-                this.closeModal();
-                this.loadDrawings();
-            },
-            
-            createRFI() {
-                const modal = document.getElementById('modal');
-                const modalContent = document.getElementById('modalContent');
-                
-                modalContent.innerHTML = `
-                    <div class="modal-header">
-                        <h2>Create RFI</h2>
-                        <button onclick="app.closeModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">×</button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="rfiForm">
-                            <div class="form-group">
-                                <label class="form-label">RFI Number *</label>
-                                <input type="text" class="form-input" id="rfiNumber" value="RFI-${String(this.rfis.length + 1).padStart(3, '0')}" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Subject *</label>
-                                <input type="text" class="form-input" id="rfiSubject" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Question *</label>
-                                <textarea class="form-textarea" id="rfiQuestion" rows="4" required></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Priority</label>
-                                <select class="form-select" id="rfiPriority">
-                                    <option value="low">Low</option>
-                                    <option value="medium">Medium</option>
-                                    <option value="high">High</option>
-                                </select>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" onclick="app.closeModal()">Cancel</button>
-                        <button class="btn btn-primary" onclick="app.saveRFI()">Create RFI</button>
-                    </div>
-                `;
-                
-                modal.classList.add('active');
-            },
-            
-            saveRFI() {
-                const rfi = {
-                    id: Date.now(),
-                    projectId: this.currentProject,
-                    number: document.getElementById('rfiNumber').value,
-                    subject: document.getElementById('rfiSubject').value,
-                    question: document.getElementById('rfiQuestion').value,
-                    priority: document.getElementById('rfiPriority').value,
-                    status: 'open',
-                    createdBy: this.currentUser.fullName,
-                    createdAt: new Date().toISOString()
-                };
-                
-                this.rfis.push(rfi);
-                this.saveData();
-                this.closeModal();
-                this.loadRFIs();
-            },
-            
-            showUserMenu() {
-                if (confirm('Sign out from ProCoordinate?')) {
-                    this.currentUser = null;
-                    this.currentProject = null;
-                    document.getElementById('appContainer').classList.remove('active');
-                    document.getElementById('authContainer').style.display = 'flex';
-                    
-                    // Clear form
-                    document.getElementById('loginForm').reset();
-                    document.getElementById('registerForm').reset();
+            logout() {
+                if (confirm('Are you sure you want to sign out?')) {
+                    location.reload();
                 }
             },
             
@@ -1673,125 +1968,22 @@
                 document.getElementById('modal').classList.remove('active');
             },
             
-            // Load other sections with basic implementation
-            loadDocuments() {
-                document.getElementById('mainContent').innerHTML = `
-                    <div class="page-header">
-                        <div>
-                            <h1 class="page-title">Documents</h1>
-                            <p class="page-subtitle">Project documentation</p>
-                        </div>
-                        <div>
-                            <button class="btn btn-primary">+ Upload Document</button>
-                        </div>
-                    </div>
-                    <div class="card text-center">
-                        <p>Document management coming soon</p>
-                    </div>
-                `;
-            },
-            
-            loadSubmittals() {
-                document.getElementById('mainContent').innerHTML = `
-                    <div class="page-header">
-                        <div>
-                            <h1 class="page-title">Submittals</h1>
-                            <p class="page-subtitle">Material and equipment approvals</p>
-                        </div>
-                        <div>
-                            <button class="btn btn-primary">+ New Submittal</button>
-                        </div>
-                    </div>
-                    <div class="card text-center">
-                        <p>Submittal tracking coming soon</p>
-                    </div>
-                `;
-            },
-            
-            loadTeam() {
-                const project = this.projects.find(p => p.id == this.currentProject);
-                const teamMembers = project ? this.users.filter(u => project.team.includes(u.id)) : [];
+            showToast(message) {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.classList.add('show');
                 
-                document.getElementById('mainContent').innerHTML = `
-                    <div class="page-header">
-                        <div>
-                            <h1 class="page-title">Project Team</h1>
-                            <p class="page-subtitle">Team members and permissions</p>
-                        </div>
-                        <div>
-                            <button class="btn btn-primary">+ Invite Member</button>
-                        </div>
-                    </div>
-                    <div class="grid">
-                        ${teamMembers.map(member => `
-                            <div class="card">
-                                <div style="display: flex; align-items: center; gap: 15px;">
-                                    <div class="user-avatar">${member.fullName.split(' ').map(n => n[0]).join('').toUpperCase()}</div>
-                                    <div>
-                                        <div style="font-weight: 500;">${member.fullName}</div>
-                                        <div style="font-size: 14px; color: var(--gray);">${this.getRoleTitle(member.role)}</div>
-                                        <div style="font-size: 13px; color: var(--gray);">${member.company}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
             },
             
-            loadDailyLogs() {
-                document.getElementById('mainContent').innerHTML = `
-                    <div class="page-header">
-                        <div>
-                            <h1 class="page-title">Daily Logs</h1>
-                            <p class="page-subtitle">Site activity reports</p>
-                        </div>
-                        <div>
-                            <button class="btn btn-primary">+ Add Daily Log</button>
-                        </div>
-                    </div>
-                    <div class="card text-center">
-                        <p>Daily logs coming soon</p>
-                    </div>
-                `;
-            },
-            
-            loadPhotos() {
-                document.getElementById('mainContent').innerHTML = `
-                    <div class="page-header">
-                        <div>
-                            <h1 class="page-title">Site Photos</h1>
-                            <p class="page-subtitle">Visual documentation</p>
-                        </div>
-                        <div>
-                            <button class="btn btn-primary">+ Upload Photos</button>
-                        </div>
-                    </div>
-                    <div class="card text-center">
-                        <p>Photo gallery coming soon</p>
-                    </div>
-                `;
-            },
-            
-            loadSafety() {
-                document.getElementById('mainContent').innerHTML = `
-                    <div class="page-header">
-                        <div>
-                            <h1 class="page-title">Safety Management</h1>
-                            <p class="page-subtitle">Health & Safety documentation</p>
-                        </div>
-                        <div>
-                            <button class="btn btn-primary">+ Report Incident</button>
-                        </div>
-                    </div>
-                    <div class="card text-center">
-                        <p>Safety management coming soon</p>
-                    </div>
-                `;
+            createProject() {
+                alert('Project creation feature coming soon');
             }
         };
         
-        // Initialize app
+        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             app.init();
         });
